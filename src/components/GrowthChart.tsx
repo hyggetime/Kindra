@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import type { GrowthPoint } from '../types/report'
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
 }
 
 export function GrowthChart({ label, series }: Props) {
+  const gradId = `${useId().replace(/:/g, '')}-growth-fill`
   const w = 320
   const h = 160
   const pad = 28
@@ -41,12 +43,12 @@ export function GrowthChart({ label, series }: Props) {
         aria-label={label}
       >
         <defs>
-          <linearGradient id="growthFill" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#7C9070" stopOpacity="0.25" />
             <stop offset="100%" stopColor="#7C9070" stopOpacity="0" />
           </linearGradient>
         </defs>
-        {areaD ? <path d={areaD} fill="url(#growthFill)" /> : null}
+        {areaD ? <path d={areaD} fill={`url(#${gradId})`} /> : null}
         <path
           d={pathD}
           fill="none"

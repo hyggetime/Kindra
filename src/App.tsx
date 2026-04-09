@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ReportDashboard } from './components/ReportDashboard'
+import { ReportExampleThree } from './components/ReportExampleThree'
 import { ReportRequestForm } from './components/ReportRequestForm'
 import { UploadZone } from './components/UploadZone'
 
@@ -135,14 +136,31 @@ function App() {
         </section>
 
         <section id="report" className="border-t border-[#EDE8E0] bg-[#FAF8F5] px-5 py-16 sm:py-20">
-          <div className="mx-auto mb-10 max-w-2xl text-center">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
             <h2 className="text-2xl font-semibold text-[#4A4A4A]">분석 리포트 미리보기</h2>
             <p className="mt-2 text-sm text-[#6B6B6B]">
-              아래 내용은 <code className="rounded bg-[#F3EFE0] px-1.5 py-0.5 text-[11px]">public/report_sample.json</code>과
-              연결된 샘플입니다.
+              두 가지 예시를 비교해 보세요. 데이터는{' '}
+              <code className="rounded bg-[#F3EFE0] px-1.5 py-0.5 text-[11px]">report_sample.json</code> 과{' '}
+              <code className="rounded bg-[#F3EFE0] px-1.5 py-0.5 text-[11px]">report_example3.json</code> 에서
+              불러옵니다.
             </p>
           </div>
-          <ReportDashboard />
+
+          <div className="mx-auto mb-14 max-w-4xl">
+            <p className="mb-4 text-center text-sm font-semibold text-[#7C9070]">예시 결과 1</p>
+            <p className="mb-6 text-center text-xs text-[#8A8A8A]">
+              상세 지표·근거·팁이 담긴 확장형 리포트
+            </p>
+            <ReportDashboard />
+          </div>
+
+          <div id="report-example-2" className="mx-auto max-w-4xl scroll-mt-24">
+            <p className="mb-4 text-center text-sm font-semibold text-[#7C9070]">예시 결과 2</p>
+            <p className="mb-6 text-center text-xs text-[#8A8A8A]">
+              4개 관점 · 분석 항목 · 관찰 근거 · 도우미 코멘트 · 기술 신뢰도 · 종합 인사이트
+            </p>
+            <ReportExampleThree />
+          </div>
         </section>
 
         <section id="request" className="border-t border-[#EDE8E0] bg-[#FDFBF9] px-5 py-16 sm:py-20">
