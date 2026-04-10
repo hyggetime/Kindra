@@ -9,6 +9,7 @@
   KINDRA_GALLERY_ZOOM_SUFFIX,
   type GalleryItem,
 } from '../data/kindraGalleryItems'
+import { KindraGalleryInteractive } from './KindraGalleryInteractive'
 
 function GalleryCard({ item }: { item: GalleryItem }) {
   return (
@@ -126,6 +127,8 @@ export function KindraGallery() {
           {KINDRA_GALLERY_FOOTER_AFTER}
         </p>
       </div>
+
+      <KindraGalleryInteractive />
 
       <div className="flex flex-col gap-12 sm:gap-14">
         {KINDRA_GALLERY_ITEMS.map((item) => (
