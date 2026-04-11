@@ -17,10 +17,8 @@ OUT = ROOT / "src" / "data" / "kindraGalleryItems.ts"
 
 INTRO = (
     "\uC544\uB798\uB294 \uC2E4\uC81C \uC544\uC774 \uADF8\uB9BC \uC608\uC2DC\uC785\uB2C8\uB2E4. "
-    "\uC6D0\uBCF8 \uC704\uC5D0 \uB9C8\uC74C\uC774 \uBA38\uBB34\uB294 \uC9C0\uC810\uC744 \uD45C\uC2DC\uD558\uACE0, "
-    "\uADF8 \uD55C \uC21C\uAC04\uC744 \uD655\uB300\uD574 \uD574\uC11D\uD558\uB294 \uBC29\uC2DD\uC744 \uBCF4\uC5EC \uB4DC\uB9BD\uB2C8\uB2E4. "
-    "\uC120\uC73C\uB85C \uC774\uC5B4\uC9C4 \uC5F0\uACB0\uC120\uC740 Kindra\uAC00 \uD568\uAED8 \uBCF4\uC558\uB358 "
-    "\u2018\uACB0\u2019\uC744 \uC774\uC5B4 \uC8FC\uB294 \uBAA8\uC2B5\uC774\uC5D0\uC694."
+    "\uADF8\uB9BC\uACFC \uD574\uC124\uB85C Kindra\uAC00 \uBC14\uB77C\uBCF4\uC558\uB358 "
+    "\u2018\uACB0\u2019\uC758 \uC5EC\uC815\uC744 \uD568\uAED8 \uB9CC\uB098 \uBCF4\uC2E4 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
 )
 
 FOOTER_BEFORE = (
@@ -31,9 +29,7 @@ FOOTER_BEFORE = (
 FOOTER_AFTER = "\uC5D0 \uD568\uAED8 \uB450\uC5C8\uC5B4\uC694."
 
 LABEL_ORIGINAL = "\uC544\uC774 \uC6D0\uBCF8 \uADF8\uB9BC"
-LABEL_MOBILE = "\uC138\uB85C \uC5F0\uACB0"
-LABEL_ANALYSIS = "Kindra \uBD84\uC11D \u00B7 \uD655\uB300"
-ZOOM_SUFFIX = " \u2014 \uD655\uB300 \uC601\uC5ED"
+LABEL_ANALYSIS = "Kindra \uBD84\uC11D"
 
 ALT1 = (
     "\uB124 \uBA85\uC774 \uD55C \uD504\uB808\uC784 \uC548\uC5D0 \uBAA8\uC5EC \uC788\uB294 \uC544\uC774\uC758 \uC778\uBB3C\uD654"
@@ -89,14 +85,12 @@ def main() -> None:
   id: string
   src: string
   alt: string
-  marker: {{ left: string; top: string }}
-  zoomBg: {{ size: string; posX: string; posY: string }}
-  line: {{ x1: number; y1: number; x2: number; y2: number }}
   tags: string[]
   comment: string
 }}
 
-export const KINDRA_GALLERY_INTRO = '{esc_ts(INTRO)}'
+export const KINDRA_GALLERY_INTRO =
+  '{esc_ts(INTRO)}'
 
 export const KINDRA_GALLERY_FOOTER_BEFORE = '{esc_ts(FOOTER_BEFORE)}'
 
@@ -104,20 +98,13 @@ export const KINDRA_GALLERY_FOOTER_AFTER = '{esc_ts(FOOTER_AFTER)}'
 
 export const KINDRA_GALLERY_LABEL_ORIGINAL = '{esc_ts(LABEL_ORIGINAL)}'
 
-export const KINDRA_GALLERY_LABEL_MOBILE = '{esc_ts(LABEL_MOBILE)}'
-
 export const KINDRA_GALLERY_LABEL_ANALYSIS = '{esc_ts(LABEL_ANALYSIS)}'
-
-export const KINDRA_GALLERY_ZOOM_SUFFIX = '{esc_ts(ZOOM_SUFFIX)}'
 
 export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {{
     id: '1',
     src: '/gallery/family-four.png',
     alt: '{esc_ts(ALT1)}',
-    marker: {{ left: '62%', top: '38%' }},
-    zoomBg: {{ size: '260% 260%', posX: '58%', posY: '36%' }},
-    line: {{ x1: 28, y1: 34, x2: 72, y2: 40 }},
     tags: {tags1},
     comment:
       '{esc_ts(C1)}',
@@ -126,9 +113,6 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
     id: '2',
     src: '/gallery/watering-scene.png',
     alt: '{esc_ts(ALT2)}',
-    marker: {{ left: '70%', top: '36%' }},
-    zoomBg: {{ size: '280% 280%', posX: '68%', posY: '34%' }},
-    line: {{ x1: 30, y1: 32, x2: 72, y2: 38 }},
     tags: {tags2},
     comment:
       '{esc_ts(C2)}',
@@ -137,9 +121,6 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
     id: '3',
     src: '/gallery/seal-show.png',
     alt: '{esc_ts(ALT3)}',
-    marker: {{ left: '48%', top: '44%' }},
-    zoomBg: {{ size: '300% 300%', posX: '46%', posY: '42%' }},
-    line: {{ x1: 28, y1: 44, x2: 72, y2: 46 }},
     tags: {tags3},
     comment:
       '{esc_ts(C3)}',
