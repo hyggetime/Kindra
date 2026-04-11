@@ -1,4 +1,13 @@
-"""Emit src/data/kindraGalleryItems.ts — Korean via \\u escapes only (ASCII source)."""
+"""Emit ../src/data/kindraGalleryItems.ts.
+
+Korean in this repo was garbled because gallery text was assembled from numeric
+code points by hand (easy to pick the wrong syllable). This script keeps copy as
+\\uXXXX escapes (ASCII-only file) so editors/agents cannot corrupt Hangul.
+
+After editing INTRO, FOOTER_*, ALT*, C*, or TAGS* below, run:
+  python scripts/emit_gallery_ts.py
+Then: npm run build
+"""
 from __future__ import annotations
 
 from pathlib import Path
