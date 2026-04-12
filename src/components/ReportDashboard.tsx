@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { buildReportSpeechText, speakKoreanSequentially } from '../lib/speech'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReportSample } from '../types/report'
 import { GrowthChart } from './GrowthChart'
 
@@ -17,7 +16,6 @@ function formatBirthMonth(ym: string): string {
 export function ReportDashboard() {
   const [data, setData] = useState<ReportSample | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [speaking, setSpeaking] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -44,26 +42,6 @@ export function ReportDashboard() {
       value: s.score,
     }))
   }, [data])
-
-  const readAloud = useCallback(() => {
-    if (!data) return
-    setSpeaking(true)
-    const parts = buildReportSpeechText(data)
-    speakKoreanSequentially(parts, {
-      onComplete: () => setSpeaking(false),
-    })
-  }, [data])
-
-  const stopSpeech = useCallback(() => {
-    window.speechSynthesis.cancel()
-    setSpeaking(false)
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      window.speechSynthesis.cancel()
-    }
-  }, [])
 
   if (error) {
     return (
@@ -124,28 +102,6 @@ export function ReportDashboard() {
             </div>
           ) : null}
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={readAloud}
-              disabled={speaking}
-              className="rounded-full bg-[#7C9070] px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#687D5D] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {speaking ? '읽는 중…' : '리포트 전체 읽어주기'}
-            </button>
-            {speaking ? (
-              <button
-                type="button"
-                onClick={stopSpeech}
-                className="rounded-full border border-[#D4CFC4] bg-white px-5 py-2.5 text-sm font-medium text-[#4A4A4A] transition hover:bg-[#F7F5F2]"
-              >
-                중지
-              </button>
-            ) : null}
-          </div>
-          <p className="mx-auto mt-3 max-w-md text-xs leading-relaxed text-[#8A8A8A]">
-            긴 본문은 문장 단위로 나누어 순서대로 읽어, 끊김 없이 전체 내용을 들을 수 있어요.
-          </p>
         </header>
 
         <div className="space-y-12 pt-10">

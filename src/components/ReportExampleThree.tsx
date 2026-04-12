@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { speakKoreanSequentially } from '../lib/speech'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReportExample3Data } from '../types/reportExample3'
 import { GrowthChart } from './GrowthChart'
 
@@ -25,7 +24,6 @@ const sectionStyles = [
 export function ReportExampleThree() {
   const [data, setData] = useState<ReportExample3Data | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [speaking, setSpeaking] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -52,41 +50,6 @@ export function ReportExampleThree() {
       value: s.score,
     }))
   }, [data])
-
-  const readAloud = useCallback(() => {
-    if (!data) return
-    setSpeaking(true)
-    const em = data.report_title_emoji ? `${data.report_title_emoji} ` : ''
-    const parts: string[] = [
-      `${data.project_name}. ${em}${data.report_title}.`,
-      data.subject,
-      data.observation,
-    ]
-    for (const s of data.sections) {
-      parts.push(s.section_heading)
-      parts.push(`점수 ${s.score}점. ${s.title}.`)
-      parts.push(s.approach_intro)
-      for (const ai of s.analysis_items) {
-        parts.push(`${ai.focus}. ${ai.detail}`)
-      }
-      parts.push(`관찰 근거입니다. ${s.evidence.replace(/\n+/g, ' ')}`)
-      parts.push(`도우미의 한마디입니다. ${s.helper_comment}`)
-      parts.push(
-        `기술적 신뢰도 평가 ${s.technical_trust.stars}. ${s.technical_trust.reason}`,
-      )
-    }
-    parts.push(`종합 인사이트입니다. ${data.summary_insight}`)
-    speakKoreanSequentially(parts, { onComplete: () => setSpeaking(false) })
-  }, [data])
-
-  const stopSpeech = useCallback(() => {
-    window.speechSynthesis.cancel()
-    setSpeaking(false)
-  }, [])
-
-  useEffect(() => {
-    return () => window.speechSynthesis.cancel()
-  }, [])
 
   if (error) {
     return (
@@ -124,25 +87,6 @@ export function ReportExampleThree() {
             <GrowthChart label="영역별 종합 점수" series={chartSeries} />
           </div>
         ) : null}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-          <button
-            type="button"
-            onClick={readAloud}
-            disabled={speaking}
-            className="rounded-full bg-[#7C9070] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#687D5D] disabled:opacity-70"
-          >
-            {speaking ? '읽는 중…' : '리포트 전체 읽어주기'}
-          </button>
-          {speaking ? (
-            <button
-              type="button"
-              onClick={stopSpeech}
-              className="rounded-full border border-[#D4CFC4] bg-white px-4 py-2.5 text-sm text-[#4A4A4A] hover:bg-[#F7F5F2]"
-            >
-              중지
-            </button>
-          ) : null}
-        </div>
       </header>
 
       <div className="space-y-10 px-6 py-10 sm:px-10">
