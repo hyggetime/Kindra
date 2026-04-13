@@ -15,7 +15,7 @@ function GalleryCard({ item, index }: { item: GalleryItem; index: number }) {
       </div>
 
       {/* Content */}
-      <div className="px-6 pb-10 pt-8 sm:px-8 sm:pb-12 sm:pt-10">
+      <div className="px-6 pb-8 pt-7 sm:px-8 sm:pb-10 sm:pt-8">
 
         {/* Label + index */}
         <div className="flex items-center gap-3">
@@ -34,7 +34,7 @@ function GalleryCard({ item, index }: { item: GalleryItem; index: number }) {
         <p className="mt-1.5 text-sm text-[#8A8A8A]">{item.subtitle}</p>
 
         {/* Tags */}
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {item.tags.map((tag) => (
             <span
               key={tag}
@@ -46,33 +46,11 @@ function GalleryCard({ item, index }: { item: GalleryItem; index: number }) {
         </div>
 
         {/* 관찰노트 */}
-        <div className="mt-8">
-          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8A8A8A]">
+        <div className="mt-6 border-t border-[#F0EDE6] pt-5">
+          <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8A8A8A]">
             관찰노트
           </p>
-          <p className="text-[0.925rem] leading-[2] text-[#4A4A4A]/90">{item.analysis[0]}</p>
-        </div>
-
-        {/* 아이의 결 */}
-        <div className="mt-8 rounded-2xl bg-[#F7F5F2] px-5 py-5 sm:px-6">
-          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#7C9070]/80">
-            아이의 결
-          </p>
-          <div className="space-y-4">
-            {item.analysis.slice(1).map((para, i) => (
-              <p key={i} className="text-[0.925rem] leading-[2] text-[#4A4A4A]/90">
-                {para}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* 응원의 한마디 */}
-        <div className="mt-6 rounded-2xl bg-[#EDF2EB] px-5 py-5 sm:px-6">
-          <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#4F6048]">
-            응원의 한마디
-          </p>
-          <p className="text-sm leading-[1.95] text-[#3D4A38]">{item.tip}</p>
+          <p className="text-[0.9rem] leading-[1.95] text-[#5A5A5A]">{item.note}</p>
         </div>
       </div>
     </article>

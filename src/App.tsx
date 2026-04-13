@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { KindraGallery } from './components/KindraGallery'
-import { ReportApplyCta } from './components/ReportApplyCta'
 import { ReportExampleYeonghui } from './components/ReportExampleYeonghui'
 import { ReportRequestForm } from './components/ReportRequestForm'
 
@@ -9,7 +8,6 @@ const PHILOSOPHY_NOTE =
 
 function App() {
   const [analyzing, setAnalyzing] = useState(false)
-  const [reportOpen, setReportOpen] = useState(false)
 
   const goReport = () => {
     setAnalyzing(true)
@@ -96,10 +94,10 @@ function App() {
 
         <section id="about" className="border-t border-[#EDE8E0] bg-white/50 px-5 py-16">
           <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-xl font-semibold text-[#4A4A4A] sm:text-2xl">킨드라가 걷는 방식</h2>
+            <h2 className="text-xl font-semibold text-[#4A4A4A] sm:text-2xl">킨드라가 이야기하는 방식</h2>
             <p className="mt-3 text-sm leading-[1.9] text-[#6B6B6B] sm:text-base">
-              숫자와 문장은 모두 아이를 대신 말해 주지 못해요. 그래서 우리는 차분한 여백과 따뜻한 어조를
-              먼저 세우고, 그다음에 해석을 얹습니다.
+              아이의 그림 한 장은 수많은 말보다 많은 것을 담고 있어요. 킨드라는 그 이야기를
+              따뜻하고 부드러운 시선으로 함께 읽어드립니다.
             </p>
           </div>
           <div className="mx-auto mb-14 max-w-2xl rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-7 py-6 sm:px-8 sm:py-7">
@@ -112,18 +110,18 @@ function App() {
           <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-3 md:gap-8">
             {[
               {
-                title: '부드러운 분석',
-                body: '따뜻한 문장과 넉넉한 여백으로 리포트를 짓습니다. 읽는 동안 숨이 조금 더 길어지도록, 부모님의 마음이 먼저 쉴 수 있게요.',
+                title: '따뜻한 시선',
+                body: '아이가 그림 속에 남긴 작은 순간들 — 처음으로 사람을 그린 날, 하늘을 가득 칠한 날 — 을 킨드라는 그냥 지나치지 않아요. 아이 인생의 기쁨의 순간을 발견하고, 그 의미를 함께 기억해 드립니다.',
                 accent: 'from-[#E8F0E4] to-transparent',
               },
               {
-                title: '성장의 흐름',
-                body: '선과 색, 구도의 변화를 한눈에 모읍니다. 지표는 부담 없이 참고용으로만 제시하고, 아이만의 속도를 존중해요.',
+                title: '부드러운 분석',
+                body: '리포트를 읽는 내내 엄마아빠의 눈빛처럼 따뜻하게 느껴지도록 글을 씁니다. 사랑과 긍정으로 아이를 도닥이는 것처럼 — 평가 대신 발견, 지적 대신 응원의 언어로 이야기해요.',
                 accent: 'from-[#F3EFE0] to-transparent',
               },
               {
-                title: '우리 집 리듬',
-                body: '여러 장의 그림을 시간과 맥락에 묶어 봅니다. 크게 드러나는 변화와, 조용히 쌓이는 변화를 함께 짚어 드려요.',
+                title: '응원과 격려',
+                body: '킨드라의 리포트는 아이만을 위한 것이 아닙니다. 매일 곁에서 지켜보며 애쓰는 부모님 자신에게도 전하는 응원입니다. 잘 하고 있다는 것, 아이를 잘 보고 있다는 것을 함께 느끼셨으면 해요.',
                 accent: 'from-[#EDE4D8] to-transparent',
               },
             ].map((item) => (
@@ -145,47 +143,22 @@ function App() {
         <section id="gallery" className="border-t border-[#EDE8E0] px-5 py-16 sm:py-20">
           <KindraGallery />
 
-          {/* 접이식 전체 리포트 */}
-          <div id="report" className="mx-auto mt-16 max-w-2xl scroll-mt-24 sm:mt-20">
-            <div className="flex flex-col items-center gap-4">
-              <p className="text-center text-xs leading-relaxed text-[#8A8A8A]">
-                갤러리에 담긴 그림들을 바탕으로 킨드라가 작성한 통합 분석 리포트입니다.
+          {/* 통합 분석 리포트 */}
+          <div id="report" className="mx-auto mt-20 max-w-2xl scroll-mt-24 sm:mt-24">
+            <div className="mb-10 text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#7C9070]/80">
+                Integrated Analysis Report
               </p>
-              <button
-                type="button"
-                onClick={() => setReportOpen((v) => !v)}
-                className="group inline-flex min-h-[52px] items-center gap-2.5 rounded-full border border-[#C8C2B8] bg-white px-8 text-sm font-semibold text-[#4A4A4A] shadow-sm transition hover:border-[#7C9070]/60 hover:bg-[#F7F5F2] hover:text-[#7C9070]"
-              >
-                <span>영희의 전체 분석 리포트 확인하기</span>
-                <span
-                  className="inline-block text-base transition-transform duration-300"
-                  style={{ transform: reportOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                >
-                  ↓
-                </span>
-              </button>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#7C9070] sm:text-3xl">
+                영희의 그림 속 마음 관찰해보기
+              </h2>
+              <p className="mx-auto mt-4 max-w-md text-xs leading-relaxed text-[#8A8A8A]">
+                갤러리에 담긴 다섯 장의 그림을 바탕으로 킨드라가 작성한 통합 분석 리포트입니다.
+              </p>
             </div>
 
-            {reportOpen && (
-              <div className="mt-10 rounded-[28px] border border-[#E8E4DC] bg-[#F8F9FA] px-5 py-10 sm:px-8 sm:py-14">
-                <ReportExampleYeonghui />
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section
-          id="cta-mid"
-          className="border-t border-[#EDE8E0] bg-gradient-to-b from-[#FAF8F5] to-[#FDFBF9] px-5 py-16 sm:py-20"
-        >
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-xl font-semibold text-[#4A4A4A] sm:text-2xl">지금, 아이의 마음결을 만나보세요</h2>
-            <p className="mt-4 text-pretty text-sm leading-[1.9] text-[#6B6B6B] sm:text-base">
-              그림을 올려 주시면 킨드라가 차분히 살펴보고, 아이만의 이야기와 감정의 결이 담긴 리포트로
-              돌려드립니다. 서두르지 않아도 괜찮아요. 준비되셨다면 아래에서 신청을 이어가 주세요.
-            </p>
-            <div className="mt-8">
-              <ReportApplyCta />
+            <div className="rounded-[28px] border border-[#E8E4DC] bg-[#F8F9FA] px-5 py-10 sm:px-8 sm:py-14">
+              <ReportExampleYeonghui />
             </div>
           </div>
         </section>
