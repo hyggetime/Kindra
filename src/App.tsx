@@ -4,8 +4,12 @@ import { ReportApplyCta } from './components/ReportApplyCta'
 import { ReportExampleYeonghui } from './components/ReportExampleYeonghui'
 import { ReportRequestForm } from './components/ReportRequestForm'
 
+const PHILOSOPHY_NOTE =
+  `킨드라는 정답을 맞히는 탐정이 아닙니다. 아이가 그림에 담은 구체적인 서사는 오직 부모님만이 알 수 있습니다. 우리는 그 서사를 표현해낸 아이의 에너지, 감정의 밀도, 세상을 대하는 태도라는 '이면의 결'을 조심스럽게 읽어드립니다. 부모님의 따뜻한 맥락이 더해질 때 비로소 킨드라의 리포트는 완성됩니다.`
+
 function App() {
   const [analyzing, setAnalyzing] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
 
   const goReport = () => {
     setAnalyzing(true)
@@ -98,6 +102,13 @@ function App() {
               먼저 세우고, 그다음에 해석을 얹습니다.
             </p>
           </div>
+          <div className="mx-auto mb-14 max-w-2xl rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-7 py-6 sm:px-8 sm:py-7">
+            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7C9070]/80">
+              킨드라의 약속
+            </p>
+            <p className="text-[0.9rem] leading-[2] text-[#5A5A5A]">{PHILOSOPHY_NOTE}</p>
+          </div>
+
           <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-3 md:gap-8">
             {[
               {
@@ -133,6 +144,34 @@ function App() {
 
         <section id="gallery" className="border-t border-[#EDE8E0] px-5 py-16 sm:py-20">
           <KindraGallery />
+
+          {/* 접이식 전체 리포트 */}
+          <div id="report" className="mx-auto mt-16 max-w-2xl scroll-mt-24 sm:mt-20">
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-center text-xs leading-relaxed text-[#8A8A8A]">
+                갤러리에 담긴 그림들을 바탕으로 킨드라가 작성한 통합 분석 리포트입니다.
+              </p>
+              <button
+                type="button"
+                onClick={() => setReportOpen((v) => !v)}
+                className="group inline-flex min-h-[52px] items-center gap-2.5 rounded-full border border-[#C8C2B8] bg-white px-8 text-sm font-semibold text-[#4A4A4A] shadow-sm transition hover:border-[#7C9070]/60 hover:bg-[#F7F5F2] hover:text-[#7C9070]"
+              >
+                <span>영희의 전체 분석 리포트 확인하기</span>
+                <span
+                  className="inline-block text-base transition-transform duration-300"
+                  style={{ transform: reportOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                >
+                  ↓
+                </span>
+              </button>
+            </div>
+
+            {reportOpen && (
+              <div className="mt-10 rounded-[28px] border border-[#E8E4DC] bg-[#F8F9FA] px-5 py-10 sm:px-8 sm:py-14">
+                <ReportExampleYeonghui />
+              </div>
+            )}
+          </div>
         </section>
 
         <section
@@ -149,17 +188,6 @@ function App() {
               <ReportApplyCta />
             </div>
           </div>
-        </section>
-
-        <section id="report" className="border-t border-[#EDE8E0] bg-[#FAF8F5] px-5 py-16 sm:py-20">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-2xl font-semibold text-[#4A4A4A]">분석 리포트 예시</h2>
-            <p className="mt-3 text-sm leading-[1.8] text-[#6B6B6B]">
-              아이의 그림을 보내주시면, 이와 같은 리포트로 돌아옵니다.
-            </p>
-          </div>
-
-          <ReportExampleYeonghui />
         </section>
 
         <section id="request" className="border-t border-[#EDE8E0] bg-[#FDFBF9] px-5 py-16 sm:py-20">

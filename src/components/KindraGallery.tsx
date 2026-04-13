@@ -45,19 +45,32 @@ function GalleryCard({ item, index }: { item: GalleryItem; index: number }) {
           ))}
         </div>
 
-        {/* Analysis */}
-        <div className="mt-8 space-y-5">
-          {item.analysis.map((para, i) => (
-            <p key={i} className="text-[0.925rem] leading-[2] text-[#4A4A4A]/90">
-              {para}
-            </p>
-          ))}
+        {/* 관찰노트 */}
+        <div className="mt-8">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#8A8A8A]">
+            관찰노트
+          </p>
+          <p className="text-[0.925rem] leading-[2] text-[#4A4A4A]/90">{item.analysis[0]}</p>
         </div>
 
-        {/* Tip */}
-        <div className="mt-9 rounded-2xl bg-[#EDF2EB] px-6 py-5">
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#4F6048]">
-            Hygge Tip · 응원법
+        {/* 아이의 결 */}
+        <div className="mt-8 rounded-2xl bg-[#F7F5F2] px-5 py-5 sm:px-6">
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#7C9070]/80">
+            아이의 결
+          </p>
+          <div className="space-y-4">
+            {item.analysis.slice(1).map((para, i) => (
+              <p key={i} className="text-[0.925rem] leading-[2] text-[#4A4A4A]/90">
+                {para}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* 응원의 한마디 */}
+        <div className="mt-6 rounded-2xl bg-[#EDF2EB] px-5 py-5 sm:px-6">
+          <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[#4F6048]">
+            응원의 한마디
           </p>
           <p className="text-sm leading-[1.95] text-[#3D4A38]">{item.tip}</p>
         </div>
