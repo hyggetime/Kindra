@@ -12,7 +12,7 @@ export type GalleryItem = {
 }
 
 export const KINDRA_GALLERY_INTRO =
-  `아이의 그림을 들여다보는 일은, 조용한 방에서 아이가 혼자 남긴 일기를 읽는 것과 닮았습니다. 아래 다섯 장의 그림과 함께, 킨드라가 바라본 '결'의 여정을 천천히 따라가 보세요.`
+  `통합 리포트를 완성하기 위한 개별 그림의 관찰 데이터입니다. 각 그림에서 추출한 키워드와 짧은 관찰 노트가 모여 위의 마음 지도가 만들어졌습니다.`
 
 export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {

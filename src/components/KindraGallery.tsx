@@ -61,14 +61,14 @@ export function KindraGallery() {
   return (
     <div className="mx-auto max-w-2xl">
       {/* Section header */}
-      <div className="mb-14 px-1 text-center sm:mb-16">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#7C9070]/80">
-          Kindra Gallery
+      <div className="mb-12 px-1 text-center sm:mb-14">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#8A8A8A]">
+          Insight Clues
         </p>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#3D3D3D] sm:text-3xl">
-          아이 그림 읽기
+        <h2 className="mt-3 text-xl font-bold tracking-tight text-[#4A4A4A] sm:text-2xl">
+          관찰의 조각들
         </h2>
-        <p className="mx-auto mt-5 max-w-lg text-[0.925rem] leading-[2] text-[#5A5A5A]">
+        <p className="mx-auto mt-4 max-w-lg text-[0.9rem] leading-[2] text-[#6B6B6B]">
           {KINDRA_GALLERY_INTRO}
         </p>
       </div>

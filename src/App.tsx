@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { KindraGallery } from './components/KindraGallery'
 import { ReportExampleYeonghui } from './components/ReportExampleYeonghui'
 import { ReportRequestForm } from './components/ReportRequestForm'
@@ -29,11 +30,11 @@ function App() {
             <a href="#about" className="text-[#6B6B6B] transition hover:text-[#7C9070]">
               소개
             </a>
-            <a href="#gallery" className="text-[#6B6B6B] transition hover:text-[#7C9070]">
-              갤러리
-            </a>
             <a href="#report" className="text-[#6B6B6B] transition hover:text-[#7C9070]">
               리포트
+            </a>
+            <a href="#insights" className="text-[#6B6B6B] transition hover:text-[#7C9070]">
+              관찰
             </a>
             <a href="#request" className="text-[#6B6B6B] transition hover:text-[#7C9070]">
               신청
@@ -43,6 +44,7 @@ function App() {
       </header>
 
       <main>
+        {/* ① Hero */}
         <section className="relative overflow-hidden px-5 pb-20 pt-16 sm:pb-28 sm:pt-24">
           <div
             className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#E8F0E4]/60 blur-3xl"
@@ -69,29 +71,30 @@ function App() {
                 무늬가 스며 있습니다.
               </p>
               <p>
-                킨드라는 그림을 ‘잘 그렸다’고 재지 않아요. 대신 아이만의 리듬과 시선, 관계를 향한 관심을
+                킨드라는 그림을 '잘 그렸다'고 재지 않아요. 대신 아이만의 리듬과 시선, 관계를 향한 관심을
                 부드럽게 풀어 드리는 마음 지도를 지향합니다. 평가가 아닌, 함께 걷는 관찰이에요.
               </p>
             </div>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              <a
-                href="#gallery"
-                className="inline-flex min-h-[44px] min-w-[140px] items-center justify-center rounded-full bg-[#7C9070] px-7 text-sm font-medium text-white shadow-[0_8px_24px_-8px_rgba(124,144,112,0.55)] transition hover:bg-[#687D5D]"
-              >
-                Kindra Gallery
-              </a>
               <button
                 type="button"
                 onClick={goReport}
                 disabled={analyzing}
-                className="inline-flex min-h-[44px] min-w-[140px] items-center justify-center rounded-full border border-[#D4CFC4] bg-white/90 px-7 text-sm font-medium text-[#4A4A4A] transition hover:border-[#7C9070]/40 hover:bg-[#F7F5F2] disabled:opacity-60"
+                className="inline-flex min-h-[44px] min-w-[140px] items-center justify-center rounded-full bg-[#7C9070] px-7 text-sm font-medium text-white shadow-[0_8px_24px_-8px_rgba(124,144,112,0.55)] transition hover:bg-[#687D5D] disabled:opacity-60"
               >
-                {analyzing ? '불러오는 중…' : '샘플 리포트 보기'}
+                {analyzing ? '불러오는 중…' : '리포트 예시 보기'}
               </button>
+              <a
+                href="#insights"
+                className="inline-flex min-h-[44px] min-w-[140px] items-center justify-center rounded-full border border-[#D4CFC4] bg-white/90 px-7 text-sm font-medium text-[#4A4A4A] transition hover:border-[#7C9070]/40 hover:bg-[#F7F5F2]"
+              >
+                관찰의 조각들 보기
+              </a>
             </div>
           </div>
         </section>
 
+        {/* ② About */}
         <section id="about" className="border-t border-[#EDE8E0] bg-white/50 px-5 py-16">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <h2 className="text-xl font-semibold text-[#4A4A4A] sm:text-2xl">킨드라가 이야기하는 방식</h2>
@@ -140,29 +143,84 @@ function App() {
           </div>
         </section>
 
-        <section id="gallery" className="border-t border-[#EDE8E0] px-5 py-16 sm:py-20">
-          <KindraGallery />
-
-          {/* 통합 분석 리포트 */}
-          <div id="report" className="mx-auto mt-20 max-w-2xl scroll-mt-24 sm:mt-24">
-            <div className="mb-10 text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#7C9070]/80">
+        {/* ③ 통합 분석 리포트 — 결론 선제시, 가장 임팩트 있게 */}
+        <section
+          id="report"
+          className="scroll-mt-16 border-t border-[#D6E0D2] bg-[#EFF3ED] px-5 py-20 sm:py-28"
+        >
+          <div className="mx-auto max-w-2xl">
+            {/* 섹션 헤더 */}
+            <div className="mb-12 text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[#7C9070]">
                 Integrated Analysis Report
               </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-[#7C9070] sm:text-3xl">
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-[#3A4F36] sm:text-4xl">
                 영희의 그림 속 마음 관찰해보기
               </h2>
-              <p className="mx-auto mt-4 max-w-md text-xs leading-relaxed text-[#8A8A8A]">
-                갤러리에 담긴 다섯 장의 그림을 바탕으로 킨드라가 작성한 통합 분석 리포트입니다.
+              <p className="mx-auto mt-5 max-w-md text-sm leading-[1.9] text-[#5A6B56]">
+                다섯 장의 그림에서 포착한 관찰 데이터를 취합해 킨드라가 완성한 통합 분석 리포트입니다.
+                아이의 에너지, 감정의 밀도, 세상을 대하는 방식이 한 장의 마음 지도로 담겨 있습니다.
               </p>
             </div>
 
-            <div className="rounded-[28px] border border-[#E8E4DC] bg-[#F8F9FA] px-5 py-10 sm:px-8 sm:py-14">
+            {/* 리포트 카드 */}
+            <div className="rounded-[32px] border border-[#C8D6C4] bg-white px-5 py-10 shadow-[0_24px_64px_-24px_rgba(60,80,55,0.18)] sm:px-8 sm:py-14">
               <ReportExampleYeonghui />
+            </div>
+
+            {/* 하단 브릿지 — 아래 관찰 섹션으로 연결 */}
+            <div className="mt-14 flex flex-col items-center gap-3 text-center">
+              <p className="max-w-sm text-sm leading-[1.85] text-[#5A6B56]">
+                이 마음 지도를 완성한 개별 관찰의 조각들을 아래에서 확인하실 수 있습니다.
+              </p>
+              <a
+                href="#insights"
+                className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-[#7C9070] transition hover:text-[#4F6048]"
+              >
+                관찰의 조각들 보기
+                <span className="text-sm">↓</span>
+              </a>
             </div>
           </div>
         </section>
 
+        {/* ④ 관찰의 조각들 — 리포트의 근거 자료, 담백하게 */}
+        <section
+          id="insights"
+          className="scroll-mt-16 border-t border-[#EDE8E0] bg-[#FDFBF9] px-5 py-14 sm:py-16"
+        >
+          <div className="mx-auto max-w-2xl">
+            {/* 상단 브릿지 — 위 리포트와의 연결 맥락 */}
+            <div className="mb-10 rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-6 py-5 text-center">
+              <p className="text-xs leading-[1.9] text-[#6B6B6B]">
+                아래 다섯 장의 그림에서 추출한 <span className="font-semibold text-[#4A4A4A]">키워드와 관찰 노트</span>가
+                위에서 보신 통합 리포트의 재료가 되었습니다.
+                <br />
+                각 그림이 어떤 단서를 제공했는지 직접 확인해보세요.
+              </p>
+            </div>
+
+            <KindraGallery />
+
+            {/* 하단 브릿지 — 전체 흐름 마무리 */}
+            <div className="mt-16 border-t border-[#EDE8E0] pt-12 text-center">
+              <p className="mx-auto max-w-md text-sm leading-[2] text-[#6B6B6B]">
+                이 관찰의 조각들이 모여,
+                <br />
+                위에서 보신 하나의 마음 지도가 완성됩니다.
+              </p>
+              <a
+                href="#report"
+                className="mt-5 inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-[#7C9070] transition hover:text-[#4F6048]"
+              >
+                <span className="text-sm">↑</span>
+                통합 리포트 다시 보기
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ⑤ 신청 */}
         <section id="request" className="border-t border-[#EDE8E0] bg-[#FDFBF9] px-5 py-16 sm:py-20">
           <ReportRequestForm />
         </section>
@@ -171,8 +229,12 @@ function App() {
       <footer className="border-t border-[#EDE8E0] px-5 py-10 text-center text-sm text-[#8A8A8A]">
         <p className="font-medium text-[#7C9070]/90">Kindra · 킨드라</p>
         <p className="mt-1">
-          © {new Date().getFullYear()} Kindra · 아이 그림 마음 분석 서비스
+          © {new Date().getFullYear()} HYGGETIME · 아이 그림 마음 분석 서비스
         </p>
+        <div className="mt-3 flex justify-center gap-5 text-xs">
+          <Link to="/privacy" className="transition hover:text-[#7C9070]">개인정보처리방침</Link>
+          <Link to="/terms" className="transition hover:text-[#7C9070]">이용약관</Link>
+        </div>
       </footer>
     </div>
   )
