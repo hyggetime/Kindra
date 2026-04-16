@@ -1,0 +1,7 @@
+# 킨드라 Kindra — robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# 사이트맵 위치
+Sitemap: https://kindra.vercel.app/sitemap.xml

@@ -28,9 +28,9 @@ export function ReportExampleYeonghui() {
           <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.22em] text-white/70">
             Kindra · 분석 리포트 예시
           </p>
-          <h1 className="text-balance text-xl font-bold leading-snug tracking-tight text-white sm:text-2xl">
+          <h2 className="text-balance text-xl font-bold leading-snug tracking-tight text-white sm:text-2xl">
             영희의 63번째 달,<br />다정함이 자라나는 결
-          </h1>
+          </h2>
         </div>
       </div>
 

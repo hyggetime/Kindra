@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 
 const EFFECTIVE_DATE = '2025년 1월 1일'
 const COMPANY = 'HYGGETIME'
@@ -17,6 +18,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function TermsOfServicePage() {
   return (
     <div className="min-h-svh bg-[#FDFBF9] text-[#4A4A4A]">
+      <Helmet>
+        <title>이용약관 — 킨드라 Kindra</title>
+        <meta name="description" content="킨드라(Kindra) 서비스 이용약관입니다. HYGGETIME이 제공하는 아이 그림 심리분석 서비스의 이용 조건, 저작권, 면책 사항을 안내합니다." />
+        <meta name="robots" content="noindex, follow" />
+        <link rel="canonical" href="https://kindra.vercel.app/terms" />
+      </Helmet>
+
       {/* 헤더 */}
       <header className="border-b border-[#EDE8E0] bg-[#FDFBF9]/90 px-5 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">

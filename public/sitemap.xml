@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- 메인 페이지 -->
+  <url>
+    <loc>https://kindra.vercel.app/</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://kindra.vercel.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kindra.vercel.app/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kindra.vercel.app/"/>
+  </url>
+
+  <!-- 개인정보처리방침 -->
+  <url>
+    <loc>https://kindra.vercel.app/privacy</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- 이용약관 -->
+  <url>
+    <loc>https://kindra.vercel.app/terms</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>

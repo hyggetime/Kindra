@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { KindraGallery } from './components/KindraGallery'
 import { ReportExampleYeonghui } from './components/ReportExampleYeonghui'
 import { ReportRequestForm } from './components/ReportRequestForm'
@@ -20,6 +21,13 @@ function App() {
 
   return (
     <div className="min-h-svh bg-[#FDFBF9] text-[#4A4A4A]">
+      <Helmet>
+        <html lang="ko" />
+        <title>킨드라 Kindra — 아이 그림 심리분석 서비스</title>
+        <meta name="description" content="킨드라는 아이의 그림을 심리학적으로 분석하여 감정, 성격, 발달 상태를 따뜻하게 읽어드립니다. HTP, KFD, DAP 기반 맞춤 리포트. Kindra analyzes children's drawings to reveal emotions and personality through psychological art methods." />
+        <link rel="canonical" href="https://kindra.vercel.app" />
+      </Helmet>
+
       <header className="sticky top-0 z-40 border-b border-[#EDE8E0] bg-[#FDFBF9]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
           <a href="#" className="flex items-baseline gap-2">

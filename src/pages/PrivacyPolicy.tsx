@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 
 const EFFECTIVE_DATE = '2025년 1월 1일'
 const COMPANY = 'HYGGETIME'
@@ -32,6 +33,13 @@ function Table({ rows }: { rows: [string, string][] }) {
 export function PrivacyPolicyPage() {
   return (
     <div className="min-h-svh bg-[#FDFBF9] text-[#4A4A4A]">
+      <Helmet>
+        <title>개인정보처리방침 — 킨드라 Kindra</title>
+        <meta name="description" content="킨드라(Kindra) 서비스의 개인정보처리방침입니다. HYGGETIME이 수집하는 개인정보 항목, 이용 목적, 보유 기간 및 이용자 권리를 안내합니다." />
+        <meta name="robots" content="noindex, follow" />
+        <link rel="canonical" href="https://kindra.vercel.app/privacy" />
+      </Helmet>
+
       {/* 헤더 */}
       <header className="border-b border-[#EDE8E0] bg-[#FDFBF9]/90 px-5 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
