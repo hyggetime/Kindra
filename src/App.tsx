@@ -23,8 +23,8 @@ function App() {
     <div className="min-h-svh bg-[#FDFBF9] text-[#4A4A4A]">
       <Helmet>
         <html lang="ko" />
-        <title>킨드라 Kindra — 아이 그림 심리분석 서비스</title>
-        <meta name="description" content="킨드라는 아이의 그림을 심리학적으로 분석하여 감정, 성격, 발달 상태를 따뜻하게 읽어드립니다. HTP, KFD, DAP 기반 맞춤 리포트. Kindra analyzes children's drawings to reveal emotions and personality through psychological art methods." />
+        <title>킨드라 | 5장의 그림으로 발견하는 아이의 마음 패턴 분석</title>
+        <meta name="description" content="아이의 그림 한 장으로는 알 수 없는 마음의 결. 킨드라는 연속된 관찰을 통해 아이의 세계를 관통하는 일관된 패턴을 찾아냅니다. 디자이너의 시선으로 엮어낸 다정한 마음 지도 리포트." />
         <link rel="canonical" href="https://kindra.vercel.app" />
       </Helmet>
 

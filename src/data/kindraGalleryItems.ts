@@ -18,7 +18,7 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'family-four',
     src: '/gallery/family-four.png',
-    alt: '네 명이 한 프레임 안에 모여 있는 아이의 인물화',
+    alt: '영희가 그린 가족 인물화 — 네 가족이 하나의 테두리 안에 모인 KFD 가족화 · 가족 응집력과 세밀한 변별력 심리 패턴 관찰 데이터',
     label: 'KFD · 가족화 분석',
     title: '우리 가족의 초상',
     subtitle: '서로를 향한 시선, 그리고 하나의 테두리',
@@ -34,7 +34,7 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'watering-scene',
     src: '/gallery/watering-scene.png',
-    alt: '나무 사이에서 새싹에 물을 주는 소녀와 하트 모양의 낙엽이 있는 가을 장면',
+    alt: '영희가 그린 나무 사이 인물화 — 눈 감고 미소 지으며 새싹에 물을 주는 소녀 · HTP 기저선 안정감·양육 모티프·필압 일관성 심리 패턴 관찰 데이터',
     label: 'HTP · 인물화 분석',
     title: '눈을 감고 웃는 소녀',
     subtitle: '내면에서 흘러나오는 돌봄의 마음',
@@ -50,7 +50,7 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'beach-scene',
     src: '/gallery/beach-scene.png',
-    alt: '해변 장면 — 선글라스 쓴 어른, 팔 벌린 중앙 인물, 스쿠버 캐릭터, 아기를 안은 보호자가 있는 여름 풍경 스케치',
+    alt: '영희가 그린 여름 해변 군상화 — 선글라스 어른·팔 벌린 중심 인물·스쿠버 캐릭터·보호자 등 다중 역할 배치 · 공간 설계력·다중 인물 세계관·색채 선택 심리 패턴 관찰 데이터',
     label: '세계관 구축 분석',
     title: '온 세상이 한 장에',
     subtitle: '복잡한 여름을 한눈에 설계하다',
@@ -66,7 +66,7 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'sketches-card',
     src: '/gallery/sketches-card.png',
-    alt: '하단에 머리핀을 한 소녀 얼굴과 상단에 세 장의 감정 카드, 하트와 역삼각형 기호가 있는 스케치',
+    alt: '영희가 그린 감정 카드 모음 스케치 — 카드 안에 다시 세 가지 표정 캐릭터를 그린 메타 표상 구성 · 상징 기호 통합·감정 변별력·반복 모티프 심리 패턴 관찰 데이터',
     label: '메타 표상 · 상징 사고 분석',
     title: '그림이 그림을 품다',
     subtitle: '메타 표상의 첫 걸음',
@@ -82,7 +82,7 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'paper-dolls-a',
     src: '/gallery/paper-dolls-a.png',
-    alt: '파란 드레스를 입은 요정 소녀 종이 인형(왼쪽)과 주황 머리 동물 캐릭터(오른쪽)',
+    alt: '영희가 만든 종이 인형 한 쌍 — 파란 드레스 요정 소녀(왼쪽)와 주황 머리 동물 캐릭터(오른쪽)를 직접 가위로 오린 작품 · 2D→3D 입체 변환·소근육 발달·반복 미소 표정 심리 패턴 관찰 데이터',
     label: '입체 변환 · 창작 세계관 분석',
     title: '종이를 뚫고 나온 세계',
     subtitle: '2D에서 3D로의 도약',

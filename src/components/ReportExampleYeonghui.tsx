@@ -20,7 +20,7 @@ export function ReportExampleYeonghui() {
       <div className="relative overflow-hidden rounded-[28px] bg-[#F5F2ED]">
         <img
           src="/yeonghui_main.png"
-          alt="영희의 그림 — 물을 주는 소녀"
+          alt="영희의 대표 그림 — 나무 사이에서 눈 감고 미소 지으며 새싹에 물을 주는 소녀 인물화 · HTP 기저선 안정감·필압 일관성·양육 모티프 심리 패턴 관찰 데이터"
           className="h-[420px] w-full object-cover object-top sm:h-[520px]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#2A2A2A]/60 via-transparent to-transparent" />
