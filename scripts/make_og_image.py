@@ -18,16 +18,11 @@ FONT_REG = r"C:\Windows\Fonts\malgun.ttf"
 FONT_BOLD = r"C:\Windows\Fonts\malgunbd.ttf"
 
 CREAM = (255, 249, 242)
-SAGE = (100, 125, 88)
 CHARCOAL = (42, 42, 42)
 LOGO_GRAY = (155, 150, 145)
 PANEL_FILL = (255, 252, 246, 175)
 
-# 상단 / 하단 카피 (2줄씩 가독성 위해 줄바꿈)
-TOP_LINES = [
-    "매일 곁에서 지켜보며 애쓰는 부모님",
-    "자신에게도 전하는 응원입니다.",
-]
+# 메인 카피만 (상단 소제목 생략 — 미리보기에서 가독성 우선)
 MAIN_LINES = [
     "아이를 잘 보고 있다는 것,",
     "킨드라의 리포트가 함께 느껴드립니다.",
@@ -60,7 +55,7 @@ def main():
 
     overlay = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
-    panel_w, panel_h = 880, 340
+    panel_w, panel_h = 920, 240
     px = (W - panel_w) // 2
     py = (H - panel_h) // 2 - 8
     r = 20
@@ -70,33 +65,22 @@ def main():
     img = img.convert("RGB")
     draw = ImageDraw.Draw(img)
 
-    f_sub = f(FONT_REG, 24)
-    f_main = f(FONT_BOLD, 40)
+    f_main = f(FONT_BOLD, 46)
 
-    # 상단 카피 (세이지)
-    y = py + 36
-    for line in TOP_LINES:
-        bb = draw.textbbox((0, 0), line, font=f_sub)
-        tw = bb[2] - bb[0]
-        draw.text(((W - tw) // 2, y), line, font=f_sub, fill=SAGE)
-        y += (bb[3] - bb[1]) + 6
+    # 본문 블록 세로 중앙 정렬
+    gap = 14
+    heights = []
+    for line in MAIN_LINES:
+        bb = draw.textbbox((0, 0), line, font=f_main)
+        heights.append(bb[3] - bb[1])
+    block_h = sum(heights) + gap * (len(MAIN_LINES) - 1)
+    y = py + (panel_h - block_h) // 2
 
-    # 구분선
-    line_y = y + 10
-    line_w = 280
-    draw.line(
-        [(W // 2 - line_w // 2, line_y), (W // 2 + line_w // 2, line_y)],
-        fill=(190, 183, 172),
-        width=1,
-    )
-
-    # 하단 카피 (메인, 굵게)
-    y = line_y + 26
     for line in MAIN_LINES:
         bb = draw.textbbox((0, 0), line, font=f_main)
         tw = bb[2] - bb[0]
         draw.text(((W - tw) // 2, y), line, font=f_main, fill=CHARCOAL)
-        y += (bb[3] - bb[1]) + 10
+        y += (bb[3] - bb[1]) + gap
 
     # 로고
     f_logo = f(FONT_REG, 19)
