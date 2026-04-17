@@ -1,6 +1,9 @@
 """
 킨드라 OG 이미지 생성 → public/og-image.png (1200×630)
 배경: public/gallery/beach-scene.png
+
+이미지를 바꾼 뒤에는 index.html 의 og:image / twitter:image URL 의 ?v= 숫자를
+1 올려 주세요. (카카오톡 등 OG 캐시 무효화)
 """
 from PIL import Image, ImageDraw, ImageFont
 import os
