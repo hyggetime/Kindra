@@ -1,6 +1,8 @@
-import { GOOGLE_FORM_URL } from '../constants/form'
+import { useGoogleFormUrl } from '../hooks/useGoogleFormUrl'
 
 export function ReportRequestForm() {
+  const formUrl = useGoogleFormUrl()
+
   return (
     <div className="mx-auto max-w-2xl text-center">
       <h2 className="text-xl font-bold tracking-tight text-[#3D3D3D] sm:text-2xl">
@@ -13,7 +15,7 @@ export function ReportRequestForm() {
 
       <div className="mt-10 flex flex-col items-center gap-5">
         <a
-          href={GOOGLE_FORM_URL}
+          href={formUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex w-full max-w-md items-center justify-center rounded-full bg-[#7C9070] px-8 py-4 text-center text-sm font-bold leading-snug text-white shadow-[0_12px_32px_-12px_rgba(124,144,112,0.55)] transition hover:scale-[1.02] hover:bg-[#687D5D] sm:text-base"
