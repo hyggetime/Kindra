@@ -27,3 +27,18 @@ body {
 #root {
   min-height: 100svh;
 }
+
+/* 리포트 인쇄 / PDF 저장 시 화면 전용 UI 제거 및 여백 */
+@media print {
+  @page {
+    margin: 14mm 12mm 18mm;
+  }
+
+  body {
+    background: #fff !important;
+  }
+
+  .report-print-root {
+    background: #fff !important;
+  }
+}

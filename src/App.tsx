@@ -4,12 +4,15 @@ import { Helmet } from 'react-helmet-async'
 import { KindraGallery } from './components/KindraGallery'
 import { ReportExampleYeonghui } from './components/ReportExampleYeonghui'
 import { ReportRequestForm } from './components/ReportRequestForm'
+import { RecentReportBanner } from './components/RecentReportBanner'
+import { useUTMTagger } from './hooks/useUTMTagger'
 
 const PHILOSOPHY_NOTE =
   `킨드라는 정답을 맞히는 탐정이 아닙니다. 아이가 그림에 담은 구체적인 서사는 오직 부모님만이 알 수 있습니다. 우리는 그 서사를 표현해낸 아이의 에너지, 감정의 밀도, 세상을 대하는 태도라는 '이면의 결'을 조심스럽게 읽어드립니다. 부모님의 따뜻한 맥락이 더해질 때 비로소 킨드라의 리포트는 완성됩니다.`
 
 function App() {
   const [analyzing, setAnalyzing] = useState(false)
+  useUTMTagger()
 
   const goReport = () => {
     setAnalyzing(true)
@@ -50,6 +53,8 @@ function App() {
           </nav>
         </div>
       </header>
+
+      <RecentReportBanner />
 
       <main>
         {/* ① Hero */}
