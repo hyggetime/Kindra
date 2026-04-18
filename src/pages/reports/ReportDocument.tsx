@@ -27,11 +27,6 @@ export function ReportDocument({ data }: Props) {
     trackEvent('report_view', { report_id: data.reportId })
   }, [data.childShortName, data.reportId, data.slug])
 
-  const handlePrint = (): void => {
-    trackEvent('report_save_click', { report_id: data.reportId })
-    window.print()
-  }
-
   const handleCopyUrl = async (): Promise<void> => {
     const url = window.location.href
     try {
@@ -211,23 +206,7 @@ export function ReportDocument({ data }: Props) {
 
         <div className="my-12 h-px bg-[#EDE8E0] print:hidden" />
 
-        {/* 액션 버튼 — 리포트 소장하기 + 리포트 공유하기 병렬 */}
-        <div className="grid gap-4 sm:grid-cols-2 print:hidden">
-          {/* 왼쪽: 소장하기 */}
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-5 py-6 text-center">
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-full bg-[#7C9070] px-6 text-sm font-medium text-white shadow-[0_8px_24px_-8px_rgba(124,144,112,0.5)] transition hover:bg-[#687D5D]"
-            >
-              리포트 소장하기
-            </button>
-            <p className="text-[11px] leading-relaxed text-[#9A9A9A]">
-              인쇄 대화상자에서 대상을 &quot;PDF로 저장&quot;으로 선택하면 깔끔한 PDF로 보관하실 수 있어요.
-            </p>
-          </div>
-
-          {/* 오른쪽: 공유하기 */}
+        <section className="mx-auto max-w-md print:hidden">
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-5 py-6 text-center">
             <button
               type="button"
@@ -240,7 +219,7 @@ export function ReportDocument({ data }: Props) {
               {data.childShortName}의 성장 기록을 가족에게 공유해보세요.
             </p>
           </div>
-        </div>
+        </section>
 
         <footer className="mt-14 border-t border-[#EDE8E0] px-1 pb-8 pt-10 text-center print:mt-10 print:border-[#DDDDDD] print:pt-8">
           <p className="text-xs leading-[1.85] text-[#8A8A8A]">{data.footer.disclaimer}</p>
