@@ -119,10 +119,16 @@
     }
     </script>
 
-    <!-- ─── Google Analytics 4 ─────────────────────────── -->
-    <!-- VITE_GA4_MEASUREMENT_ID 환경변수(예: G-XXXXXXXXXX)를 설정하면 활성화됩니다. -->
-    <!-- Vercel: Settings → Environment Variables / 로컬: .env.local -->
-    <script>window.__KINDRA_GA4_ID = '%VITE_GA4_MEASUREMENT_ID%';</script>
+    <!-- Google tag (gtag.js) — GA4 G-QHB2KXJ78B -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QHB2KXJ78B"></script>
+    <script>
+      window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
+      }
+      gtag('js', new Date())
+      gtag('config', 'G-QHB2KXJ78B')
+    </script>
 
     <!-- 폰트 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
