@@ -8,7 +8,6 @@ declare global {
   interface Window {
     dataLayer?: unknown[]
     gtag?: (...args: unknown[]) => void
-    __KINDRA_GA4_ID?: string
   }
 }
 
@@ -25,28 +24,14 @@ function getStoredUTM(): EventParams {
 let ga4Initialized = false
 
 /**
- * 최초 호출 시 window.__KINDRA_GA4_ID 가 유효한 GA4 ID(G-...)이면
- * gtag.js 스크립트를 동적으로 로드하고 초기화합니다.
+ * index.html 에 삽입된 Google tag(gtag.js)가 있으면 그대로 사용합니다.
+ * (gtag 이중 로드·window.gtag 덮어쓰기 방지)
  */
 export function ensureGA4(): void {
   if (ga4Initialized) return
-  const id = window.__KINDRA_GA4_ID
-  if (!id?.startsWith('G-')) return
-
-  ga4Initialized = true
-  window.dataLayer = window.dataLayer ?? []
-
-  const push = (...args: unknown[]): void => {
-    window.dataLayer?.push(args)
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+    ga4Initialized = true
   }
-  window.gtag = push
-  push('js', new Date())
-  push('config', id)
-
-  const script = document.createElement('script')
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${id}`
-  script.async = true
-  document.head.appendChild(script)
 }
 
 /**
