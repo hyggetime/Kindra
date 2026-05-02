@@ -36,3 +36,6 @@ __pycache__/
 # TypeScript incremental
 *.tsbuildinfo
 tsconfig.tsbuildinfo
+
+# Supabase CLI local link state (do not commit)
+supabase/.temp/
