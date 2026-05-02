@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useSearchParams } from 'next/navigation'
 import { storeUTMParams, trackEvent } from '../lib/analytics'
 
 const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'ref'] as const
@@ -9,10 +9,11 @@ const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'ut
  * 같은 세션에서 다른 페이지로 이동해도 유입 채널 정보가 유지됩니다.
  */
 export function useUTMTagger(): void {
-  const location = useLocation()
+  const searchParams = useSearchParams()
+  const searchKey = searchParams.toString()
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
+    const params = new URLSearchParams(searchKey)
     const found: Record<string, string> = {}
 
     for (const key of UTM_KEYS) {
@@ -24,5 +25,5 @@ export function useUTMTagger(): void {
       storeUTMParams(found)
       trackEvent('utm_entry', found)
     }
-  }, [location.search])
+  }, [searchKey])
 }

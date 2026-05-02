@@ -15,7 +15,8 @@ export function useSectionEngagement(reportId: string): void {
     )
     if (!elements.length) return
 
-    const timers = new Map<HTMLElement, ReturnType<typeof setTimeout>>()
+    /** 브라우저 `setTimeout` 핸들 (Node `Timeout` 과 구분) */
+    const timers = new Map<HTMLElement, number>()
     const fired = new Set<HTMLElement>()
 
     const observer = new IntersectionObserver(

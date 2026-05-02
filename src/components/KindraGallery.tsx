@@ -1,16 +1,19 @@
 import { KINDRA_GALLERY_INTRO, KINDRA_GALLERY_ITEMS, type GalleryItem } from '../data/kindraGalleryItems'
+import { KindraPublicImage } from './KindraPublicImage'
 
 function GalleryCard({ item, index }: { item: GalleryItem; index: number }) {
   return (
     <article className="overflow-hidden rounded-[28px] border border-[#EDE8E0] bg-white shadow-[0_16px_48px_-24px_rgba(74,74,74,0.18)]">
       {/* Image */}
       <div className="bg-[#F7F5F2]">
-        <img
+        <KindraPublicImage
+          variant="contain"
           src={item.src}
           alt={item.alt}
-          loading="lazy"
-          className="w-full object-contain"
-          style={{ maxHeight: '480px' }}
+          width={1200}
+          height={900}
+          className="mx-auto max-h-[480px] w-full object-contain"
+          sizes="(max-width: 640px) 100vw, 42rem"
         />
       </div>
 

@@ -1,0 +1,70 @@
+@import 'tailwindcss';
+
+/* Vite 때처럼 `src/**` 의 유틸 클래스가 빌드에 포함되도록 스캔 경로를 명시합니다. */
+@source "../src/**/*.{js,ts,jsx,tsx}";
+@source "./**/*.{js,ts,jsx,tsx}";
+@source "../lib/**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  --font-sans: 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --color-cream: #fdfbf9;
+  --color-ink: #4a4a4a;
+  --color-sage: #7c9070;
+  --color-sage-dark: #687d5d;
+  --color-terracotta: #a45c40;
+  --color-honey: #c8a47e;
+  --color-sand: #f3efe0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  font-family: var(--font-sans);
+  background: var(--color-cream);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes kindra-overlay-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kindra-overlay-line {
+  animation: kindra-overlay-line-in 0.48s ease-out forwards;
+}
+
+@keyframes kindra-philosophy-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.kindra-philosophy-ticker {
+  display: inline-block;
+  white-space: nowrap;
+  animation: kindra-philosophy-marquee 56s linear infinite;
+}
+
+@media print {
+  @page {
+    margin: 14mm 12mm 18mm;
+  }
+
+  body {
+    background: #fff !important;
+  }
+}

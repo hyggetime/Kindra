@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReportSample } from '../types/report'
 import { GrowthChart } from './GrowthChart'
@@ -89,9 +90,12 @@ export function ReportDashboard() {
           </dl>
 
           <div className="mx-auto mt-8 max-w-xl overflow-hidden rounded-2xl border border-[#EDE8E0] bg-[#F7F5F2]">
-            <img
+            <Image
               src="/sample_child_art.svg"
               alt="리포트 예시 그림"
+              width={400}
+              height={280}
+              unoptimized
               className="mx-auto max-h-52 w-full object-contain p-4"
             />
           </div>

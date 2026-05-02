@@ -8,9 +8,13 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.next
 dist
 dist-ssr
 *.local
+
+# 실제 비밀은 `.env.local` 등 `*.local` 패턴에 걸리는 파일에만 두세요.
+# `.env.example` 은 변수 이름·형식 안내용(플레이스홀더만)이므로 Git 에 포함합니다.
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +26,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Cursor / local tooling (not part of app)
+.cursor/
+
+# Python
+__pycache__/
+
+# TypeScript incremental
+*.tsbuildinfo
+tsconfig.tsbuildinfo

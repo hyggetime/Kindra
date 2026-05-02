@@ -17,7 +17,8 @@ export const KINDRA_GALLERY_INTRO =
 export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'family-four',
-    src: '/gallery/family-four.png',
+    /* public 에 원본이 없을 때: 동일 톤의 기존 에셋으로 대체 (파일 추가 시 경로만 바꾸면 됨) */
+    src: '/gallery/paper-dolls-b.png',
     alt: '영희가 그린 가족 인물화 — 네 가족이 하나의 테두리 안에 모인 KFD 가족화 · 가족 응집력과 세밀한 변별력 심리 패턴 관찰 데이터',
     label: 'KFD · 가족화 분석',
     title: '우리 가족의 초상',
@@ -33,7 +34,7 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   },
   {
     id: 'watering-scene',
-    src: '/gallery/watering-scene.png',
+    src: '/gallery/birthday-cake.png',
     alt: '영희가 그린 나무 사이 인물화 — 눈 감고 미소 지으며 새싹에 물을 주는 소녀 · HTP 기저선 안정감·양육 모티프·필압 일관성 심리 패턴 관찰 데이터',
     label: 'HTP · 인물화 분석',
     title: '눈을 감고 웃는 소녀',

@@ -1,8 +1,27 @@
-import { useGoogleFormUrl } from '../hooks/useGoogleFormUrl'
+import Link from 'next/link'
+
+import { APPLY_FORM_HREF } from '@lib/apply-href'
+
+function ToolsIntroIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      <path d="M8 7h8M8 11h8M8 15h5" />
+    </svg>
+  )
+}
 
 export function ReportRequestForm() {
-  const formUrl = useGoogleFormUrl()
-
   return (
     <div className="mx-auto max-w-2xl text-center">
       <h2 className="text-xl font-bold tracking-tight text-[#3D3D3D] sm:text-2xl">
@@ -14,18 +33,27 @@ export function ReportRequestForm() {
       </p>
 
       <div className="mt-10 flex flex-col items-center gap-5">
-        <a
-          href={formUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href={APPLY_FORM_HREF}
           className="inline-flex w-full max-w-md items-center justify-center rounded-full bg-[#7C9070] px-8 py-4 text-center text-sm font-bold leading-snug text-white shadow-[0_12px_32px_-12px_rgba(124,144,112,0.55)] transition hover:scale-[1.02] hover:bg-[#687D5D] sm:text-base"
         >
-          킨드라 아이 그림 분석 신청&nbsp;&nbsp;|&nbsp;&nbsp;소요시간 약 2분
-        </a>
+          아이 그림 분석 신청하기 · 약 2분
+        </Link>
+
+        <Link
+          href="/tools"
+          className="group inline-flex max-w-md items-center gap-2.5 rounded-full border border-[#E4E8E1] bg-white/80 px-4 py-2.5 text-left text-[13px] leading-snug text-[#5C6658] shadow-sm transition hover:border-[#7C9070]/35 hover:bg-[#FAFBF9] hover:text-[#3D4A38]"
+        >
+          <ToolsIntroIcon className="h-[18px] w-[18px] shrink-0 text-[#7C9070]/75 transition group-hover:text-[#7C9070]" />
+          <span>
+            킨드라가 마음을 읽는 법
+            <span className="text-[#8A9389]">(분석 도구 소개)</span>
+          </span>
+        </Link>
 
         <div className="flex flex-col gap-2">
-          <p className="text-xs text-[#8A8A8A]">전문 분석을 위해 구글 로그인이 필요할 수 있습니다.</p>
-          <p className="text-xs font-medium text-[#7C9070]/90">구글 폼을 통해 안전하게 신청됩니다</p>
+          <p className="text-xs text-[#8A8A8A]">신청 과정에서 이메일 확인이 필요할 수 있어요.</p>
+          <p className="text-xs font-medium text-[#7C9070]/90">킨드라 신청 화면에서 안전하게 진행돼요.</p>
           <p className="text-xs text-[#8A8A8A]">업로드하신 소중한 그림은 분석 후 안전하게 관리됩니다.</p>
         </div>
       </div>

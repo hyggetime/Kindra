@@ -2,8 +2,8 @@
 킨드라 OG 이미지 생성 → public/og-image.png (1200×630)
 배경: public/gallery/beach-scene.png
 
-이미지를 바꾼 뒤에는 index.html 의 og:image / twitter:image URL 의 ?v= 숫자를
-1 올려 주세요. (카카오톡 등 OG 캐시 무효화)
+이미지를 바꾼 뒤에는 `lib/site-og.ts` 의 `OG_IMAGE_CACHE_VERSION` 을 1 올려 주세요.
+(SITE_OG_IMAGE.url 의 `?v=` 가 함께 바뀝니다.) 카카오톡 등 OG 캐시 무효화용입니다.
 """
 from PIL import Image, ImageDraw, ImageFont
 import os
@@ -92,6 +92,7 @@ def main():
 
     img.save(DST, format="PNG", optimize=True)
     print("saved:", DST)
+    print("[다음 단계] OG 이미지를 교체했다면 lib/site-og.ts 의 OG_IMAGE_CACHE_VERSION 을 1 증가시키세요.")
 
 
 if __name__ == "__main__":

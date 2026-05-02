@@ -1,14 +1,10 @@
-import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import Link from 'next/link'
+import { isStaticReportSlug } from '@lib/reports/static-report-slugs'
 import { getReportVisits, type ReportVisitRecord } from '../lib/reportVisitStorage'
 
+/** 홈(`/`) 전용 — 마운트 시마다 localStorage 에서 최근 리포트 링크를 읽습니다. */
 export function RecentReportBanner() {
-  const location = useLocation()
-  const [visits, setVisits] = useState<ReportVisitRecord[]>(() => getReportVisits())
-
-  useEffect(() => {
-    setVisits(getReportVisits())
-  }, [location.pathname])
+  const visits: ReportVisitRecord[] = getReportVisits().filter((v) => isStaticReportSlug(v.slug))
 
   if (visits.length === 0) return null
 
@@ -18,10 +14,10 @@ export function RecentReportBanner() {
         {visits.map((v) => (
           <Link
             key={v.reportId}
-            to={`/report/${v.slug}`}
+            href={`/report/${v.slug}`}
             className="font-medium text-[#7C9070] underline-offset-4 transition hover:text-[#4F6048] hover:underline"
           >
-            {v.childShortName}의 지난 기록 보기
+            {v.childShortName}의 마음 지도 다시 보기
           </Link>
         ))}
       </div>
