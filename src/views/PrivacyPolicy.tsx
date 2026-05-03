@@ -1,8 +1,11 @@
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 
-const EFFECTIVE_DATE = '2025년 1월 1일'
-const COMPANY = 'HYGGETIME'
-const EMAIL = 'hygge.studio.dev@gmail.com'
+import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
+
+const EFFECTIVE_DATE = '2026년 4월 19일'
+const COMPANY = BUSINESS_INFO.companyDisplay
+const EMAIL = BUSINESS_INFO.supportEmail
 const SERVICE = '킨드라(Kindra)'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -14,7 +17,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-function Table({ rows }: { rows: [string, string][] }) {
+function Table({ rows }: { rows: [string, ReactNode][] }) {
   return (
     <table className="mt-3 w-full border-collapse text-[0.85rem]">
       <tbody>
@@ -68,9 +71,9 @@ export function PrivacyPolicyPage() {
         <Section title="1. 수집하는 개인정보 항목 및 수집 방법">
           <p>회사는 서비스 제공을 위해 아래와 같은 개인정보를 수집합니다.</p>
           <Table rows={[
-            ['수집 항목', '신청자 이름, 이메일 주소, 아이의 그림 이미지 파일, 아이의 나이, 아이의 성별'],
-            ['수집 방법', 'Google 설문 폼(Google Forms)을 통한 직접 입력 및 파일 업로드'],
-            ['필수·선택 여부', '이름, 이메일, 그림 이미지: 필수 / 아이 나이·성별: 선택'],
+            ['수집 항목', '이메일 주소, 부모(신청자) 표시 이름, 아이 호칭·이름, 아이 성별·연령 힌트·메모(선택), 마케팅·가격 관련 설문 응답(선택), 아이 그림 이미지 파일, 유료 구간 이용 시 입금자명(해당 시) 등 신청·이용 과정에서 입력·업로드되는 정보'],
+            ['수집 방법', '웹사이트 내 신청·결제·문의 절차, 이메일 매직 링크 로그인, 서버(Supabase) 및 스토리지에의 저장'],
+            ['필수·선택 여부', '이메일, 부모 표시 이름, 아이 호칭·이름, 아이 성별, 그림 이미지: 필수 / 그 외 항목: 서비스 화면에 표시된 대로 필수 또는 선택'],
           ]} />
           <p className="mt-3 rounded-xl bg-[#F7F5F2] px-4 py-3 text-xs text-[#6B6B6B]">
             ※ 아이의 그림 이미지에는 아동의 개인정보가 포함될 수 있습니다.
@@ -80,9 +83,10 @@ export function PrivacyPolicyPage() {
 
         <Section title="2. 개인정보의 수집 및 이용 목적">
           <Table rows={[
-            ['리포트 작성', '제공된 그림 이미지를 분석하여 아동 그림 심리 관찰 리포트를 작성하고 신청자에게 전달'],
-            ['서비스 품질 향상', '서비스 개선을 위한 내부 분석 (개인 식별 불가능한 형태로 활용)'],
-            ['고객 응대', '리포트 전달 및 관련 문의 응답을 위한 이메일 연락'],
+            ['리포트 작성·제공', '제공된 그림·신청 정보를 바탕으로 아동 그림 심리 관찰 리포트를 작성·저장하고, 로그인된 이용자에게 웹으로 열람할 수 있게 제공'],
+            ['본인 확인·서비스 운영', '이메일 기반 로그인(매직 링크), 신청·유료 구간(입금 확인 등) 처리, 부정 이용 방지'],
+            ['서비스 품질 향상', '서비스 개선을 위한 내부 분석 (가능한 범위에서 비식별·통계 형태로 활용)'],
+            ['고객 응대', '리포트·결제 관련 문의 응답(이메일·카카오톡 채널 등 회사가 안내하는 채널)'],
           ]} />
         </Section>
 
@@ -93,7 +97,7 @@ export function PrivacyPolicyPage() {
           </p>
           <Table rows={[
             ['리포트 제공 완료 후', '신청자 요청 시 즉시 삭제, 별도 요청 없을 시 서비스 제공일로부터 1년'],
-            ['전자상거래 기록 (결제 도입 후)', '5년 (전자상거래 등에서의 소비자보호에 관한 법률)'],
+            ['계좌이체(무통장 입금) 등 대금 관련 기록', '5년 (전자상거래 등에서의 소비자보호에 관한 법률)'],
             ['소비자 불만·분쟁 기록', '3년 (동법)'],
           ]} />
         </Section>
@@ -110,16 +114,34 @@ export function PrivacyPolicyPage() {
         </Section>
 
         <Section title="5. 개인정보 처리 위탁">
-          <p>서비스 제공을 위해 아래와 같이 개인정보 처리 업무를 위탁하고 있습니다.</p>
+          <p>서비스 제공을 위해 아래와 같이 개인정보 처리 업무를 위탁(또는 재수탁)하고 있습니다.</p>
           <Table rows={[
             ['수탁자', '위탁 업무 내용'],
-            ['Google LLC', '설문 폼 운영 및 데이터 수집 (Google Forms / Google Drive)'],
-            ['Anthropic / OpenAI (향후 적용)', 'AI 기반 그림 분석 처리 (적용 시 별도 고지)'],
+            ['Supabase Inc.', '회원 인증·데이터베이스 및 파일 스토리지 등 클라우드 인프라(신청·리포트·그림 파일 저장)'],
+            ['Google LLC', '생성형 AI(Google Gemini API 등)를 이용한 그림·텍스트 기반 분석 처리'],
+            ['Vercel Inc.', '웹 애플리케이션 호스팅 및 배포, 접속·성능 관련 지표 처리'],
+            [
+              '토스페이먼츠(주)',
+              '결제 대행 및 본인인증 등 전자결제 처리(결제 위젯·간편결제·카드 결제가 제공되는 경우에 한함)',
+            ],
           ]} />
           <p className="mt-2 text-xs text-[#8A8A8A]">
             ※ 위탁 계약 시 개인정보 보호 관련 법규 준수, 개인정보 보호를 위한 기술적·관리적 보호조치,
             재위탁 제한, 수탁자에 대한 관리·감독 및 손해배상 등을 계약서에 명시합니다.
           </p>
+          <div className="mt-4 rounded-xl border border-[#E8E4DC] bg-[#F7F5F2] px-4 py-3 text-xs leading-relaxed text-[#5A5A5A]">
+            <p className="font-semibold text-[#3D3D3D]">토스페이먼츠(주) 위탁 안내</p>
+            <p className="mt-2">
+              카드·간편결제 등 <strong>전자결제</strong>를 이용할 때, 회사는 결제 정보를 직접 저장하지 않고{' '}
+              <strong>수탁자 토스페이먼츠(주)</strong>가 결제 대행·본인인증 등에 필요한 정보를 처리합니다.
+              이에 따라 토스페이먼츠(주)의 개인정보처리방침·전자금융거래 약관 등이 추가로 적용될 수 있습니다.
+            </p>
+            <p className="mt-2">
+              <strong>무통장 입금만</strong> 이용하는 경우에는 위 전자결제(PG) 단계가 없으므로, 그 경로로
+              토스페이먼츠(주)에 위탁되는 정보가 생기지 않습니다. 결제 위젯이 노출·활성화되는 경우에는 위 표와
+              같이 위탁이 적용될 수 있어 연동 시점에 맞춰 본 방침을 갱신합니다.
+            </p>
+          </div>
         </Section>
 
         <Section title="6. 개인정보의 파기 절차 및 방법">
@@ -161,14 +183,16 @@ export function PrivacyPolicyPage() {
 
         <Section title="10. 쿠키(Cookie) 사용">
           <p>
-            현재 서비스는 필수적인 세션 쿠키 외에 별도의 추적 쿠키를 사용하지 않습니다.
-            향후 분석 도구(Google Analytics 등) 도입 시 해당 내용을 방침에 추가하고 별도 고지합니다.
+            서비스는 원활한 이용과 보안을 위해 쿠키 및 이와 유사한 기술을 사용할 수 있습니다. 예를 들어
+            로그인 세션 유지, 리포트 열람 권한과 관련된 쿠키, 사이트 이용 분석(Google Analytics 4),
+            호스팅사 제공 접속 분석(Vercel Analytics) 등이 있습니다. 브라우저 설정에서 쿠키 저장을
+            거부할 수 있으나, 일부 기능이 제한될 수 있습니다.
           </p>
         </Section>
 
         <Section title="11. 개인정보 보호 책임자">
           <Table rows={[
-            ['책임자', COMPANY],
+            ['책임자', `${BUSINESS_INFO.privacyOfficer} (${BUSINESS_INFO.tradeNameKo})`],
             ['이메일', EMAIL],
             ['처리 시간', '영업일 기준 10일 이내 회신'],
           ]} />
@@ -189,8 +213,33 @@ export function PrivacyPolicyPage() {
           </p>
         </Section>
 
+        <Section title="13. 전자상거래법상 사업자 정보">
+          <Table rows={[
+            ['상호', `${BUSINESS_INFO.tradeNameKo} (${BUSINESS_INFO.tradeNameEn})`],
+            ['대표자', BUSINESS_INFO.representative],
+            ['사업자등록번호', BUSINESS_INFO.bizRegNo],
+            ['통신판매업 신고번호', BUSINESS_INFO.mailOrderReportNo],
+            ['사업장 소재지', getBusinessPremisesAddress()],
+            ['대표번호', getBusinessPhone() || '고객지원 이메일로 문의 시 안내'],
+            [
+              '사업자 정보 확인',
+              <a
+                key="ftc"
+                href={BUSINESS_INFO.ftcBizVerifyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#7C9070] underline"
+              >
+                공정거래위원회 사업자정보확인
+              </a>,
+            ],
+          ]} />
+        </Section>
+
         <div className="mt-14 border-t border-[#EDE8E0] pt-8 text-center text-xs text-[#8A8A8A]">
-          <p>© {new Date().getFullYear()} {COMPANY}. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} {BUSINESS_INFO.tradeNameKo} ({BUSINESS_INFO.tradeNameEn}). All rights reserved.
+          </p>
           <div className="mt-3 flex justify-center gap-4">
             <Link href="/terms" className="hover:text-[#7C9070]">이용약관</Link>
             <Link href="/" className="hover:text-[#7C9070]">메인으로</Link>

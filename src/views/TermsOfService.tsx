@@ -1,9 +1,11 @@
 import Link from 'next/link'
 
-const EFFECTIVE_DATE = '2025년 1월 1일'
-const COMPANY = 'HYGGETIME'
+import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
+
+const EFFECTIVE_DATE = '2026년 4월 19일'
+const COMPANY = BUSINESS_INFO.companyDisplay
 const SERVICE = '킨드라(Kindra)'
-const EMAIL = 'hygge.studio.dev@gmail.com'
+const EMAIL = BUSINESS_INFO.supportEmail
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -84,6 +86,35 @@ export function TermsOfServicePage() {
               단, 이용자에게 불리한 중대한 변경은 최소 7일 전 고지합니다.
             </li>
             <li>회사는 운영상·기술상 필요에 따라 서비스의 전부 또는 일부를 일시 중단하거나 종료할 수 있습니다.</li>
+          </ul>
+        </Section>
+
+        <Section title="제4조의2 (요금·결제·환불 등)">
+          <ul className="ml-4 list-disc space-y-2">
+            <li>
+              서비스 중 일부는 유료로 제공될 수 있으며, 요금·구간·결제 방법은 신청·결제 화면 및
+              별도 안내에 따릅니다.
+            </li>
+            <li>
+              <strong>계좌이체(무통장 입금)</strong>를 원칙적인 결제 수단으로 안내할 수 있으며,
+              입금 확인 후 리포트 발송 등 다음 절차가 진행됩니다. 입금자명 불일치 등으로 확인이
+              지연될 수 있습니다.
+            </li>
+            <li>
+              <strong>전자결제(예: 간편결제·카드)</strong>를 별도로 제공하는 경우, 해당 결제
+              창·약관은 결제 대행사의 정책이 추가로 적용될 수 있습니다.
+            </li>
+            <li>
+              <strong>청약철회·환불:</strong> 「전자상거래 등에서의 소비자보호에 관한 법률」 등 관련 법령 및
+              회사가 서비스 화면·고객 응대 정책에서 정하는 바에 따릅니다. 리포트는{' '}
+              <strong>이용자에게 맞춤 제공되는 디지털 콘텐츠</strong>에 해당할 수 있으며,{' '}
+              <strong>분석(작성)이 시작된 이후</strong> 또는 <strong>리포트가 이메일 등으로 제공된 이후</strong>에는
+              법령이 정한 바에 따라 <strong>청약철회가 제한</strong>되고 <strong>환불이 어려울 수 있습니다.</strong>
+            </li>
+            <li>
+              결제·환불·분쟁과 관련한 구체적 기준·절차는 유료 신청·결제 화면의 안내, 본 약관 개정,
+              고객지원(이메일·카카오톡 채널 등)을 통해 안내될 수 있습니다.
+            </li>
           </ul>
         </Section>
 
@@ -186,13 +217,60 @@ export function TermsOfServicePage() {
           </p>
         </Section>
 
+        <Section title="제12조 (사업자·통신판매업 고지)">
+          <p className="text-sm">
+            「전자상거래 등에서의 소비자보호에 관한 법률」에 따른 사업자 정보입니다.
+          </p>
+          <ul className="ml-4 mt-2 list-disc space-y-2 text-sm">
+            <li>
+              <strong>상호:</strong> {BUSINESS_INFO.tradeNameKo} ({BUSINESS_INFO.tradeNameEn})
+            </li>
+            <li>
+              <strong>대표자:</strong> {BUSINESS_INFO.representative}
+            </li>
+            <li>
+              <strong>사업자등록번호:</strong> {BUSINESS_INFO.bizRegNo}
+            </li>
+            <li>
+              <strong>통신판매업 신고번호:</strong> {BUSINESS_INFO.mailOrderReportNo}
+            </li>
+            <li>
+              <strong>개인정보 보호책임자:</strong> {BUSINESS_INFO.privacyOfficer}
+            </li>
+            <li>
+              <strong>고객지원 이메일:</strong> {BUSINESS_INFO.supportEmail}
+            </li>
+            <li>
+              <strong>사업장 소재지:</strong>{' '}
+              {getBusinessPremisesAddress()}
+            </li>
+            <li>
+              <strong>대표번호:</strong>{' '}
+              {getBusinessPhone() || '고객지원 이메일로 문의 시 안내합니다.'}
+            </li>
+            <li>
+              <strong>사업자 정보 확인:</strong>{' '}
+              <a
+                href={BUSINESS_INFO.ftcBizVerifyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-[#7C9070] underline"
+              >
+                공정거래위원회 사업자정보확인
+              </a>
+            </li>
+          </ul>
+        </Section>
+
         <div className="mt-6 rounded-xl bg-[#F7F5F2] px-5 py-4 text-xs text-[#6B6B6B]">
           <p className="font-medium text-[#4A4A4A]">부칙</p>
           <p className="mt-1">이 약관은 {EFFECTIVE_DATE}부터 시행합니다.</p>
         </div>
 
         <div className="mt-14 border-t border-[#EDE8E0] pt-8 text-center text-xs text-[#8A8A8A]">
-          <p>© {new Date().getFullYear()} {COMPANY}. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} {BUSINESS_INFO.tradeNameKo} ({BUSINESS_INFO.tradeNameEn}). All rights reserved.
+          </p>
           <div className="mt-3 flex justify-center gap-4">
             <Link href="/privacy" className="hover:text-[#7C9070]">개인정보처리방침</Link>
             <Link href="/" className="hover:text-[#7C9070]">메인으로</Link>

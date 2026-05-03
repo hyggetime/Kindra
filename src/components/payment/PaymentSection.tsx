@@ -238,6 +238,22 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
           </p>
         ) : null}
 
+        <div
+          className="rounded-xl border border-[#E8DFD0] bg-[#FDF9F3] px-4 py-3 text-[11px] leading-relaxed text-[#5A4A3A] sm:text-xs"
+          role="note"
+        >
+          <p className="font-semibold text-[#3D3D3D]">디지털 콘텐츠(맞춤 리포트) · 환불 안내</p>
+          <p className="mt-1.5">
+            본 서비스는 이용자 맞춤형 <strong>디지털 콘텐츠</strong>에 해당할 수 있습니다.{' '}
+            <strong>분석이 시작된 이후</strong> 또는 <strong>리포트가 제공된 이후</strong>에는 관련 법령에 따라{' '}
+            <strong>청약철회가 제한</strong>될 수 있고, <strong>환불이 어려울 수 있어요.</strong> 결제를 진행하기 전에{' '}
+            <Link href="/terms" className="font-semibold text-[#5A6F52] underline underline-offset-2">
+              이용약관
+            </Link>
+            의 요금·환불 조항을 확인해 주세요.
+          </p>
+        </div>
+
         {tossConfigured ? (
           <>
             {tossBlock}

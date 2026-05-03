@@ -2,10 +2,8 @@ import Link from 'next/link'
 
 import { BizVerifyButton } from '@/components/layout/BizVerifyButton'
 import { KakaoChannelButtons } from '@/components/layout/KakaoChannelButtons'
+import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
 import { shouldShowKakaoChannel } from '@lib/locale/kakao-cs-visibility'
-
-const FTC_BIZ_VERIFY_URL = 'https://www.ftc.go.kr/bizCommPop.do?wrkr_no=8257800316'
-const SUPPORT_EMAIL = 'hygge.studio.dev@gmail.com'
 
 export function Footer() {
   const year = new Date().getFullYear()
@@ -20,10 +18,10 @@ export function Footer() {
           <p className="text-[10px] leading-snug sm:text-[11px]">
             <span className="text-[#7A7A7A]">이메일:</span>{' '}
             <a
-              href={`mailto:${SUPPORT_EMAIL}`}
+              href={`mailto:${BUSINESS_INFO.supportEmail}`}
               className="text-[#5A6F52] underline decoration-[#C8D4C0] underline-offset-2 transition hover:text-[#4F6048]"
             >
-              {SUPPORT_EMAIL}
+              {BUSINESS_INFO.supportEmail}
             </a>
           </p>
         </div>
@@ -32,21 +30,36 @@ export function Footer() {
           className="mt-4 space-y-1 text-[10px] leading-relaxed text-[#9A9A9A] sm:text-[11px] sm:leading-relaxed"
         >
           <p>
-            <span className="text-[#7A7A7A]">상호:</span> 휘게타임 <span className="text-[#C8C4BC]">|</span>{' '}
-            <span className="text-[#7A7A7A]">대표:</span> 안형설 <span className="text-[#C8C4BC]">|</span>{' '}
-            <span className="text-[#7A7A7A]">사업자등록번호</span> 825-78-00316 <span className="text-[#C8C4BC]">|</span>{' '}
-            <BizVerifyButton href={FTC_BIZ_VERIFY_URL} />
+            <span className="text-[#7A7A7A]">상호:</span> {BUSINESS_INFO.tradeNameKo}{' '}
+            <span className="text-[#C8C4BC]">|</span>{' '}
+            <span className="text-[#7A7A7A]">대표:</span> {BUSINESS_INFO.representative}{' '}
+            <span className="text-[#C8C4BC]">|</span>{' '}
+            <span className="text-[#7A7A7A]">사업자등록번호</span> {BUSINESS_INFO.bizRegNo}{' '}
+            <span className="text-[#C8C4BC]">|</span>{' '}
+            <BizVerifyButton href={BUSINESS_INFO.ftcBizVerifyUrl} />
           </p>
           <p>
-            <span className="text-[#7A7A7A]">통신판매업신고번호</span> 2022-서울양천-0568 <span className="text-[#C8C4BC]">|</span>{' '}
-            <span className="text-[#7A7A7A]">개인정보보호책임자:</span> 안형설
+            <span className="text-[#7A7A7A]">통신판매업신고번호</span> {BUSINESS_INFO.mailOrderReportNo}{' '}
+            <span className="text-[#C8C4BC]">|</span>{' '}
+            <span className="text-[#7A7A7A]">개인정보보호책임자:</span> {BUSINESS_INFO.privacyOfficer}
           </p>
+          <p>
+            <span className="text-[#7A7A7A]">사업장 소재지:</span> {getBusinessPremisesAddress()}
+          </p>
+          {getBusinessPhone() ? (
+            <p>
+              <span className="text-[#7A7A7A]">대표번호:</span>{' '}
+              <a href={`tel:${getBusinessPhone().replace(/\s/g, '')}`} className="text-[#5A6F52] underline">
+                {getBusinessPhone()}
+              </a>
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-4 flex flex-col items-center gap-1.5 border-t border-[#EDE8E0]/70 pt-3 text-[11px] sm:flex-row sm:justify-between sm:gap-2">
           <span className="font-medium tracking-tight text-[#7C9070]/85">Kindra · 킨드라</span>
           <span className="text-center tabular-nums text-[#A8A8A8] sm:text-left">
-            © {year} 휘게타임 · All Rights Reserved
+            © {year} {BUSINESS_INFO.tradeNameKo} · All Rights Reserved
           </span>
           <nav className="flex items-center gap-3 text-[11px]">
             <Link href="/privacy" className="text-[#8A8A8A] transition hover:text-[#5A6F52]">
