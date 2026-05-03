@@ -18,10 +18,11 @@ type PageProps = { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const data = isStaticReportSlug(slug) ? REPORTS[slug] : undefined
-  if (!data) return { title: '리포트 — Kindra' }
+  if (!data) return { title: '리포트 — Kindra', robots: { index: false, follow: false } }
   return {
     title: data.seo.title,
     description: data.seo.description,
+    robots: { index: false, follow: false },
   }
 }
 
