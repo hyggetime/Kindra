@@ -491,7 +491,7 @@ function ApplyIntegratedFormFields({
                   rows={2}
                   maxLength={500}
                   disabled={pending}
-                  placeholder="예: 동생이랑 싸운 뒤 그렸어요 (선택)"
+                  placeholder="그림을 그린 시기나 당시의 상황을 적어주시면 더 정확한 분석이 가능합니다"
                   className="w-full resize-y rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-xs text-[#3D3D3D] outline-none ring-[#7C9070]/20 focus:border-[#7C9070]/45 focus:ring-1 disabled:opacity-60"
                 />
               </div>
