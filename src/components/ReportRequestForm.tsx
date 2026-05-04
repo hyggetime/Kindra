@@ -54,7 +54,9 @@ export function ReportRequestForm() {
         <div className="flex flex-col gap-2">
           <p className="text-xs text-[#8A8A8A]">신청 과정에서 이메일 확인이 필요할 수 있어요.</p>
           <p className="text-xs font-medium text-[#7C9070]/90">킨드라 신청 화면에서 안전하게 진행돼요.</p>
-          <p className="text-xs text-[#8A8A8A]">업로드하신 소중한 그림은 분석 후 안전하게 관리됩니다.</p>
+          <p className="text-xs text-[#8A8A8A]">
+            보내주신 그림은 분석과 킨드라의 다채로운 서비스(리포트, 굿즈 등) 제공을 위해 안전하게 관리됩니다.
+          </p>
           <p className="text-xs text-[#8A8A8A]">한국 아동 그림 56,000건(심허브)과 영유아 성장도표 데이터를 함께 활용해요.</p>
         </div>
       </div>

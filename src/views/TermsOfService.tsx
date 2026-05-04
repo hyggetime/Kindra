@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
 
-const EFFECTIVE_DATE = '2026년 4월 19일'
+const EFFECTIVE_DATE = '2026년 4월 18일'
 const COMPANY = BUSINESS_INFO.companyDisplay
 const SERVICE = '킨드라(Kindra)'
 const EMAIL = BUSINESS_INFO.supportEmail
@@ -149,7 +149,9 @@ export function TermsOfServicePage() {
             </li>
             <li>
               이용자가 제공한 그림 이미지의 저작권은 원 저작자(이용자 또는 아동)에게 있으며,
-              회사는 리포트 작성 목적으로만 이를 이용합니다.
+              회사는 이용자가 업로드한 그림을 리포트 생성, 서비스 품질 개선, 그리고 킨드라가 제공하는
+              부가 서비스(아이 그림 기반 콘텐츠 제작, 굿즈 안내 및 연계 서비스 등)를 제공하기 위한
+              범위 내에서 이용할 수 있습니다.
             </li>
             <li>
               회사가 작성한 리포트의 저작권은 회사에 있으나, 이용자는 개인적 목적으로

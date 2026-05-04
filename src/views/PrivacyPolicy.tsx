@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
 
-const EFFECTIVE_DATE = '2026년 4월 19일'
+const EFFECTIVE_DATE = '2026년 4월 18일'
 const COMPANY = BUSINESS_INFO.companyDisplay
 const EMAIL = BUSINESS_INFO.supportEmail
 const SERVICE = '킨드라(Kindra)'
@@ -77,13 +77,18 @@ export function PrivacyPolicyPage() {
           ]} />
           <p className="mt-3 rounded-xl bg-[#F7F5F2] px-4 py-3 text-xs text-[#6B6B6B]">
             ※ 아이의 그림 이미지에는 아동의 개인정보가 포함될 수 있습니다.
-            부모님(법정대리인)이 동의하신 범위 내에서만 처리하며, 분석 목적 외에 사용하지 않습니다.
+            부모님(법정대리인)이 동의하신 범위 내에서만 처리하며, 이용약관·개인정보처리방침에 기재된
+            서비스 제공 및 이용 목적의 범위에서만 이용합니다.
           </p>
         </Section>
 
         <Section title="2. 개인정보의 수집 및 이용 목적">
           <Table rows={[
             ['리포트 작성·제공', '제공된 그림·신청 정보를 바탕으로 아동 그림 심리 관찰 리포트를 작성·저장하고, 로그인된 이용자에게 웹으로 열람할 수 있게 제공'],
+            [
+              '맞춤형 부가 서비스',
+              '아이 그림을 활용한 맞춤형 콘텐츠(굿즈 등) 안내 및 제작 서비스 제공, 성장 기록·갤러리 등 킨드라가 안내하는 지속 보관형 기능(해당 시 별도 동의·절차에 따름)',
+            ],
             ['본인 확인·서비스 운영', '이메일 기반 로그인(매직 링크), 신청·유료 구간(입금 확인 등) 처리, 부정 이용 방지'],
             ['서비스 품질 향상', '서비스 개선을 위한 내부 분석 (가능한 범위에서 비식별·통계 형태로 활용)'],
             ['고객 응대', '리포트·결제 관련 문의 응답(이메일·카카오톡 채널 등 회사가 안내하는 채널)'],
@@ -100,6 +105,10 @@ export function PrivacyPolicyPage() {
             ['계좌이체(무통장 입금) 등 대금 관련 기록', '5년 (전자상거래 등에서의 소비자보호에 관한 법률)'],
             ['소비자 불만·분쟁 기록', '3년 (동법)'],
           ]} />
+          <p className="mt-3 text-sm leading-relaxed">
+            단, 이용자가 &apos;아이 그림 보관함&apos; 또는 &apos;성장 갤러리&apos; 등 지속적인 보관 서비스에
+            동의하거나 굿즈 제작 등을 위해 보존을 요청한 경우, 해당 서비스 제공 완료 시까지 보유합니다.
+          </p>
         </Section>
 
         <Section title="4. 개인정보의 제3자 제공">

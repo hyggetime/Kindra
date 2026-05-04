@@ -219,8 +219,8 @@ function ApplyIntegratedFormFields({
     <form ref={formRef} action={formAction} className="space-y-8">
       <div className="rounded-xl border border-[#D4CFC4] bg-[#FAF8F4] px-4 py-4 sm:px-5 sm:py-5">
         <p className="text-[12px] leading-[1.85] text-[#4A4A4A] sm:text-[13px]">
-          신청서를 제출하시면 아이의 그림과 정보를 리포트 작성 목적으로만 활용하는 것에 동의하신 것으로 간주돼요. 수집된 자료는
-          분석 외 다른 용도로 사용되지 않아요.
+          신청서를 제출하시면 아이의 그림과 정보를 리포트 작성 및 킨드라 서비스 제공 목적으로 활용하는 것에 동의하신 것으로
+          간주돼요. 보내주신 그림은 분석과 킨드라의 다채로운 서비스(리포트, 굿즈 등) 제공을 위해 안전하게 관리됩니다.
         </p>
         <p className="mt-2.5 text-[11px] leading-relaxed text-[#6B6B6B] sm:text-xs">
           (그림을 받은 후 24시간 이내 발송을 목표로 해요. 꼼꼼히 살펴보느라 조금 늦어질 수 있어요.)
