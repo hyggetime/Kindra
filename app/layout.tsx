@@ -4,6 +4,8 @@ import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/react'
 
 import { KakaoSdkProvider } from '@/components/kakao/KakaoSdkProvider'
+import { KindraJsonLd } from '@lib/seo/kindra-json-ld'
+import { getMetadataBase } from '@lib/site-origin'
 import { SITE_OG_IMAGE } from '@lib/site-og'
 
 import './globals.css'
@@ -15,7 +17,7 @@ const SITE_DESCRIPTION =
 export const metadata: Metadata = {
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
-  metadataBase: new URL('https://kindra.vercel.app'),
+  metadataBase: getMetadataBase(),
   alternates: { canonical: '/' },
   /** `main` 브랜치 `index.html` 과 동일 — `public/favicon*.png` */
   icons: {
@@ -63,6 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', 'G-QHB2KXJ78B');
           `}
         </Script>
+        <KindraJsonLd />
         <KakaoSdkProvider>
           <Suspense fallback={null}>{children}</Suspense>
         </KakaoSdkProvider>

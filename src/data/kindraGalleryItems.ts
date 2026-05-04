@@ -17,9 +17,9 @@ export const KINDRA_GALLERY_INTRO =
 export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   {
     id: 'family-four',
-    /* public 에 원본이 없을 때: 동일 톤의 기존 에셋으로 대체 (파일 추가 시 경로만 바꾸면 됨) */
-    src: '/gallery/paper-dolls-b.png',
-    alt: '영희가 그린 가족 인물화 — 네 가족이 하나의 테두리 안에 모인 KFD 가족화 · 가족 응집력과 세밀한 변별력 심리 패턴 관찰 데이터',
+    /** 랜딩 전용 예시 에셋 (`public/gallery/`) — 타 리포트 원본과 분리 */
+    src: '/gallery/family-four.png',
+    alt: '연필 선화 가족 인물화 — 세로형 사각 테두리 안에 부모와 아이 두 명이 배치된 KFD 가족화 · 가족 응집력과 세밀한 변별력 관찰 데이터',
     label: 'KFD · 가족화 분석',
     title: '우리 가족의 초상',
     subtitle: '서로를 향한 시선, 그리고 하나의 테두리',
@@ -34,8 +34,9 @@ export const KINDRA_GALLERY_ITEMS: GalleryItem[] = [
   },
   {
     id: 'watering-scene',
-    src: '/gallery/birthday-cake.png',
-    alt: '영희가 그린 나무 사이 인물화 — 눈 감고 미소 지으며 새싹에 물을 주는 소녀 · HTP 기저선 안정감·양육 모티프·필압 일관성 심리 패턴 관찰 데이터',
+    /** 랜딩 예시(`ReportExampleYeonghui`)와 동일 원본 — 가을 느낌 나무·낙엽, 색연필, 새싹에 물 주는 소녀 */
+    src: '/yeonghui_main.png',
+    alt: '영희가 그린 색연필 인물화 — 가을 느낌의 나무와 낙엽을 배경으로 땅의 작은 새싹에 물을 주며 눈 감고 미소 짓는 소녀 · HTP 기저선·양육 모티프 관찰 데이터',
     label: 'HTP · 인물화 분석',
     title: '눈을 감고 웃는 소녀',
     subtitle: '내면에서 흘러나오는 돌봄의 마음',

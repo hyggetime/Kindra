@@ -4,11 +4,28 @@ import { ApplyPageShell } from '../apply/ApplyPageShell'
 import { IntakeClient, type IntakePricingSnapshot } from './IntakeClient'
 import { DISCOUNT_LIMIT, FREE_LIMIT, effectivePriceTier, formatPriceWon, displayPriceWonForTier } from '@lib/constants'
 import { getIntakePricingContext } from '@lib/intake-pricing.server'
+import { SITE_OG_IMAGE } from '@lib/site-og'
+
+const INTAKE_TITLE = '그림 신청 — 킨드라 Kindra'
+const INTAKE_DESC =
+  '아이의 그림과 이야기를 보내주시면 킨드라가 따뜻한 마음 리포트를 준비해 드려요. 선착순 무료·할인 구간 안내와 함께 신청할 수 있습니다.'
 
 export const metadata: Metadata = {
-  title: '그림 신청 — 킨드라 Kindra',
-  description: '아이의 그림과 이야기를 보내주시면, 킨드라가 따뜻한 마음 리포트를 준비해 드려요.',
+  title: INTAKE_TITLE,
+  description: INTAKE_DESC,
   alternates: { canonical: '/intake' },
+  openGraph: {
+    title: INTAKE_TITLE,
+    description: INTAKE_DESC,
+    url: '/intake',
+    images: [SITE_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: INTAKE_TITLE,
+    description: INTAKE_DESC,
+    images: [SITE_OG_IMAGE.url],
+  },
 }
 
 export default async function IntakePage() {

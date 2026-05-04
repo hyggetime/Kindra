@@ -2,12 +2,28 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { Footer } from '@/components/layout/Footer'
+import { SITE_OG_IMAGE } from '@lib/site-og'
+
+const TOOLS_TITLE = '킨드라가 마음을 읽는 법 — 킨드라 Kindra'
+const TOOLS_DESC =
+  '킨드라가 아이의 그림을 어떻게 읽는지 알려드려요. HTP·DAP·KFD·LMT·PITR 등 검증된 심리 분석 이론을 바탕으로, 임상 진단이 아닌 따뜻한 경향성 가이드를 만들어요.'
 
 export const metadata: Metadata = {
-  title: '킨드라가 마음을 읽는 법 — 킨드라 Kindra',
-  description:
-    '킨드라가 아이의 그림을 어떻게 읽는지 알려드려요. HTP·DAP·KFD·LMT·PITR 등 검증된 심리 분석 이론을 바탕으로, 임상 진단이 아닌 따뜻한 경향성 가이드를 만들어요.',
+  title: TOOLS_TITLE,
+  description: TOOLS_DESC,
   alternates: { canonical: '/tools' },
+  openGraph: {
+    title: TOOLS_TITLE,
+    description: TOOLS_DESC,
+    url: '/tools',
+    images: [SITE_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TOOLS_TITLE,
+    description: TOOLS_DESC,
+    images: [SITE_OG_IMAGE.url],
+  },
 }
 
 type Framework = {
