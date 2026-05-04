@@ -53,6 +53,9 @@ export function TransparentPricingTeaser() {
           </li>
         </ul>
         <p className="mt-5 text-center text-[11px] leading-relaxed text-[#8A8A8A] sm:text-xs">
+          한국 아동 그림 56,000건(심허브)과 영유아 성장도표 데이터를 함께 활용해요.
+        </p>
+        <p className="mt-3 text-center text-[11px] leading-relaxed text-[#8A8A8A] sm:text-xs">
           지금 신청하시면 현재 구간 요금을 그대로 적용받으세요. 정확한 금액은{' '}
           <Link href={APPLY_FORM_HREF} className="font-medium text-[#5A6F52] underline-offset-2 hover:underline">
             신청

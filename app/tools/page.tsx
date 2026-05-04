@@ -175,8 +175,74 @@ export default function ToolsPage() {
           </div>
         </section>
 
+        {/* 이론만이 아닌, 실제 데이터와 함께 */}
+        <section className="border-y border-sage/10 bg-white/40 px-5 py-16 sm:px-8 sm:py-20">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-10 text-center">
+              <h2 className="text-2xl font-semibold text-ink">이론만이 아닌, 실제 데이터와 함께</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-ink/70">
+                다섯 가지 분석 이론 외에, 킨드라는 두 가지 실제 데이터를 리포트 작성에 함께 활용해요.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {/* 심허브 */}
+              <div className="flex flex-col rounded-2xl border border-sage/25 bg-[#F7FAF5]/80 p-6 shadow-sm sm:p-8">
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-sage/75">
+                  참고 데이터 01
+                </p>
+                <h3 className="text-base font-semibold leading-snug text-ink">
+                  한국 아동 그림 데이터
+                </h3>
+                <p className="mt-0.5 text-xs text-ink/45">심허브 (SeemHub)</p>
+                <p className="mt-5 text-sm leading-[1.85] text-ink/80">
+                  킨드라는 AI 단독 판단이 아니라, 실제 한국 아동의 그림 데이터를 배경으로 활용해요.{' '}
+                  <strong className="font-semibold text-ink">7~13세 아동 7,000명</strong>에게서 수집한{' '}
+                  <strong className="font-semibold text-ink">56,000장의 그림</strong>과, 각 그림 속 주요
+                  요소의 위치·형태를 정밀하게 기록한 라벨링 데이터가 그 기반이에요. 집·나무·여자사람·남자사람
+                  네 가지 HTP 분류로 구성되어 있어요.
+                </p>
+                <p className="mt-4 text-sm leading-[1.85] text-ink/80">
+                  아이의 그림을 분석할 때, 같은 연령대 한국 아이들의 실제 그림과 비교하는{' '}
+                  <em className="not-italic text-sage-dark">또래의 감각</em>이 자연스럽게 배경으로
+                  작동해요.
+                </p>
+                <p className="mt-5 rounded-lg bg-sage/8 px-3.5 py-2.5 text-xs leading-relaxed text-ink/55">
+                  이 데이터는 <strong className="font-medium text-ink/70">7~13세 아동</strong>의 그림에서
+                  가장 풍부하게 적용돼요.
+                </p>
+              </div>
+
+              {/* 성장도표 */}
+              <div className="flex flex-col rounded-2xl border border-sage/25 bg-[#F7FAF5]/80 p-6 shadow-sm sm:p-8">
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-sage/75">
+                  참고 데이터 02
+                </p>
+                <h3 className="text-base font-semibold leading-snug text-ink">
+                  아동 신체 발달 기준 데이터
+                </h3>
+                <p className="mt-0.5 text-xs text-ink/45">국민건강보험공단 영유아 성장도표</p>
+                <p className="mt-5 text-sm leading-[1.85] text-ink/80">
+                  그림에는 아이의 심리뿐 아니라 신체 발달 단계가 함께 담겨 있어요. 킨드라는{' '}
+                  <strong className="font-semibold text-ink">국민건강보험공단 영유아 성장도표</strong>를
+                  활용해, 연령별 신체 발달 기준을 리포트의 한 관점으로 더해요.
+                </p>
+                <p className="mt-4 text-sm leading-[1.85] text-ink/80">
+                  그림에서 보이는 소근육 표현의 정교함, 공간 구성 방식이 아이의 발달 단계와 어떻게
+                  맞닿아 있는지를 부드럽게 짚어드릴 수 있어요.
+                </p>
+                <p className="mt-5 rounded-lg bg-sage/8 px-3.5 py-2.5 text-xs leading-relaxed text-ink/55">
+                  발달 지연이나 이상을 진단하는 용도가 아니에요.{' '}
+                  <strong className="font-medium text-ink/70">아이의 그림을 맥락 있게 읽기 위한</strong>{' '}
+                  참고 기준이에요.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* 이렇게 함께 읽어요 */}
-        <section className="border-y border-sage/10 bg-sand/35 px-5 py-16 sm:px-8 sm:py-20">
+        <section className="border-b border-sage/10 bg-sand/35 px-5 py-16 sm:px-8 sm:py-20">
           <div className="mx-auto max-w-3xl">
             <h2 className="text-2xl font-semibold text-ink">이렇게 함께 읽어요</h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink/70">

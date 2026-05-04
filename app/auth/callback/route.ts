@@ -8,7 +8,7 @@ import {
 
 /**
  * 이메일 매직링크(PKCE) 수신 — `code` 가 있을 때만 세션을 만들고 `next` 로 이동합니다.
- * `/reports/{uuid}` 또는 레거시 `/report/{slug}` 로 갈 때 잠금 해제 쿠키를 심습니다.
+ * `/reports/{uuid}` 로 갈 때 잠금 해제 쿠키를 십니다.
  */
 export async function GET(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -54,8 +54,7 @@ export async function GET(request: NextRequest) {
   }
 
   const reportsMatch = /^\/reports\/([0-9a-f-]{36})\/?$/i.exec(redirectTarget.pathname)
-  const legacyMatch = /^\/report\/([^/]+)\/?$/.exec(redirectTarget.pathname)
-  const unlockValue = (reportsMatch?.[1] ?? legacyMatch?.[1] ?? '').toLowerCase() || null
+  const unlockValue = (reportsMatch?.[1] ?? '').toLowerCase() || null
 
   if (unlockValue) {
     response.cookies.set(KINDRA_REPORT_UNLOCK_COOKIE, unlockValue, {

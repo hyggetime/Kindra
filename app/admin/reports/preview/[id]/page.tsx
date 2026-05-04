@@ -43,7 +43,7 @@ export default async function AdminReportPreviewPage({ params, searchParams }: P
   }
 
   if (resolved.variant === 'intake_session') {
-    return <IntakeReportDocument payload={resolved.session} />
+    return <IntakeReportDocument payload={resolved.session} reportUuid={id} />
   }
-  return <ReportDocument data={resolved.data} />
+  return <ReportDocument data={resolved.data} canonicalReportUuid={id} />
 }

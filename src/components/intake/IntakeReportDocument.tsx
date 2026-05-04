@@ -10,6 +10,7 @@ import {
 import { parseDrawingSummaryCaptions } from '@lib/intake/parse-drawing-summary'
 import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-session'
 import { RichParagraph } from '@/components/RichParagraph'
+import { recordReportVisit } from '@/lib/reportVisitStorage'
 import { trackEvent } from '@/lib/analytics'
 import { useScrollDepth } from '@/hooks/useScrollDepth'
 import { useSectionEngagement } from '@/hooks/useSectionEngagement'
@@ -25,6 +26,8 @@ const FOOTER = {
 
 type Props = {
   payload: IntakeReportSessionPayload
+  /** `/reports/{uuid}` 에서만 설정 — 최근 리포트 띠·방문 기록용 */
+  reportUuid?: string
 }
 
 function bodyToParagraphs(body: string): string[] {
@@ -201,7 +204,7 @@ function DrawingMagazineSection({ body, thumbs }: { body: string; thumbs: string
   )
 }
 
-export function IntakeReportDocument({ payload }: Props) {
+export function IntakeReportDocument({ payload, reportUuid }: Props) {
   const [copyDone, setCopyDone] = useState(false)
   const { reportId, subject, childShortName, markdown, heroTitleLines, drawingThumbDataUrls, heroImageDataUrl } =
     payload
@@ -220,9 +223,15 @@ export function IntakeReportDocument({ payload }: Props) {
   )
 
   useEffect(() => {
-    /** `/apply/report` 는 세션 전용이라 `/report/...` 바로가기에 넣으면 404 — 기록하지 않음 */
-    trackEvent('report_view', { report_id: reportId, slug: 'intake' })
-  }, [reportId])
+    if (reportUuid) {
+      recordReportVisit({ reportUuid, childShortName: payload.childShortName })
+    }
+    /** `/apply/report` 세션 전용이면 reportUuid 없음 — 방문 기록 생략 */
+    trackEvent('report_view', {
+      report_id: payload.reportId,
+      ...(reportUuid ? { report_uuid: reportUuid } : {}),
+    })
+  }, [payload.childShortName, payload.reportId, reportUuid])
 
   const handleCopyUrl = async (): Promise<void> => {
     try {

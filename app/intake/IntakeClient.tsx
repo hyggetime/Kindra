@@ -75,6 +75,7 @@ function IntakeStatusBanner({ initial }: { initial: IntakePricingSnapshot }) {
     >
       {body}
       <p className="mt-2 text-xs text-[#8A8A8A]">현재 신청 요금: {priceLabel} · 실시간 인원을 반영해요.</p>
+      <p className="mt-1 text-xs text-[#9A9A9A]">한국 아동 그림 56,000건(심허브)과 영유아 성장도표 데이터를 함께 활용해요.</p>
     </div>
   )
 }

@@ -17,7 +17,8 @@ export type KindraReportHyggeTip = {
 
 export type KindraReportPageData = {
   reportId: string
-  slug: string
+  /** @deprecated URL 은 `/reports/{uuid}` 고정 — 레거시 JSON 호환용으로만 남김 */
+  slug?: string
   childShortName: string
   seo: {
     title: string

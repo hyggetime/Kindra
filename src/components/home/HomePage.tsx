@@ -152,7 +152,10 @@ export function HomePage() {
             ))}
           </div>
 
-          <div className="mx-auto mt-12 flex max-w-xl justify-center border-t border-[#EDE8E0] pt-10">
+          <p className="mx-auto mt-12 max-w-xl border-t border-[#EDE8E0] pt-8 text-center text-[11px] leading-relaxed text-[#8A8A8A]">
+            한국 아동 그림 56,000건(심허브)과 국민건강보험공단 영유아 성장도표 데이터를 함께 활용해요.
+          </p>
+          <div className="mx-auto mt-5 flex max-w-xl justify-center">
             <Link
               href="/tools"
               className="group inline-flex items-center gap-2.5 text-sm text-[#5C6658] transition hover:text-[#3D4A38]"

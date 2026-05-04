@@ -14,7 +14,9 @@ export type StoredIntakeReportJson = {
 function isKindraReportPageData(v: unknown): v is KindraReportPageData {
   if (!v || typeof v !== 'object') return false
   const o = v as Record<string, unknown>
-  return typeof o.reportId === 'string' && typeof o.slug === 'string' && o.hero !== undefined
+  if (typeof o.reportId !== 'string' || o.hero === undefined || typeof o.hero !== 'object') return false
+  const hero = o.hero as Record<string, unknown>
+  return typeof hero.imageSrc === 'string'
 }
 
 function isIntakeSessionPayload(s: unknown): s is IntakeReportSessionPayload {

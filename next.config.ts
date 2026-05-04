@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next'
 
+import { KINDRA_JIO_REPORT_UUID } from './lib/reports/kindra-static-demo-report'
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   /** 5장 × 최대 4MB 업로드(Server Action) — 기본 1MB 한도를 넘기지 않으면 Gemini 폼이 413 으로 실패합니다 */
@@ -13,6 +15,15 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
+  },
+  async redirects() {
+    return [
+      {
+        source: '/report/jio',
+        destination: `/reports/${KINDRA_JIO_REPORT_UUID}`,
+        permanent: true,
+      },
+    ]
   },
 }
 

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { KINDRA_REPORT_UNLOCK_COOKIE } from '@lib/auth/report-gate'
 
 /**
- * Supabase 세션 쿠키 갱신 + (선택) /apply 보호 + 리포트 게이트 (/reports/[id], /report/[slug]).
+ * Supabase 세션 쿠키 갱신 + (선택) /apply 보호 + 리포트 게이트 (`/reports/[uuid]`).
  * @see https://supabase.com/docs/guides/auth/server-side/nextjs
  */
 export async function updateSession(request: NextRequest) {
@@ -40,28 +40,21 @@ export async function updateSession(request: NextRequest) {
   const reportGateOn = process.env.REPORT_GATE_ENABLED === 'true'
 
   const reportsUuidMatch = /^\/reports\/([0-9a-f-]{36})\/?$/i.exec(pathname)
-  const legacySlugMatch = /^\/report\/([^/]+)\/?$/.exec(pathname)
-  const gateKeyRaw = reportsUuidMatch?.[1] ?? legacySlugMatch?.[1] ?? null
+  const gateKeyRaw = reportsUuidMatch?.[1] ?? null
   const gateKey = gateKeyRaw ? gateKeyRaw.toLowerCase() : null
 
-  if (gateKey && reportGateOn && (reportsUuidMatch || legacySlugMatch)) {
+  if (gateKey && reportGateOn && reportsUuidMatch) {
     const unlock = request.cookies.get(KINDRA_REPORT_UNLOCK_COOKIE)?.value?.toLowerCase() ?? ''
 
     if (!user) {
       const login = new URL('/auth/login', request.url)
-      login.searchParams.set(
-        'next',
-        reportsUuidMatch ? `/reports/${gateKey}` : `/report/${legacySlugMatch![1]}`,
-      )
+      login.searchParams.set('next', `/reports/${gateKey}`)
       login.searchParams.set('reason', 'login_required')
       return NextResponse.redirect(login)
     }
     if (unlock !== gateKey) {
       const login = new URL('/auth/login', request.url)
-      login.searchParams.set(
-        'next',
-        reportsUuidMatch ? `/reports/${gateKey}` : `/report/${legacySlugMatch![1]}`,
-      )
+      login.searchParams.set('next', `/reports/${gateKey}`)
       login.searchParams.set('reason', 'magic_link_only')
       return NextResponse.redirect(login)
     }

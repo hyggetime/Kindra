@@ -12,9 +12,11 @@ import { useSectionEngagement } from '../../hooks/useSectionEngagement'
 
 type Props = {
   data: KindraReportPageData
+  /** 브라우저 주소 `/reports/{uuid}` — localStorage·OG 정합 */
+  canonicalReportUuid: string
 }
 
-export function ReportDocument({ data }: Props) {
+export function ReportDocument({ data, canonicalReportUuid }: Props) {
   const [copyDone, setCopyDone] = useState(false)
 
   useScrollDepth(data.reportId)
@@ -22,12 +24,11 @@ export function ReportDocument({ data }: Props) {
 
   useEffect(() => {
     recordReportVisit({
-      reportId: data.reportId,
-      slug: data.slug,
+      reportUuid: canonicalReportUuid,
       childShortName: data.childShortName,
     })
-    trackEvent('report_view', { report_id: data.reportId })
-  }, [data.childShortName, data.reportId, data.slug])
+    trackEvent('report_view', { report_id: data.reportId, report_uuid: canonicalReportUuid })
+  }, [canonicalReportUuid, data.childShortName, data.reportId])
 
   const handleCopyUrl = async (): Promise<void> => {
     const url = window.location.href

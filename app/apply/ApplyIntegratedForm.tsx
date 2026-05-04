@@ -404,7 +404,8 @@ function ApplyIntegratedFormFields({
 
       <div className="rounded-xl border border-[#E8EDE6] bg-[#F7FAF6]/90 px-3.5 py-3 sm:px-4 sm:py-3.5">
         <p className="text-[11px] leading-relaxed text-[#6B7568] sm:text-xs">
-          킨드라는 HTP·LMT 등 검증된 심리 분석 이론을 토대로 아이의 그림을 살펴봐요.{' '}
+          킨드라는 HTP·LMT 등 검증된 심리 분석 이론을 토대로 아이의 그림을 살펴봐요. 한국 아동 그림
+          56,000건(심허브)과 국민건강보험공단 영유아 성장도표도 함께 활용해요.{' '}
           <Link
             href="/tools"
             className="font-medium text-[#5A6F52] underline decoration-[#7C9070]/30 underline-offset-[3px] transition hover:text-[#4A5C44] hover:decoration-[#7C9070]/55"

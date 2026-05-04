@@ -60,6 +60,9 @@ export function ApplyPaymentView({ tier, reportId, bankTransfer }: Props) {
         <p className="mx-auto mt-4 max-w-md text-sm leading-[1.85] text-[#6B6B6B]">
           신청서와 그림이 안전하게 전달됐어요. 요금 구간에 맞는 안내를 아래에서 확인해 주세요.
         </p>
+        <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#9A9A9A]">
+          한국 아동 그림 56,000건(심허브) 데이터를 배경으로 꼼꼼히 살펴볼게요.
+        </p>
       </header>
 
       <PaymentSection emphasis tier={tier} reportId={reportId} bankTransfer={bankTransfer} />
