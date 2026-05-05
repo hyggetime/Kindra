@@ -5,8 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useCallback, useMemo, useRef, useState, useTransition } from 'react'
 
 import { saveBankDepositorName } from '@app/actions/save-bank-depositor'
-import type { PriceTier } from '@lib/constants'
-import { DISCOUNT_PRICE_WON, NORMAL_PRICE_WON } from '@lib/constants'
+import { type PriceTier, displayPriceWonForTier, formatPriceWon, tossChargeAmountWonForTier } from '@lib/constants'
 import type { BankTransferDisplay } from '@lib/payment/bank-transfer'
 import { isTossPaymentsWidgetConfigured } from '@lib/payment/toss-payments-config'
 
@@ -64,9 +63,8 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
     }
   }, [bankTransfer.accountNo, accountCopyBusy])
 
-  const isFree = tier === 'free'
-  const isPaid = tier === 'discount' || tier === 'normal'
   const hasReport = Boolean(reportId)
+  const chargeWon = tossChargeAmountWonForTier(tier)
 
   const onSaveDepositor = useCallback(() => {
     if (!reportId || saveLockRef.current) return
@@ -93,34 +91,15 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
 
   const idSuffix = emphasis ? 'pay' : 'ok'
 
-  if (isFree) {
-    return (
-      <div
-        className={
-          emphasis
-            ? 'rounded-2xl border border-[#C8D6C4] bg-gradient-to-b from-white to-[#F7FAF5]/90 px-5 py-6 text-center shadow-[0_12px_40px_-20px_rgba(60,80,55,0.2)] sm:px-8 sm:py-8'
-            : 'text-center'
-        }
-      >
-        {emphasis ? (
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#5A6F52]">요금 안내</p>
-        ) : null}
-        <p className="mx-auto max-w-lg text-sm leading-[1.95] text-[#5A5A5A]">
-          선착순 무료 분석 대상이에요. 24시간 내로 이메일로 리포트를 보내드릴게요. 솔직한 의견도 함께 나눠 주시면
-          감사하겠습니다.
-        </p>
-      </div>
-    )
-  }
-
   const bankCard = (
     <div className="rounded-2xl border border-[#E8E4DC] bg-white/90 px-5 py-6 shadow-inner">
       <p className="text-xs font-semibold uppercase tracking-wide text-[#7C9070]">무통장 입금 안내</p>
-      <p className="mt-3 text-lg font-bold tabular-nums text-[#4F6048]">
-        {tier === 'discount'
-          ? `${DISCOUNT_PRICE_WON.toLocaleString('ko-KR')}원`
-          : `${NORMAL_PRICE_WON.toLocaleString('ko-KR')}원`}
-      </p>
+      <p className="mt-3 text-lg font-bold tabular-nums text-[#4F6048]">{formatPriceWon(chargeWon)}</p>
+      {displayPriceWonForTier(tier) !== chargeWon ? (
+        <p className="mt-1 text-xs leading-relaxed text-[#8A8A8A]">
+          무료 혜택 구간이에요. 위 금액은 결제·입금 확인용 최소 청구예요.
+        </p>
+      ) : null}
 
       <dl className="mt-4 space-y-3 text-sm text-[#4A4A4A]">
         <div className="flex justify-between gap-3 border-t border-[#F0EBE3] pt-3">
@@ -155,7 +134,7 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
   )
 
   const depositorOrWarn =
-    isPaid && hasReport ? (
+    hasReport ? (
       <div className="rounded-2xl border border-[#D4E0D0] bg-[#FDFBF9] px-5 py-5">
         <label htmlFor={`bank-depositor-${idSuffix}`} className="block text-xs font-semibold text-[#5A6F52]">
           입금자명 (송금인 표기와 동일하게)
@@ -197,12 +176,12 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
           </p>
         ) : null}
       </div>
-    ) : isPaid && !hasReport ? (
+    ) : (
       <p className="rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-center text-xs leading-relaxed text-amber-950">
         이 화면 주소에 리포트 식별자가 없어 입금자명을 여기서 저장할 수 없어요. 신청을 마친 직후 열린 페이지이거나, 주소
         끝이 잘렸을 수 있어요. 같은 이메일로 다시 신청하거나 문의해 주세요.
       </p>
-    ) : null
+    )
 
   const bankFirstBanner = !tossConfigured ? (
     <div
@@ -213,22 +192,20 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
     </div>
   ) : null
 
-  const tossBlock = <IntakeTossPaymentsWidgetSection secondaryPlacement={!tossConfigured} />
+  const tossBlock = <IntakeTossPaymentsWidgetSection secondaryPlacement={!tossConfigured} tier={tier} reportId={reportId} />
 
   const body = (
     <>
       {emphasis ? null : (
         <p className="mx-auto mt-6 max-w-lg text-sm leading-[1.95] text-[#5A5A5A]">
-          유료 구간으로 접수됐어요. 카드·간편결제 위젯을 연결할 예정이에요. 지금은 무통장 입금으로 결제해 주시면, 확인 후
-          리포트를 보내드릴게요.
+          신청이 접수됐어요. 아래에서 카드·간편결제 또는 무통장 입금으로 결제를 이어가 주시면, 확인 후 리포트를 보내드릴게요.
         </p>
       )}
 
       <div className={`mx-auto text-left ${emphasis ? 'max-w-lg' : 'mt-8 max-w-md'} space-y-6`}>
         {emphasis && tossConfigured ? (
           <p className="text-sm leading-[1.85] text-[#5A5A5A]">
-            유료 구간으로 접수됐어요. 아래에서 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요. (카드·간편결제는 연동
-            준비 중이에요.)
+            신청이 접수됐어요. 아래에서 카드·간편결제 또는 무통장으로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요.
           </p>
         ) : null}
         {emphasis && !tossConfigured ? (
@@ -286,7 +263,7 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
             결제 안내
           </h2>
           <p className="mt-1.5 text-xs font-medium uppercase tracking-[0.12em] text-[#5A6F52]/90">
-            카드·간편결제(준비 중) · 무통장 입금
+            카드·간편결제 · 무통장 입금
           </p>
         </div>
         <div className="mt-6 sm:mt-7">{body}</div>

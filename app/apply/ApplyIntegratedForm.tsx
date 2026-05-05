@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { submitIntegratedIntake } from '@app/actions/intake-submit'
-import type { PriceTier } from '@lib/constants'
+import { NORMAL_PRICE_WON, type PriceTier } from '@lib/constants'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
 import { completedMonthsFromDaysSinceBirth, parseBirthDateIso } from '@lib/intake/age-months'
 import {
@@ -551,8 +551,8 @@ function ApplyIntegratedFormFields({
               서비스 이용료에 대한 설문조사 <span className="text-[#B85C5C]">*</span>
             </legend>
             <p className="mt-2 text-[12px] leading-relaxed text-[#5A5A5A] sm:text-sm">
-              킨드라는 현재 무료로 분석을 제공하고 있어요. 정식 출시 후 예상 이용료는 9,900원입니다. 이 금액으로 이용하실 의향이
-              있으신가요?
+              킨드라는 구간별 할인가 또는 정상가로 분석을 제공해요. 현재 예상 구간은 신청 화면 상단 안내를 참고해 주세요. 정상가{' '}
+              {NORMAL_PRICE_WON.toLocaleString('ko-KR')}원 수준으로 이용하실 의향이 있으신가요?
             </p>
             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
               <label className="flex cursor-pointer items-center gap-2 text-sm text-[#3D3D3D]">

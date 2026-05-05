@@ -1,10 +1,14 @@
 'use client'
 
-import { getTossPaymentsMid, isTossPaymentsWidgetConfigured } from '@lib/payment/toss-payments-config'
+import { ANONYMOUS, loadTossPayments } from '@tosspayments/tosspayments-sdk'
+import { useCallback, useState } from 'react'
 
-function KakaoPayIcon() {
+import { type PriceTier, displayPriceWonForTier, formatPriceWon, tossChargeAmountWonForTier } from '@lib/constants'
+import { getTossPaymentsMid, getTossWidgetClientKey, isTossPaymentsWidgetConfigured } from '@lib/payment/toss-payments-config'
+
+function KakaoPayIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 48 48" className="h-8 w-8 sm:h-9 sm:w-9" aria-hidden>
+    <svg className={className} viewBox="0 0 48 48" aria-hidden>
       <rect width="48" height="48" rx="11" fill="#FEE500" />
       <path
         fill="#3C1E1E"
@@ -14,27 +18,27 @@ function KakaoPayIcon() {
   )
 }
 
-function NaverPayIcon() {
+function NaverPayIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 48 48" className="h-8 w-8 sm:h-9 sm:w-9" aria-hidden>
+    <svg className={className} viewBox="0 0 48 48" aria-hidden>
       <rect width="48" height="48" rx="11" fill="#03C75A" />
       <path fill="#fff" d="M15 15h4v18h-4V15zm7 0h4.2l6.8 11.3V15h4v18h-4.1L22.2 21.7V33h-4V15z" />
     </svg>
   )
 }
 
-function TossPayIcon() {
+function TossPayIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 48 48" className="h-8 w-8 sm:h-9 sm:w-9" aria-hidden>
+    <svg className={className} viewBox="0 0 48 48" aria-hidden>
       <rect width="48" height="48" rx="11" fill="#0064FF" />
       <path fill="#fff" d="M15 31V17h4.5v9.2L26.2 17H31l-6.2 9.4L31.5 31H27l-4.8-7.2H19.5V31H15z" />
     </svg>
   )
 }
 
-function ApplePayIcon() {
+function ApplePayIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 48 48" className="h-8 w-8 sm:h-9 sm:w-9" aria-hidden>
+    <svg className={className} viewBox="0 0 48 48" aria-hidden>
       <rect width="48" height="48" rx="11" fill="#000" />
       <path
         fill="#fff"
@@ -44,9 +48,9 @@ function ApplePayIcon() {
   )
 }
 
-function GooglePayIcon() {
+function GooglePayIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 48 48" className="h-8 w-8 sm:h-9 sm:w-9" aria-hidden>
+    <svg className={className} viewBox="0 0 48 48" aria-hidden>
       <rect width="48" height="48" rx="11" fill="#fff" />
       <path fill="#4285F4" d="M25.2 20.4v3.3h7.9c-.2 1.7-1 3.2-2.1 4.2v3.5h3.4c2-1.8 3.1-4.5 3.1-7.7 0-.7-.1-1.4-.2-2.1h-12.1z" />
       <path fill="#34A853" d="M24 35c2.8 0 5.2-.9 6.9-2.5l-3.4-3.5c-.9.6-2.1 1-3.5 1-2.7 0-5-1.8-5.8-4.2h-3.5v3.4c1.7 3.4 5.2 5.8 9.3 5.8z" />
@@ -64,21 +68,94 @@ const METHODS = [
   { id: 'google', name: 'Google Pay', Icon: GooglePayIcon },
 ] as const
 
-/** DOM 에 결제 위젯이 붙을 루트(토스 SDK `renderPaymentMethods` 등 연동 시 사용). */
+/** DOM 에 결제 위젯이 붙을 루트(주문서형 연동 시 사용). 결제창형은 오버레이라 미사용일 수 있음. */
 export const KINDRA_TOSS_PAYMENT_WIDGET_ROOT_ID = 'kindra-toss-payment-widget-root'
 
 type SectionProps = {
+  tier: PriceTier
+  reportId: string | null
   /** `bankFirst` 일 때는 시각적 강조를 약하게(무통장이 위에 있을 때) */
   secondaryPlacement?: boolean
 }
 
 /**
- * 토스페이먼츠 결제 위젯 자리 + 지원 예정 결제수단 아이콘.
- * MID(`NEXT_PUBLIC_TOSS_MID` 또는 코드 기본값)이 비어 있으면 **런타임 오류 없이** 안내만 표시하고, 무통장으로 유도하는 메시지를 씁니다.
+ * 토스페이먼츠 결제위젯 **V2 결제창형** (`renderPaymentWindow` + `requestPayment`).
+ * @see https://docs.tosspayments.com/guides/v2/payment-widget/integration-window
  */
-export function IntakeTossPaymentsWidgetSection({ secondaryPlacement = false }: SectionProps) {
+export function IntakeTossPaymentsWidgetSection({ tier, reportId, secondaryPlacement = false }: SectionProps) {
   const mid = getTossPaymentsMid()
-  const configured = isTossPaymentsWidgetConfigured()
+  const clientKey = getTossWidgetClientKey()
+  const sdkReady = isTossPaymentsWidgetConfigured()
+  const chargeWon = tossChargeAmountWonForTier(tier)
+  const displayWon = displayPriceWonForTier(tier)
+  const priceLabel = formatPriceWon(chargeWon)
+
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const openPaymentWindow = useCallback(async () => {
+    if (!sdkReady) return
+    setError(null)
+    setBusy(true)
+    try {
+      const res = await fetch('/api/payments/toss/prepare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier, reportId }),
+      })
+      const data = (await res.json()) as {
+        error?: string
+        orderId?: string
+        amount?: number
+        orderName?: string
+      }
+      if (!res.ok) {
+        setError(data.error ?? '결제 준비에 실패했어요.')
+        return
+      }
+
+      const tossPayments = await loadTossPayments(clientKey)
+      const widgets = tossPayments.widgets({ customerKey: ANONYMOUS })
+
+      await widgets.setAmount({
+        value: data.amount!,
+        currency: 'KRW',
+      })
+
+      const paymentWindow = await widgets.renderPaymentWindow({
+        variantKey: {
+          paymentMethod: 'DEFAULT',
+          agreement: 'AGREEMENT',
+        },
+      })
+
+      const origin = window.location.origin
+
+      paymentWindow.on('paymentRequest', async () => {
+        try {
+          await widgets.requestPayment({
+            orderId: data.orderId!,
+            orderName: data.orderName ?? '킨드라 아이 그림 리포트',
+            successUrl: `${origin}/apply/payment/toss/callback`,
+            failUrl: `${origin}/apply/payment/toss/fail`,
+          })
+        } catch (e) {
+          console.error(e)
+          setError(e instanceof Error ? e.message : '결제 요청에 실패했어요.')
+        } finally {
+          try {
+            await paymentWindow.destroy()
+          } catch {
+            /* noop */
+          }
+        }
+      })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '결제창을 열 수 없어요.')
+    } finally {
+      setBusy(false)
+    }
+  }, [clientKey, reportId, sdkReady, tier])
 
   return (
     <section
@@ -86,7 +163,7 @@ export function IntakeTossPaymentsWidgetSection({ secondaryPlacement = false }: 
         secondaryPlacement ? 'px-4 py-4 sm:px-5' : 'px-5 py-6'
       }`}
       aria-labelledby="toss-widget-heading"
-      data-toss-widget-ready={configured ? 'true' : 'false'}
+      data-toss-widget-ready={sdkReady ? 'true' : 'false'}
       {...(mid ? { 'data-toss-mid': mid } : {})}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -94,29 +171,36 @@ export function IntakeTossPaymentsWidgetSection({ secondaryPlacement = false }: 
           <p id="toss-widget-heading" className="text-xs font-semibold uppercase tracking-wide text-[#7C9070]">
             카드 · 간편결제
           </p>
-          <p className="mt-1 text-sm font-semibold text-[#3D3D3D]">토스페이먼츠 결제 위젯</p>
+          <p className="mt-1 text-sm font-semibold text-[#3D3D3D]">토스페이먼츠 결제위젯</p>
           <p className="mt-1.5 text-[11px] leading-relaxed text-[#8A8A8A] sm:text-xs">
-            카카오페이 · 네이버페이 · 토스페이 · Apple Pay · Google Pay{' '}
-            <span className="font-medium text-[#6B6B6B]">지원 예정</span>
+            카카오페이 · 네이버페이 · 토스페이 · Apple Pay · Google Pay 등 (토스 계약·어드민 설정에 따라 제공)
           </p>
+          <p className="mt-1 text-[11px] font-medium tabular-nums text-[#4F6048] sm:text-xs">
+            결제 금액 <span className="text-[#3D3D3D]">{priceLabel}</span>
+          </p>
+          {displayWon !== chargeWon ? (
+            <p className="mt-0.5 text-[10px] leading-relaxed text-[#9A9A9A] sm:text-[11px]">
+              무료 혜택 구간은 표시 요금이 없고, 위 금액은 결제·시스템 확인용 최소 청구예요.
+            </p>
+          ) : null}
         </div>
         <span
           className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
-            configured
-              ? 'border-[#E8E4DC] bg-[#F4F7F2] text-[#5A6F52]'
+            sdkReady
+              ? 'border-[#C8D6C4] bg-[#EEF5EC] text-[#4F6048]'
               : 'border-amber-200/90 bg-amber-50/90 text-amber-900'
           }`}
         >
-          {configured ? '연동 준비' : '점검·연동'}
+          {sdkReady ? 'V2 연동' : '키 필요'}
         </span>
       </div>
 
-      <ul className="mt-5 grid grid-cols-3 gap-2.5 sm:grid-cols-5 sm:gap-3" aria-label="지원 예정 결제 수단">
+      <ul className="mt-5 grid grid-cols-3 gap-2.5 sm:grid-cols-5 sm:gap-3" aria-label="결제 수단 예시">
         {METHODS.map(({ id, name, Icon }) => (
           <li key={id}>
             <div className="flex flex-col items-center gap-2 rounded-2xl border border-[#EDE8E0] bg-gradient-to-b from-white to-[#FAFAF8] px-1.5 py-3.5 shadow-sm">
               <span className="flex h-12 w-12 items-center justify-center rounded-xl shadow-[0_3px_10px_-3px_rgba(0,0,0,0.1)] ring-1 ring-black/[0.04] sm:h-14 sm:w-14">
-                <Icon />
+                <Icon className="h-9 w-9 sm:h-10 sm:w-10" />
               </span>
               <span className="text-center text-[10px] font-semibold leading-tight text-[#5A5A5A] sm:text-[11px]">{name}</span>
             </div>
@@ -124,25 +208,41 @@ export function IntakeTossPaymentsWidgetSection({ secondaryPlacement = false }: 
         ))}
       </ul>
 
-      {/* 토스페이먼츠 Payment Widget: SDK에서 `#${KINDRA_TOSS_PAYMENT_WIDGET_ROOT_ID}` 에 렌더 */}
-      <div
-        id={KINDRA_TOSS_PAYMENT_WIDGET_ROOT_ID}
-        className="mt-5 min-h-[52px] rounded-xl border border-dashed border-[#D4DED0] bg-[#FAFAF8]/80 px-3 py-4 text-center text-[11px] leading-relaxed text-[#9A9A9A]"
-        role="status"
-        aria-live="polite"
-      >
-        {configured ? (
-          <span>
-            상점 MID가 설정되었습니다. 결제 위젯 SDK 연결 후 이 영역에 결제 UI가 표시됩니다. 로드에 실패하면 잠시 후
-            이 페이지를 다시 열어 보시고, 그때도 안 되면 아래 <span className="font-medium text-[#6B6B6B]">무통장 입금</span>으로
-            이어가 주세요.
-          </span>
+      <div className="mt-5 space-y-3">
+        {sdkReady ? (
+          <button
+            type="button"
+            onClick={() => void openPaymentWindow()}
+            disabled={busy}
+            className="w-full rounded-xl bg-[#0064FF] py-3.5 text-sm font-bold text-white shadow-[0_10px_28px_-12px_rgba(0,100,255,0.55)] transition hover:bg-[#0056E0] disabled:opacity-60"
+          >
+            {busy ? '결제창 여는 중…' : '카드·간편결제로 결제하기'}
+          </button>
         ) : (
-          <span className="text-[#7A7A7A]">
-            카드·간편결제 시스템을 더 편리하게 준비하고 있어요. 지금은 아래 무통장 입금을 이용해 주시면, 확인 즉시
-            리포트를 보내드릴게요. 불편하신 점은 카카오톡 문의로 알려 주세요.
-          </span>
+          <div
+            id={KINDRA_TOSS_PAYMENT_WIDGET_ROOT_ID}
+            className="rounded-xl border border-dashed border-[#D4DED0] bg-[#FAFAF8]/80 px-3 py-4 text-center text-[11px] leading-relaxed text-[#9A9A9A]"
+            role="status"
+          >
+            <span className="text-[#7A7A7A]">
+              브라우저에서 결제창을 띄우려면 환경 변수{' '}
+              <span className="font-mono text-[10px] text-[#5A5A5A]">NEXT_PUBLIC_TOSS_WIDGET_CLIENT_KEY</span> 와 서버의{' '}
+              <span className="font-mono text-[10px] text-[#5A5A5A]">TOSS_WIDGET_SECRET_KEY</span> 를 설정해 주세요. (토스
+              개발자센터 · 결제위젯 연동 키)
+            </span>
+          </div>
         )}
+
+        {error ? (
+          <p className="rounded-lg border border-[#F0D9D9] bg-[#FFF8F8] px-3 py-2 text-center text-xs text-[#A34D4D]" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        <p className="text-[10px] leading-relaxed text-[#9A9A9A] sm:text-[11px]">
+          모바일에서는 iframe 대신 토스 결제창(오버레이)이 열립니다. 문제가 있으면 아래{' '}
+          <span className="font-medium text-[#6B6B6B]">무통장 입금</span>으로 이어가 주세요.
+        </p>
       </div>
     </section>
   )

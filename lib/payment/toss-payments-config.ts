@@ -1,15 +1,16 @@
 /**
- * 토스페이먼츠 **결제 위젯(Payment Widget)** 연동을 위한 공개 설정만 둡니다.
+ * 토스페이먼츠 **결제 위젯(Payment Widget) V2** 연동용 공개 설정.
  *
- * - `NEXT_PUBLIC_TOSS_MID` — 상점 아이디(MID). 설정하면 그 값을 쓰고, **미설정(undefined)** 이면 아래 기본 MID를 씁니다.
- *   빈 문자열(`NEXT_PUBLIC_TOSS_MID=`)으로 두면 **위젯 비활성**(심사 전 등)으로 둘 수 있습니다.
- * - 추후 연동 시(예시): `NEXT_PUBLIC_TOSS_CLIENT_KEY` 는 브라우저 SDK용, `TOSS_WIDGET_SECRET_KEY` 등은
- *   **서버 전용** env 로 두고 결제 승인·조회 API만 서버에서 호출하세요. (시크릿은 절대 `NEXT_PUBLIC_` 금지)
+ * - `NEXT_PUBLIC_TOSS_WIDGET_CLIENT_KEY` — 개발자센터 **결제위젯 연동** 클라이언트 키 (브라우저).
+ * - `TOSS_WIDGET_SECRET_KEY` — 같은 메뉴의 **시크릿 키** (서버 전용, 절대 `NEXT_PUBLIC_` 금지). 승인 API에 사용.
+ * - `NEXT_PUBLIC_TOSS_MID` — 상점 MID (선택, UI·디버그 표시). 비우면 코드 기본값.
+ * - 주문 위조 방지를 위해 `POST /api/payments/toss/prepare` 가 쿠키에 서명된 주문을 싹습니다. 서명에는
+ *   `TOSS_CHECKOUT_SIGNING_SECRET`(선택) 또는 `TOSS_WIDGET_SECRET_KEY` 를 사용합니다.
  *
- * @see https://docs.tosspayments.com/guides/v2/payment-widget
+ * @see https://docs.tosspayments.com/guides/v2/payment-widget/integration-window
  */
 
-/** 상점 MID — env 미설정 시 사용(무통장 기본값 등 다른 결제 설정과 별도). */
+/** 상점 MID — env 미설정 시 사용 */
 const KINDRA_TOSS_PAYMENTS_DEFAULT_MID = 'vkindrwnal'
 
 export function getTossPaymentsMid(): string {
@@ -19,7 +20,16 @@ export function getTossPaymentsMid(): string {
   return KINDRA_TOSS_PAYMENTS_DEFAULT_MID
 }
 
-/** MID 가 설정되어 있으면 결제 위젯 마운트·SDK 로드 단계로 진행할 수 있음 */
+/** 결제위젯 연동 클라이언트 키 (브라우저 SDK 초기화) */
+export function getTossWidgetClientKey(): string {
+  if (typeof process === 'undefined') return ''
+  return process.env.NEXT_PUBLIC_TOSS_WIDGET_CLIENT_KEY?.trim() ?? ''
+}
+
+/**
+ * SDK로 결제 UI를 띄울 수 있는지 — **클라이언트 키**가 있어야 합니다.
+ * (MID만으로는 스크립트를 초기화할 수 없습니다.)
+ */
 export function isTossPaymentsWidgetConfigured(): boolean {
-  return getTossPaymentsMid().length > 0
+  return getTossWidgetClientKey().length > 0
 }

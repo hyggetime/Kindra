@@ -24,7 +24,6 @@ export function ApplyPaymentView({ tier, reportId, bankTransfer }: Props) {
   const [copied, setCopied] = useState(false)
   const [copyLinkBusy, setCopyLinkBusy] = useState(false)
 
-  const isPaidTier = tier === 'discount' || tier === 'normal'
   const kakaoInquiryUrl = useMemo(
     () => getKakaoChannelChatPageUrl(resolveKakaoChannelPublicId()),
     [],
@@ -48,15 +47,9 @@ export function ApplyPaymentView({ tier, reportId, bankTransfer }: Props) {
     <div className="space-y-8 sm:space-y-10">
       <header className="text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#7C9070]/90">전송 완료</p>
-        {isPaidTier ? (
-          <h1 className="mx-auto mt-3 max-w-md text-base font-bold leading-[1.65] tracking-tight text-[#2F3D2E] sm:text-lg">
-            아이의 마음을 살펴볼 준비가 끝났어요. 리포트를 받으시려면 아래에서 결제를 이어가 주세요.
-          </h1>
-        ) : (
-          <h1 className="mx-auto mt-3 max-w-md text-base font-bold leading-[1.65] tracking-tight text-[#2F3D2E] sm:text-lg">
-            아이의 마음을 살펴볼 준비가 끝났어요. 별도 결제 없이 곧 이메일로 리포트 안내를 보내드릴게요.
-          </h1>
-        )}
+        <h1 className="mx-auto mt-3 max-w-md text-base font-bold leading-[1.65] tracking-tight text-[#2F3D2E] sm:text-lg">
+          아이의 마음을 살펴볼 준비가 끝났어요. 리포트를 받으시려면 아래에서 결제를 이어가 주세요.
+        </h1>
         <p className="mx-auto mt-4 max-w-md text-sm leading-[1.85] text-[#6B6B6B]">
           신청서와 그림이 안전하게 전달됐어요. 요금 구간에 맞는 안내를 아래에서 확인해 주세요.
         </p>

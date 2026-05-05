@@ -24,7 +24,7 @@ export function Step2Toggle({ adminPw, initialEnabled }: Props) {
       <div>
         <p className="text-sm font-semibold text-[#3D3D3D]">Step 2 활성화</p>
         <p className="mt-1 text-xs leading-relaxed text-[#6B6B6B]">
-          꺼 두면 1단계(무료 UI)로 고정되고, 켜면 신청 수에 따라 무료·할인·정상가가 적용됩니다.
+          꺼 두면 1단계(무료 혜택 티어, 결제 확인 플로 포함)로 고정되고, 켜면 신청 수에 따라 할인·정상가가 적용됩니다.
         </p>
       </div>
       <label className="flex cursor-pointer items-center gap-2.5 self-start sm:self-center">

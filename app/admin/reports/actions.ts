@@ -9,8 +9,8 @@ function assertAdminPassword(pw: string): boolean {
 
 const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-function isPaidTier(t: string | null | undefined): boolean {
-  return t === 'discount' || t === 'normal'
+function isPaymentTier(t: string | null | undefined): boolean {
+  return t === 'free' || t === 'discount' || t === 'normal'
 }
 
 export async function updateKindraReportIsSent(
@@ -39,7 +39,7 @@ export async function updateKindraReportIsSent(
     }
     const pt = row.price_tier as string | null | undefined
     const dep = Boolean((row as { deposit_confirmed?: boolean }).deposit_confirmed)
-    if (isPaidTier(pt) && !dep) {
+    if (isPaymentTier(pt) && !dep) {
       return { ok: false, reason: 'deposit_required' }
     }
   }

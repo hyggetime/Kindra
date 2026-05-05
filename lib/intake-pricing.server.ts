@@ -4,6 +4,13 @@ import { createServiceRoleClient } from '@lib/supabase/admin'
 
 const STEP2_KEY = 'is_step2_enabled'
 
+function resolveStep2FromEnv(): boolean | null {
+  const raw = process.env.KINDRA_FORCE_STEP2_ENABLED?.trim().toLowerCase()
+  if (raw === 'true' || raw === '1') return true
+  if (raw === 'false' || raw === '0') return false
+  return null
+}
+
 /** `kindra_reports` 총 행 수 (서비스 롤, RLS 우회) */
 export async function getKindraReportsCount(): Promise<number> {
   try {
@@ -19,8 +26,10 @@ export async function getKindraReportsCount(): Promise<number> {
   }
 }
 
-/** `feature_flags.is_step2_enabled` — 없으면 false */
+/** `feature_flags.is_step2_enabled` — 없으면 false. `KINDRA_FORCE_STEP2_ENABLED` 로 로컬·스테이징에서 덮어쓸 수 있음 */
 export async function getIsStep2Enabled(): Promise<boolean> {
+  const envOverride = resolveStep2FromEnv()
+  if (envOverride !== null) return envOverride
   try {
     const supabase = createServiceRoleClient()
     const { data, error } = await supabase.from('feature_flags').select('value_bool').eq('key', STEP2_KEY).maybeSingle()

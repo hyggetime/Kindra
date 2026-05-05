@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import { APPLY_FORM_HREF, APPLY_STEPS_HREF } from '@lib/apply-href'
-import { DISCOUNT_LIMIT, DISCOUNT_PRICE_WON, FREE_LIMIT, NORMAL_PRICE_WON } from '@lib/constants'
+import { DISCOUNT_LIMIT, DISCOUNT_PRICE_WON, NORMAL_PRICE_WON } from '@lib/constants'
 
 /**
  * 랜딩 하단 — 짧은 요금 구간 안내(사전 인지).
@@ -21,7 +21,7 @@ export function TransparentPricingTeaser() {
           id="pricing-preview-title"
           className="mt-2.5 text-center text-base font-semibold text-[#3D3D3D] sm:text-lg"
         >
-          선착순·단계별 요금을 미리 알려드려요
+          단계별 요금을 미리 알려드려요
         </h2>
         <ul className="mt-5 space-y-2.5 text-left text-[13px] leading-[1.75] text-[#5A5A5A] sm:text-sm">
           <li className="flex gap-2.5">
@@ -29,16 +29,7 @@ export function TransparentPricingTeaser() {
               ·
             </span>
             <span>
-              처음 <strong className="font-semibold text-[#4A4A4A]">{FREE_LIMIT}명</strong> — 통합 리포트{' '}
-              <strong className="text-[#5A6F52]">무료</strong>
-            </span>
-          </li>
-          <li className="flex gap-2.5">
-            <span className="mt-0.5 shrink-0 text-[#7C9070]" aria-hidden>
-              ·
-            </span>
-            <span>
-              그 다음 <strong className="font-semibold text-[#4A4A4A]">{DISCOUNT_LIMIT}명</strong>까지 —{' '}
+              누적 <strong className="font-semibold text-[#4A4A4A]">{DISCOUNT_LIMIT}명</strong> 미만 —{' '}
               <strong className="text-[#4A4A4A]">{DISCOUNT_PRICE_WON.toLocaleString('ko-KR')}원</strong> (얼리버드 할인)
             </span>
           </li>
