@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useCallback, useMemo, useRef, useState, useTransition } from 'react'
 
 import { saveBankDepositorName } from '@app/actions/save-bank-depositor'
-import { type PriceTier, displayPriceWonForTier, formatPriceWon, tossChargeAmountWonForTier } from '@lib/constants'
+import { type PriceTier, displayPriceWonForTier, formatPriceWon } from '@lib/constants'
+import { effectiveTossChargeWonForTier } from '@lib/payment/payment-charge-override'
 import type { BankTransferDisplay } from '@lib/payment/bank-transfer'
-import { isTossPaymentsWidgetConfigured } from '@lib/payment/toss-payments-config'
+import { isTossPaymentsConfigured } from '@lib/payment/toss-payments-config'
 
 import { IntakeTossPaymentsWidgetSection } from '@app/intake/success/IntakeTossPaymentsWidgetSection'
 
@@ -20,34 +20,19 @@ type Props = {
 }
 
 /**
- * 토스 위젯 안내 + 무통장 입금 + 입금자명 저장.
- * `kindra_reports` 와 `tier`·`report` 쿼리는 신청 직후 결제 안내에 사용합니다.
+ * 토스 결제창 + (선택) 무통장 입금 + 입금자명 저장.
+ * `NEXT_PUBLIC_PAYMENT_HIDE_BANK_TRANSFER=true` 이면 무통장·입금자명 블록을 숨길 수 있어요.
  */
 export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false }: Props) {
-  const searchParams = useSearchParams()
   const [depositor, setDepositor] = useState('')
   const [formMsg, setFormMsg] = useState<string | null>(null)
   const [formOk, setFormOk] = useState(false)
-  const [showLoginCta, setShowLoginCta] = useState(false)
   const [accountCopied, setAccountCopied] = useState(false)
   const [accountCopyBusy, setAccountCopyBusy] = useState(false)
   const [pending, startTransition] = useTransition()
   const saveLockRef = useRef(false)
 
-  const tossConfigured = useMemo(() => isTossPaymentsWidgetConfigured(), [])
-
-  const loginNext = useMemo(() => {
-    const q = new URLSearchParams()
-    const t = searchParams.get('tier')
-    const r = searchParams.get('report')
-    if (t === 'discount' || t === 'normal' || t === 'free') q.set('tier', t)
-    else q.set('tier', tier)
-    if (r && /^[0-9a-f-]{36}$/i.test(r)) q.set('report', r)
-    else if (reportId) q.set('report', reportId)
-    return `/apply/payment?${q.toString()}`
-  }, [searchParams, tier, reportId])
-
-  const loginHref = `/auth/login?reason=login_required&next=${encodeURIComponent(loginNext)}`
+  const tossConfigured = useMemo(() => isTossPaymentsConfigured(), [])
 
   const copyAccountNumber = useCallback(async () => {
     if (accountCopyBusy) return
@@ -64,13 +49,16 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
   }, [bankTransfer.accountNo, accountCopyBusy])
 
   const hasReport = Boolean(reportId)
-  const chargeWon = tossChargeAmountWonForTier(tier)
+  const chargeWon = effectiveTossChargeWonForTier(tier)
+
+  /** 토스가 켜져 있을 때만 — 무통장·입금자명 블록을 숨겨 PG 구간만 두드러지게 */
+  const hideBankForTossFocus =
+    tossConfigured && process.env.NEXT_PUBLIC_PAYMENT_HIDE_BANK_TRANSFER === 'true'
 
   const onSaveDepositor = useCallback(() => {
     if (!reportId || saveLockRef.current) return
     setFormMsg(null)
     setFormOk(false)
-    setShowLoginCta(false)
     saveLockRef.current = true
     startTransition(() => {
       void saveBankDepositorName(reportId, depositor)
@@ -81,7 +69,6 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
             return
           }
           setFormMsg(r.message)
-          setShowLoginCta(Boolean(r.needAuth))
         })
         .finally(() => {
           saveLockRef.current = false
@@ -127,8 +114,7 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
       </dl>
 
       <p className="mt-4 text-xs leading-relaxed text-[#9A9A9A]">
-        입금 시 <span className="font-semibold text-[#5A5A5A]">입금자명</span>을 아래에 적어 주시면 확인이 빨라져요. (신청
-        시 이메일로 로그인한 뒤 저장할 수 있어요.)
+        입금 시 <span className="font-semibold text-[#5A5A5A]">입금자명</span>을 아래에 적어 주시면 확인이 빨라져요.
       </p>
     </div>
   )
@@ -147,7 +133,6 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
             setDepositor(e.target.value)
             setFormMsg(null)
             setFormOk(false)
-            setShowLoginCta(false)
           }}
           maxLength={80}
           autoComplete="name"
@@ -167,12 +152,7 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
           <p
             className={`mt-3 text-center text-xs leading-relaxed ${formOk ? 'text-[#4F6048]' : 'text-[#B85C5C]'}`}
           >
-            {formMsg}{' '}
-            {showLoginCta ? (
-              <Link href={loginHref} className="font-semibold underline underline-offset-2">
-                로그인하기
-              </Link>
-            ) : null}
+            {formMsg}
           </p>
         ) : null}
       </div>
@@ -203,9 +183,14 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
       )}
 
       <div className={`mx-auto text-left ${emphasis ? 'max-w-lg' : 'mt-8 max-w-md'} space-y-6`}>
-        {emphasis && tossConfigured ? (
+        {emphasis && tossConfigured && !hideBankForTossFocus ? (
           <p className="text-sm leading-[1.85] text-[#5A5A5A]">
             신청이 접수됐어요. 아래에서 카드·간편결제 또는 무통장으로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요.
+          </p>
+        ) : null}
+        {emphasis && tossConfigured && hideBankForTossFocus ? (
+          <p className="text-sm leading-[1.85] text-[#5A5A5A]">
+            신청이 접수됐어요. 아래에서 카드·간편결제로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요.
           </p>
         ) : null}
         {emphasis && !tossConfigured ? (
@@ -234,8 +219,8 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
         {tossConfigured ? (
           <>
             {tossBlock}
-            {bankCard}
-            {depositorOrWarn}
+            {!hideBankForTossFocus && bankCard}
+            {!hideBankForTossFocus && depositorOrWarn}
           </>
         ) : (
           <>
@@ -263,7 +248,7 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
             결제 안내
           </h2>
           <p className="mt-1.5 text-xs font-medium uppercase tracking-[0.12em] text-[#5A6F52]/90">
-            카드·간편결제 · 무통장 입금
+            {hideBankForTossFocus ? '카드·간편결제' : '카드·간편결제 · 무통장 입금'}
           </p>
         </div>
         <div className="mt-6 sm:mt-7">{body}</div>

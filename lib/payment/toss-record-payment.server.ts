@@ -1,10 +1,12 @@
 import 'server-only'
 
+import { getTossClientKey } from '@lib/payment/toss-payments-config'
+import { getTossSecretKey } from '@lib/payment/toss-secret.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 
 function detectTossTestKeysFromEnv(): boolean {
-  const ck = process.env.NEXT_PUBLIC_TOSS_WIDGET_CLIENT_KEY?.trim() ?? ''
-  const sk = process.env.TOSS_WIDGET_SECRET_KEY?.trim() ?? ''
+  const ck = getTossClientKey()
+  const sk = getTossSecretKey()
   return ck.startsWith('test_') && sk.startsWith('test_')
 }
 

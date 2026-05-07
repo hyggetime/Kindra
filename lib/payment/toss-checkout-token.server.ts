@@ -3,6 +3,7 @@ import 'server-only'
 import { createHmac, timingSafeEqual } from 'crypto'
 
 import type { PriceTier } from '@lib/constants'
+import { getTossSecretKey } from '@lib/payment/toss-secret.server'
 
 export type TossCheckoutPayload = {
   orderId: string
@@ -15,8 +16,8 @@ export type TossCheckoutPayload = {
 const PREFIX = 'v1.'
 
 function getSigningSecret(): string {
-  const s = process.env.TOSS_CHECKOUT_SIGNING_SECRET?.trim() || process.env.TOSS_WIDGET_SECRET_KEY?.trim()
-  if (!s) throw new Error('TOSS_WIDGET_SECRET_KEY 또는 TOSS_CHECKOUT_SIGNING_SECRET 이 필요합니다.')
+  const s = process.env.TOSS_CHECKOUT_SIGNING_SECRET?.trim() || getTossSecretKey()
+  if (!s) throw new Error('TOSS_SECRET_KEY(또는 TOSS_WIDGET_SECRET_KEY) 또는 TOSS_CHECKOUT_SIGNING_SECRET 이 필요합니다.')
   return s
 }
 

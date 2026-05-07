@@ -1,14 +1,16 @@
 import 'server-only'
 
-/** POST /v1/payments/confirm — 결제위젯 연동 시크릿 키 사용 */
+import { getTossSecretKey } from '@lib/payment/toss-secret.server'
+
+/** POST /v1/payments/confirm — API 개별 연동 시크릿 키 사용 */
 export async function confirmTossWidgetPayment(params: {
   paymentKey: string
   orderId: string
   amount: number
 }): Promise<unknown> {
-  const secretKey = process.env.TOSS_WIDGET_SECRET_KEY?.trim()
+  const secretKey = getTossSecretKey()
   if (!secretKey) {
-    throw new Error('TOSS_WIDGET_SECRET_KEY 가 설정되어 있지 않습니다.')
+    throw new Error('TOSS_SECRET_KEY(또는 TOSS_WIDGET_SECRET_KEY)가 설정되어 있지 않습니다.')
   }
 
   const encoded = Buffer.from(`${secretKey}:`, 'utf8').toString('base64')

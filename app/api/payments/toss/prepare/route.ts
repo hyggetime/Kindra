@@ -2,7 +2,8 @@ import { randomUUID } from 'crypto'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { type PriceTier, tossChargeAmountWonForTier } from '@lib/constants'
+import { type PriceTier } from '@lib/constants'
+import { effectiveTossChargeWonForTier } from '@lib/payment/payment-charge-override'
 import { encodeCheckoutCookie, type TossCheckoutPayload } from '@lib/payment/toss-checkout-token.server'
 
 export const runtime = 'nodejs'
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
       ? reportRaw.trim().toLowerCase()
       : null
 
-  const amount = tossChargeAmountWonForTier(tier)
+  const amount = effectiveTossChargeWonForTier(tier)
   const orderId = `kr_${randomUUID().replace(/-/g, '')}`
   const exp = Date.now() + MAX_AGE * 1000
 
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
     cookieValue = encodeCheckoutCookie(payload)
   } catch {
     return NextResponse.json(
-      { error: '서버에 TOSS_WIDGET_SECRET_KEY(또는 TOSS_CHECKOUT_SIGNING_SECRET)가 설정되어 있지 않아요.' },
+      { error: '서버에 TOSS_SECRET_KEY(또는 TOSS_WIDGET_SECRET_KEY/TOSS_CHECKOUT_SIGNING_SECRET)가 설정되어 있지 않아요.' },
       { status: 503 },
     )
   }

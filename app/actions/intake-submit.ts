@@ -22,6 +22,7 @@ import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-sessi
 import { buildIntakeReportIdentifiers } from '@lib/intake/report-id'
 import { effectivePriceTier } from '@lib/constants'
 import { getIntakePricingContext } from '@lib/intake-pricing.server'
+import { setReportAccessCookie } from '@lib/payment/report-access-cookie.server'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 
@@ -386,6 +387,12 @@ export async function submitIntegratedIntake(
         ok: false,
         message: '그림은 잘 받았어요. 리포트 생성 중 문제가 생겼으니 카카오톡으로 알려 주시면 바로 도와드릴게요.',
       }
+    }
+
+    try {
+      await setReportAccessCookie(reportUuid)
+    } catch (e) {
+      console.error('[intake-submit] setReportAccessCookie', e)
     }
 
     return {
