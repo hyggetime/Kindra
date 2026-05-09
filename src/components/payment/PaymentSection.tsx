@@ -247,9 +247,9 @@ export function PaymentSection({
         ) : (
           <>
             {bankFirstBanner}
+            {tossBlock}
             {bankCard}
             {depositorOrWarn}
-            {tossBlock}
           </>
         )}
       </div>

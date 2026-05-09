@@ -433,7 +433,10 @@ export async function submitIntegratedIntake(
     try {
       await setReportAccessCookie(reportUuid)
     } catch (e) {
-      console.error('[intake-submit] setReportAccessCookie', e)
+      console.error(
+        '[intake-submit] setReportAccessCookie — 무통장 입금자명 저장 쿠키 미설정. REPORT_ACCESS_SIGNING_SECRET 또는 TOSS_SECRET_KEY 확인:',
+        e,
+      )
     }
 
     return {

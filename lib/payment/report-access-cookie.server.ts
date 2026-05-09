@@ -22,7 +22,9 @@ function getSigningSecret(): string {
     process.env.TOSS_CHECKOUT_SIGNING_SECRET?.trim() ||
     getTossSecretKey()
   if (!s) {
-    throw new Error('REPORT_ACCESS_SIGNING_SECRET 또는 TOSS_SECRET_KEY(또는 TOSS_CHECKOUT_SIGNING_SECRET)가 필요합니다.')
+    throw new Error(
+      '무통장 입금자명용 서명 비밀이 없습니다. 프로덕션에서 토스 시크릿을 쓰지 않을 때는 REPORT_ACCESS_SIGNING_SECRET(긴 무작위 문자열)을 Vercel 등에 설정하세요.',
+    )
   }
   return s
 }

@@ -141,7 +141,7 @@ export function IntakeTossPaymentsWidgetSection({
     >
       <div className="text-center">
         <p id="toss-payment-heading" className="text-xs font-semibold uppercase tracking-wide text-[#7C9070]">
-          카드 · 간편결제
+          {sdkReady ? '카드 · 간편결제' : '할인 코드 (선택)'}
         </p>
 
         <div className="mt-4 rounded-xl border border-[#E8E4DC] bg-[#FAFAF8]/90 px-4 py-3 text-left">
