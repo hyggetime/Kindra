@@ -160,17 +160,45 @@ export function buildPhysioEmotionalSectionMarkdown(
   }
   if (personal.length === 0) {
     personal.push(
-      '키·몸무게를 알려 주시면, 같은 월령·성별의 **중앙값(p50)** 과만 비교해 한두 문장으로 정리할 수 있습니다. 지금은 **그림에서 읽히는 정서·표현**을 중심으로 보시면 됩니다.',
+      '키·몸무게를 알려 주시면, 같은 월령·성별의 **중앙값(p50)** 과만 비교해 한두 문장으로 정리해 드릴 수 있어요. 지금은 **그림에서 읽히는 정서·표현**을 중심으로 보시면 돼요.',
     )
   }
 
   const bridge =
-    '그림에서 읽힌 **선·색·구도의 에너지**와, 여기서 말하는 **신체 성장의 참고치**는 서로를 대신하지 않습니다. 부모님께서 평소 느끼시는 아이의 모습과 그림이 주는 신호가 다르게 느껴질 때는, **둘을 나란히 두고** 차분히 보시는 것이 좋습니다. 리포트 본문에서는 부모 메모를 **맥락**으로만 쓰고, 해석의 중심은 항상 **그림의 시각적 근거**에 두었습니다.'
+    '그림에서 읽힌 **선·색·구도의 에너지**와, 여기서 말하는 **신체 성장의 참고치**는 서로를 대신하지 않아요. 리포트 본문의 심리·표현 해석은 **생후 개월 수·발달 단계**를 최우선으로 두고, 키·몸무게는 같은 월령 성장도표와 비교한 **참고**일 뿐이에요. 부모님께서 평소 느끼시는 아이의 모습과 그림이 주는 신호가 다르게 느껴질 때는, **둘을 나란히 두고** 차분히 보시면 좋아요. 리포트 본문에서는 부모 메모를 **맥락**으로만 쓰고, 해석의 중심은 항상 **그림의 시각적 근거**에 두었어요.'
 
   const intro =
-    `이 절은 국민건강보험공단이 공개한 **영유아 성장도표(LMS 기반)** 를 바탕으로, **${name}**의 **생후 ${completedMonths}개월 · ${sexLabel}** 조건에서 **중앙값(p50)** 만 짚어 드립니다. 임상 진단이나 의학적 판정이 아닙니다.${clampNote}`
+    `이 절은 국민건강보험공단이 공개한 **영유아 성장도표(LMS 기반)** 를 바탕으로, **${name}**의 **생후 ${completedMonths}개월 · ${sexLabel}** 조건에서 **중앙값(p50)** 만 짚어드려요. 임상 진단이나 의학적 판정이 아닙니다.${clampNote}`
 
   const body = [intro, ...personal, bridge].join('\n\n')
 
   return `### 몸과 마음이 함께 보내는 신호\n\n${body}`
 }
+
+/** 성장도표 월령·성별 구간에서 키·몸무게가 p5~p95 밖이면 통계적으로 드문 입력으로 간주 */
+export function shouldAppendBodyGrowthRangeDisclaimer(
+  stats: GrowthStatsShape,
+  sex: 'male' | 'female',
+  completedMonths: number,
+  heightCm: number | null,
+  weightKg: number | null,
+): boolean {
+  const keys = monthKeysForSex(stats, sex)
+  if (keys.length === 0) return false
+  const monthKey = clampedMonthKey(completedMonths, keys)
+  const row = stats[sex]?.[String(monthKey)]
+  if (!row) return false
+  if (heightCm != null && row.height) {
+    if (heightCm < row.height.p5 || heightCm > row.height.p95) return true
+  }
+  if (weightKg != null && row.weight) {
+    if (weightKg < row.weight.p5 || weightKg > row.weight.p95) return true
+  }
+  return false
+}
+
+export const BODY_GROWTH_DISCLAIMER_MARKDOWN = `---
+
+### 신체 지표에 관한 안내
+
+킨드라의 리포트는 아이의 그림과 발달 연령을 바탕으로 한 심리 해석입니다. 신체 성장 지표는 참고용이며, 정확한 발달 상담은 전문 의료기관을 방문하시길 권장합니다.`

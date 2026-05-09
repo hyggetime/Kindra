@@ -9,10 +9,6 @@ function assertAdminPassword(pw: string): boolean {
 
 const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-function isPaymentTier(t: string | null | undefined): boolean {
-  return t === 'free' || t === 'discount' || t === 'normal'
-}
-
 export async function updateKindraReportIsSent(
   pw: string,
   reportId: string,
@@ -29,7 +25,7 @@ export async function updateKindraReportIsSent(
   if (isSent) {
     const { data: row, error: fetchErr } = await supabase
       .from('kindra_reports')
-      .select('price_tier, deposit_confirmed')
+      .select('deposit_confirmed, toss_payment_key')
       .eq('id', id)
       .maybeSingle()
 
@@ -37,9 +33,10 @@ export async function updateKindraReportIsSent(
       console.error('[admin/reports] update is_sent prefetch', fetchErr?.message)
       return { ok: false }
     }
-    const pt = row.price_tier as string | null | undefined
+    const tpk = (row as { toss_payment_key?: unknown }).toss_payment_key
     const dep = Boolean((row as { deposit_confirmed?: boolean }).deposit_confirmed)
-    if (isPaymentTier(pt) && !dep) {
+    const hasCard = typeof tpk === 'string' && tpk.trim().length > 0
+    if (!hasCard && !dep) {
       return { ok: false, reason: 'deposit_required' }
     }
   }
@@ -67,20 +64,6 @@ export async function updateKindraReportDepositConfirmed(
 
   if (error) {
     console.error('[admin/reports] update deposit_confirmed', error.message)
-    return { ok: false }
-  }
-  return { ok: true }
-}
-
-export async function setStep2EnabledFlag(pw: string, enabled: boolean): Promise<{ ok: boolean }> {
-  if (!assertAdminPassword(pw)) return { ok: false }
-  const supabase = createServiceRoleClient()
-  const { error } = await supabase
-    .from('feature_flags')
-    .upsert({ key: 'is_step2_enabled', value_bool: enabled, updated_at: new Date().toISOString() }, { onConflict: 'key' })
-
-  if (error) {
-    console.error('[admin/reports] setStep2', error.message)
     return { ok: false }
   }
   return { ok: true }

@@ -30,6 +30,15 @@ function startOfLocalDay(d: Date): Date {
   return x
 }
 
+/** 로컬 달력 기준으로 `deltaMonths`만큼 이동한 날의 시작(0시). 말일 넘침은 JS `Date` 규칙을 따릅니다. */
+export function addCalendarMonths(base: Date, deltaMonths: number): Date {
+  const x = new Date(base.getTime())
+  const day = x.getDate()
+  x.setMonth(x.getMonth() + deltaMonths)
+  if (x.getDate() < day) x.setDate(0)
+  return startOfLocalDay(x)
+}
+
 /** 생일 0시 ~ 기준일 0시까지의 **경과 일수** (음이면 0) */
 export function wholeDaysFromBirthToRef(
   birthYear: number,

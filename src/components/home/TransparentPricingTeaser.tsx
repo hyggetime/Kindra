@@ -1,10 +1,10 @@
 import Link from 'next/link'
 
 import { APPLY_FORM_HREF, APPLY_STEPS_HREF } from '@lib/apply-href'
-import { DISCOUNT_LIMIT, DISCOUNT_PRICE_WON, NORMAL_PRICE_WON } from '@lib/constants'
+import { LIST_PRICE_WON } from '@lib/constants'
 
 /**
- * 랜딩 하단 — 짧은 요금 구간 안내(사전 인지).
+ * 랜딩 하단 — 짧은 요금 안내(사전 인지).
  */
 export function TransparentPricingTeaser() {
   return (
@@ -21,7 +21,7 @@ export function TransparentPricingTeaser() {
           id="pricing-preview-title"
           className="mt-2.5 text-center text-base font-semibold text-[#3D3D3D] sm:text-lg"
         >
-          단계별 요금을 미리 알려드려요
+          정상가와 쿠폰을 미리 알려드려요
         </h2>
         <ul className="mt-5 space-y-2.5 text-left text-[13px] leading-[1.75] text-[#5A5A5A] sm:text-sm">
           <li className="flex gap-2.5">
@@ -29,17 +29,9 @@ export function TransparentPricingTeaser() {
               ·
             </span>
             <span>
-              누적 <strong className="font-semibold text-[#4A4A4A]">{DISCOUNT_LIMIT}명</strong> 미만 —{' '}
-              <strong className="text-[#4A4A4A]">{DISCOUNT_PRICE_WON.toLocaleString('ko-KR')}원</strong> (얼리버드 할인)
-            </span>
-          </li>
-          <li className="flex gap-2.5">
-            <span className="mt-0.5 shrink-0 text-[#7C9070]" aria-hidden>
-              ·
-            </span>
-            <span>
-              이후 — <strong className="text-[#4A4A4A]">{NORMAL_PRICE_WON.toLocaleString('ko-KR')}원</strong> (정상가, 2차
-              오픈 이후)
+              리포트 정상가{' '}
+              <strong className="text-[#4A4A4A]">{LIST_PRICE_WON.toLocaleString('ko-KR')}원</strong> — 결제 단계에서
+              프로모션 쿠폰을 입력하면 할인된 금액으로 이어가실 수 있어요.
             </span>
           </li>
         </ul>
@@ -47,11 +39,11 @@ export function TransparentPricingTeaser() {
           한국 아동 그림 56,000건(심허브)과 영유아 성장도표 데이터를 함께 활용해요.
         </p>
         <p className="mt-3 text-center text-[11px] leading-relaxed text-[#8A8A8A] sm:text-xs">
-          지금 신청하시면 현재 구간 요금을 그대로 적용받으세요. 정확한 금액은{' '}
+          정확한 청구 금액은{' '}
           <Link href={APPLY_FORM_HREF} className="font-medium text-[#5A6F52] underline-offset-2 hover:underline">
             신청
           </Link>
-          단계에서 확인하실 수 있어요. 또는{' '}
+          후 결제 안내 화면에서 확인하실 수 있어요. 또는{' '}
           <Link href={APPLY_STEPS_HREF} className="font-medium text-[#5A6F52] underline-offset-2 hover:underline">
             3단계 진행 순서
           </Link>

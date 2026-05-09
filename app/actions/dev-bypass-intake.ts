@@ -4,12 +4,11 @@ import { randomUUID } from 'node:crypto'
 
 import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-session'
 import { isDevIntakeBypassEnabled } from '@lib/intake/dev-intake-bypass'
-import { getIntakePricingContext } from '@lib/intake-pricing.server'
 import { buildIntakeReportIdentifiers } from '@lib/intake/report-id'
+import { LIST_PRICE_WON } from '@lib/constants'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
 import { setReportAccessCookie } from '@lib/payment/report-access-cookie.server'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
-import { effectivePriceTier } from '@lib/constants'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 
 export type DevBypassIntakeResult =
@@ -30,9 +29,6 @@ export async function createDevBypassIntakeReport(): Promise<DevBypassIntakeResu
   const childDisplayName = '테스트아이'
   const parentName = '테스트보호자'
   const email = `bypass.local+${Date.now()}@example.invalid`
-
-  const { count: reportCountBefore, isStep2Enabled } = await getIntakePricingContext()
-  const priceTier = effectivePriceTier(reportCountBefore, isStep2Enabled)
 
   const reportMarkdown =
     '# 로컬 바이패스 리포트\n\n개발용 더미 마크다운입니다. 실제 신청·분석 없이 생성된 행이에요.\n'
@@ -59,7 +55,7 @@ export async function createDevBypassIntakeReport(): Promise<DevBypassIntakeResu
     id: reportUuid,
     owner_email: email,
     title: `${childDisplayName} · 통합 리포트 (바이패스)`,
-    price_tier: priceTier,
+    listed_price_won: LIST_PRICE_WON,
     report_json: {
       schema: STORED_KINDRA_INTAKE_SCHEMA,
       childName: childDisplayName,
@@ -79,5 +75,5 @@ export async function createDevBypassIntakeReport(): Promise<DevBypassIntakeResu
     console.error('[createDevBypassIntakeReport] cookie', e)
   }
 
-  return { ok: true, redirectPath: buildApplyPaymentPath(priceTier, reportUuid) }
+  return { ok: true, redirectPath: buildApplyPaymentPath(reportUuid) }
 }

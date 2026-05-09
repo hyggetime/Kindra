@@ -1,48 +1,18 @@
 /**
- * 킨드라 단계별 유동 가격·오픈 정책 상수 (클라이언트에서도 import 가능)
+ * 킨드라 가격·최소 결제·쿠폰 코드 (클라이언트에서도 import 가능)
  */
-export const DISCOUNT_LIMIT = 100
-/** 할인 단계 가격 (원) */
-export const DISCOUNT_PRICE_WON = 4_900
-/** 정상가 (원) */
-export const NORMAL_PRICE_WON = 9_900
 
-export type PriceTier = 'free' | 'discount' | 'normal'
+/** 리포트 정상가 (원) — 결제 안내·DB listed_price_won 기본값 */
+export const LIST_PRICE_WON = 9_900
 
 /**
- * 무료 혜택 구간도 토스·입금 플로를 태울 때 사용하는 청구 금액(원).
- * 0원은 PG에서 처리하기 어려운 경우가 많아 최소 금액으로 통일합니다.
+ * PG·무통장 확인용 최소 청구 금액 (원). 0원 결제가 어려울 때 사용.
+ * 이벤트 쿠폰(KINDRA100 등) 적용 시 최종 금액이 이 값이 되도록 맞춤.
  */
-export const FREE_TIER_CHECKOUT_WON = 100
+export const MIN_CHECKOUT_WON = 100
 
-/** 토스 결제창·prepare 쿠키에 넣는 실제 청구 금액 */
-export function tossChargeAmountWonForTier(tier: PriceTier): number {
-  if (tier === 'free') return FREE_TIER_CHECKOUT_WON
-  return displayPriceWonForTier(tier)
-}
-
-/**
- * @param reportCount — 현재 `kindra_reports` 총 행 수 (이번 INSERT 직전 기준)
- * @param isStep2Enabled — false면 1단계(무료 혜택 티어)로 고정
- */
-export function effectivePriceTier(reportCount: number, isStep2Enabled: boolean): PriceTier {
-  if (!isStep2Enabled) return 'free'
-  if (reportCount < DISCOUNT_LIMIT) return 'discount'
-  return 'normal'
-}
-
-export function priceTierLabelKo(tier: PriceTier | null | undefined): string {
-  if (!tier) return '미분류'
-  if (tier === 'free') return '무료 대상'
-  if (tier === 'discount') return '할인(유료)'
-  return '정상가(유료)'
-}
-
-export function displayPriceWonForTier(tier: PriceTier): number {
-  if (tier === 'free') return 0
-  if (tier === 'discount') return DISCOUNT_PRICE_WON
-  return NORMAL_PRICE_WON
-}
+/** 이벤트 쿠폰: 최종 청구액이 MIN_CHECKOUT_WON 이 되도록 할인 적용 */
+export const EVENT_COUPON_TO_MIN_CHECKOUT = 'KINDRA100' as const
 
 export function formatPriceWon(won: number): string {
   return won <= 0 ? '무료' : `${won.toLocaleString('ko-KR')}원`

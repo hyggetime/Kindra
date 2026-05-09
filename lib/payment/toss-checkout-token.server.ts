@@ -2,15 +2,18 @@ import 'server-only'
 
 import { createHmac, timingSafeEqual } from 'crypto'
 
-import type { PriceTier } from '@lib/constants'
 import { getTossSecretKey } from '@lib/payment/toss-secret.server'
 
 export type TossCheckoutPayload = {
   orderId: string
   amount: number
   exp: number
-  tier: PriceTier
+  /** 신청 리포트 UUID */
   reportId: string | null
+  /** 결제 시점 정상가 스냅샷 */
+  listedPriceWon: number
+  /** 적용 쿠폰(대문자) 또는 없음 */
+  couponCode: string | null
 }
 
 const PREFIX = 'v1.'
@@ -54,10 +57,11 @@ export function decodeCheckoutCookie(cookieValue: string): TossCheckoutPayload |
       typeof parsed.orderId !== 'string' ||
       typeof parsed.amount !== 'number' ||
       typeof parsed.exp !== 'number' ||
-      !['free', 'discount', 'normal'].includes(parsed.tier)
+      typeof parsed.listedPriceWon !== 'number'
     ) {
       return null
     }
+    if (parsed.couponCode !== null && typeof parsed.couponCode !== 'string') return null
     return parsed
   } catch {
     return null

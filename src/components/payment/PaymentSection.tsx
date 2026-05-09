@@ -1,29 +1,36 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useMemo, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 
 import { saveBankDepositorName } from '@app/actions/save-bank-depositor'
-import { type PriceTier, displayPriceWonForTier, formatPriceWon } from '@lib/constants'
-import { effectiveTossChargeWonForTier } from '@lib/payment/payment-charge-override'
+import { formatPriceWon } from '@lib/constants'
+import { isPaymentHideBankTransferEnabled } from '@lib/payment/hide-bank-transfer-env'
 import type { BankTransferDisplay } from '@lib/payment/bank-transfer'
 import { isTossPaymentsConfigured } from '@lib/payment/toss-payments-config'
 
 import { IntakeTossPaymentsWidgetSection } from '@app/intake/success/IntakeTossPaymentsWidgetSection'
 
 type Props = {
-  tier: PriceTier
+  listedPriceWon: number
   reportId: string | null
   bankTransfer: BankTransferDisplay
   /** `/apply/payment` 등에서 결제 UI를 시각적으로 더 강조 */
   emphasis?: boolean
+  /** 서버가 읽은 무통장 블록 숨김 플래그 */
+  hideBankTransferUi?: boolean
 }
 
 /**
  * 토스 결제창 + (선택) 무통장 입금 + 입금자명 저장.
- * `NEXT_PUBLIC_PAYMENT_HIDE_BANK_TRANSFER=true` 이면 무통장·입금자명 블록을 숨길 수 있어요.
  */
-export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false }: Props) {
+export function PaymentSection({
+  listedPriceWon,
+  reportId,
+  bankTransfer,
+  emphasis = false,
+  hideBankTransferUi: hideBankTransferUiProp,
+}: Props) {
   const [depositor, setDepositor] = useState('')
   const [formMsg, setFormMsg] = useState<string | null>(null)
   const [formOk, setFormOk] = useState(false)
@@ -31,6 +38,11 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
   const [accountCopyBusy, setAccountCopyBusy] = useState(false)
   const [pending, startTransition] = useTransition()
   const saveLockRef = useRef(false)
+  const [checkoutWon, setCheckoutWon] = useState(listedPriceWon)
+
+  useEffect(() => {
+    setCheckoutWon(listedPriceWon)
+  }, [listedPriceWon])
 
   const tossConfigured = useMemo(() => isTossPaymentsConfigured(), [])
 
@@ -49,11 +61,14 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
   }, [bankTransfer.accountNo, accountCopyBusy])
 
   const hasReport = Boolean(reportId)
-  const chargeWon = effectiveTossChargeWonForTier(tier)
 
-  /** 토스가 켜져 있을 때만 — 무통장·입금자명 블록을 숨겨 PG 구간만 두드러지게 */
+  /**
+   * 토스 클라이언트 키가 있을 때만 무통장을 숨길 수 있음(토스 없으면 무통장만 안내).
+   * prop 또는 env 중 하나라도 켜면 숨김 — 느슨한 파싱은 `isPaymentHideBankTransferEnabled`.
+   */
   const hideBankForTossFocus =
-    tossConfigured && process.env.NEXT_PUBLIC_PAYMENT_HIDE_BANK_TRANSFER === 'true'
+    tossConfigured &&
+    (hideBankTransferUiProp === true || isPaymentHideBankTransferEnabled())
 
   const onSaveDepositor = useCallback(() => {
     if (!reportId || saveLockRef.current) return
@@ -81,10 +96,10 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
   const bankCard = (
     <div className="rounded-2xl border border-[#E8E4DC] bg-white/90 px-5 py-6 shadow-inner">
       <p className="text-xs font-semibold uppercase tracking-wide text-[#7C9070]">무통장 입금 안내</p>
-      <p className="mt-3 text-lg font-bold tabular-nums text-[#4F6048]">{formatPriceWon(chargeWon)}</p>
-      {displayPriceWonForTier(tier) !== chargeWon ? (
+      <p className="mt-3 text-lg font-bold tabular-nums text-[#4F6048]">{formatPriceWon(checkoutWon)}</p>
+      {listedPriceWon !== checkoutWon ? (
         <p className="mt-1 text-xs leading-relaxed text-[#8A8A8A]">
-          무료 혜택 구간이에요. 위 금액은 결제·입금 확인용 최소 청구예요.
+          정상가 {formatPriceWon(listedPriceWon)}에서 쿠폰 할인을 반영한 금액이에요.
         </p>
       ) : null}
 
@@ -172,7 +187,14 @@ export function PaymentSection({ tier, reportId, bankTransfer, emphasis = false 
     </div>
   ) : null
 
-  const tossBlock = <IntakeTossPaymentsWidgetSection secondaryPlacement={!tossConfigured} tier={tier} reportId={reportId} />
+  const tossBlock = (
+    <IntakeTossPaymentsWidgetSection
+      secondaryPlacement={!tossConfigured}
+      listedPriceWon={listedPriceWon}
+      reportId={reportId}
+      onResolvedAmount={setCheckoutWon}
+    />
+  )
 
   const body = (
     <>

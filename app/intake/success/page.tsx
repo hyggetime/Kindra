@@ -8,9 +8,7 @@ type PageProps = {
 export default async function IntakeSuccessRedirectPage({ searchParams }: PageProps) {
   const sp = await searchParams
   const q = new URLSearchParams()
-  const tier = sp.tier
   const report = sp.report
-  if (typeof tier === 'string') q.set('tier', tier)
   if (typeof report === 'string') q.set('report', report)
   const suffix = q.toString()
   redirect(suffix ? `/apply/payment?${suffix}` : '/apply/payment')

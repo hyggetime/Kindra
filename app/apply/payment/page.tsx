@@ -4,7 +4,9 @@ import { Suspense } from 'react'
 import { ApplyPageShell } from '../ApplyPageShell'
 import { ApplyPaymentView } from './ApplyPaymentView'
 import { readBankTransferFromEnv } from '@lib/payment/bank-transfer-env.server'
-import { parseReportIdParam, parseTierParam } from '@lib/payment/parse-payment-page-params'
+import { parseReportIdParam } from '@lib/payment/parse-payment-page-params'
+import { isPaymentHideBankTransferEnabled } from '@lib/payment/hide-bank-transfer-env'
+import { getListedPriceWonForReport } from '@lib/payment/report-checkout.server'
 
 export const metadata: Metadata = {
   title: '결제 안내 — 킨드라 Kindra',
@@ -14,14 +16,15 @@ export const metadata: Metadata = {
 }
 
 type PageProps = {
-  searchParams: Promise<{ tier?: string; report?: string }>
+  searchParams: Promise<{ report?: string }>
 }
 
 export default async function ApplyPaymentPage({ searchParams }: PageProps) {
-  const { tier: tierRaw, report: reportRaw } = await searchParams
-  const tier = parseTierParam(tierRaw)
+  const { report: reportRaw } = await searchParams
   const reportId = parseReportIdParam(reportRaw)
   const bankTransfer = readBankTransferFromEnv()
+  const listedPriceWon = await getListedPriceWonForReport(reportId)
+  const hideBankTransferUi = isPaymentHideBankTransferEnabled()
 
   return (
     <ApplyPageShell>
@@ -32,7 +35,12 @@ export default async function ApplyPaymentPage({ searchParams }: PageProps) {
           </p>
         }
       >
-        <ApplyPaymentView tier={tier} reportId={reportId} bankTransfer={bankTransfer} />
+        <ApplyPaymentView
+          reportId={reportId}
+          bankTransfer={bankTransfer}
+          listedPriceWon={listedPriceWon}
+          hideBankTransferUi={hideBankTransferUi}
+        />
       </Suspense>
     </ApplyPageShell>
   )

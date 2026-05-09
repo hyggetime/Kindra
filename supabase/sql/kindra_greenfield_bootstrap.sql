@@ -117,13 +117,17 @@ create table if not exists public.kindra_intakes (
   gemini_error text,
   drawing_paths jsonb not null default '[]'::jsonb,
   child_display_name text not null,
-  child_gender text not null
+  child_gender text not null,
+  child_birthday date,
+  marketing_agreed boolean not null default false
 );
 
 comment on table public.kindra_intakes is '분석 신청 이력. 동일 이메일로 여러 행 가능(신청마다 insert).';
 comment on column public.kindra_intakes.marketing_opt_in is 'yes | no (필수)';
+comment on column public.kindra_intakes.marketing_agreed is '생일 쿠폰·맞춤 알림 등 선택 마케팅 동의';
 comment on column public.kindra_intakes.pricing_intent is 'yes | no_expensive | no_uninterested | null (미선택)';
 comment on column public.kindra_intakes.child_age_hint is '신청 시 부모가 남긴 연령 힌트 (선택)';
+comment on column public.kindra_intakes.child_birthday is '아이 생년월일(YYYY-MM-DD). 맞춤 분석·선택 마케팅에 활용';
 comment on column public.kindra_intakes.gemini_report_markdown is 'Gemini 멀티모달 분석 결과 (마크다운)';
 comment on column public.kindra_intakes.gemini_status is 'pending | running | completed | failed';
 comment on column public.kindra_intakes.drawing_paths is 'Storage intake-drawings 버킷 내 객체 경로 JSON 배열';

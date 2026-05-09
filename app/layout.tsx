@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import Script from 'next/script'
 import { Analytics } from '@vercel/analytics/react'
 
+import { SiteAnalytics } from '@/components/analytics/SiteAnalytics'
 import { KakaoSdkProvider } from '@/components/kakao/KakaoSdkProvider'
 import { KindraJsonLd } from '@lib/seo/kindra-json-ld'
 import { getMetadataBase } from '@lib/site-origin'
@@ -56,15 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body suppressHydrationWarning>
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-QHB2KXJ78B" strategy="afterInteractive" />
-        <Script id="kindra-gtag" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-QHB2KXJ78B');
-          `}
-        </Script>
+        <SiteAnalytics />
         <KindraJsonLd />
         <KakaoSdkProvider>
           <Suspense fallback={null}>{children}</Suspense>

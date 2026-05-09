@@ -22,6 +22,10 @@ export type IntakeReportSessionPayload = {
   heroTitleLines: [string, string]
   /** 그림 1 고해상도 JPEG data URL — 히어로 전용(없으면 drawingThumbDataUrls[0]) */
   heroImageDataUrl?: string
+  /** 그림이 그려진 날(YYYY-MM-DD) — 시계열·개월 수와 함께 보관 */
+  drawnAtIso?: string
+  /** drawnAtIso 시점 생후 개월 수(코드 계산) */
+  childAgeInMonthsAtDrawing?: number
   /** 작은 JPEG data URL — 그림별 요약 UI (없으면 그라데이션만) */
   drawingThumbDataUrls?: string[]
 }

@@ -4,7 +4,6 @@ import { APPLY_FORM_HREF } from '@lib/apply-href'
 import { SITE_OG_IMAGE } from '@lib/site-og'
 
 import { ApplyAnalysisIntroSection } from '@/components/apply/ApplyAnalysisIntroSection'
-import { ApplyFormTrustNote } from '@/components/apply/ApplyFormTrustNote'
 import { ApplyStepsSection } from '@/components/apply/ApplyStepsSection'
 
 import { ApplyIntegratedForm } from './ApplyIntegratedForm'
@@ -59,7 +58,6 @@ export default function ApplyPage() {
         id="apply-form"
         className="mt-10 scroll-mt-24 rounded-2xl border border-[#E8E4DC] bg-white px-6 py-8 shadow-sm"
       >
-        <ApplyFormTrustNote />
         <ApplyIntegratedForm />
       </section>
     </ApplyPageShell>

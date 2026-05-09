@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 
 import { AdminReportsTable } from './AdminReportsTable'
 import { loadAdminReportRows } from './load-rows'
-import { Step2Toggle } from './Step2Toggle'
 
 export const metadata: Metadata = {
   title: '리포트 발송 관리 — Kindra',
@@ -32,7 +31,6 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
         <h1 className="mb-8 text-xl font-bold tracking-tight text-[#3D3D3D] sm:text-2xl">
           킨드라 관리자 - 리포트 발송 관리
         </h1>
-        <Step2Toggle adminPw={pw} initialEnabled={loaded.isStep2Enabled} />
         <AdminReportsTable rows={loaded.rows} adminPw={pw} origin={origin} />
       </div>
     </main>

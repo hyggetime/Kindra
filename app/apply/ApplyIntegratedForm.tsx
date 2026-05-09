@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { submitIntegratedIntake } from '@app/actions/intake-submit'
-import { NORMAL_PRICE_WON, type PriceTier } from '@lib/constants'
+import { formatPriceWon, LIST_PRICE_WON } from '@lib/constants'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
 import { completedMonthsFromDaysSinceBirth, parseBirthDateIso } from '@lib/intake/age-months'
 import {
@@ -53,9 +53,9 @@ function ApplyIntegratedFormFields({
 }: {
   onSuccess: () => void
   variant?: 'apply' | 'intake'
-  onIntakeSuccess?: (tier: PriceTier, reportRowId?: string) => void
+  onIntakeSuccess?: (reportRowId?: string) => void
   /** `/apply` 전용: 전송 성공 시 결제 페이지로 이동 */
-  onApplyPaymentRedirect?: (tier: PriceTier, reportRowId?: string) => void
+  onApplyPaymentRedirect?: (reportRowId?: string) => void
   submitPriceHint?: string | null
 }) {
   const [state, formAction, pending] = useActionState<IntegratedIntakeState, FormData>(
@@ -70,6 +70,8 @@ function ApplyIntegratedFormFields({
   const successEmittedRef = useRef(false)
   const doneTimerRef = useRef<number | null>(null)
 
+  const [consentAcknowledged, setConsentAcknowledged] = useState(false)
+  const [consentDeniedFlash, setConsentDeniedFlash] = useState(false)
   const [slots, setSlots] = useState<(Slot | null)[]>([null, null, null, null, null])
   const [imageBusyIndex, setImageBusyIndex] = useState<number | null>(null)
   const [birthDate, setBirthDate] = useState('')
@@ -78,9 +80,10 @@ function ApplyIntegratedFormFields({
   const birthPreview = useMemo(() => {
     const p = parseBirthDateIso(birthDate)
     if (!p) return { months: null as number | null }
-    const ref = new Date()
+    const today0 = new Date()
+    today0.setHours(0, 0, 0, 0)
     return {
-      months: completedMonthsFromDaysSinceBirth(p.y, p.m, p.d, ref),
+      months: completedMonthsFromDaysSinceBirth(p.y, p.m, p.d, today0),
     }
   }, [birthDate])
 
@@ -123,10 +126,10 @@ function ApplyIntegratedFormFields({
     doneTimerRef.current = window.setTimeout(() => {
       doneTimerRef.current = null
       setOverlayOpen(false)
-      if (variant === 'intake' && onIntakeSuccess && state.priceTier) {
-        onIntakeSuccess(state.priceTier, state.reportRowId)
-      } else if (variant === 'apply' && onApplyPaymentRedirect && state.priceTier) {
-        onApplyPaymentRedirect(state.priceTier, state.reportRowId)
+      if (variant === 'intake' && onIntakeSuccess && state.reportRowId) {
+        onIntakeSuccess(state.reportRowId)
+      } else if (variant === 'apply' && onApplyPaymentRedirect && state.reportRowId) {
+        onApplyPaymentRedirect(state.reportRowId)
       } else {
         onSuccess()
       }
@@ -137,7 +140,7 @@ function ApplyIntegratedFormFields({
         doneTimerRef.current = null
       }
     }
-  }, [pending, state.ok, state.message, state.priceTier, state.reportRowId, variant, onIntakeSuccess, onApplyPaymentRedirect, onSuccess])
+  }, [pending, state.ok, state.message, state.reportRowId, variant, onIntakeSuccess, onApplyPaymentRedirect, onSuccess])
 
   async function onPick(index: number, input: HTMLInputElement) {
     const file = input.files?.[0] ?? null
@@ -216,15 +219,52 @@ function ApplyIntegratedFormFields({
 
   return (
     <>
-    <form ref={formRef} action={formAction} className="space-y-8">
-      <div className="rounded-xl border border-[#D4CFC4] bg-[#FAF8F4] px-4 py-4 sm:px-5 sm:py-5">
-        <p className="text-[12px] leading-[1.85] text-[#4A4A4A] sm:text-[13px]">
-          신청서를 제출하시면 아이의 그림과 정보를 리포트 작성 및 킨드라 서비스 제공 목적으로 활용하는 것에 동의하신 것으로
-          간주돼요. 보내주신 그림은 분석과 킨드라의 다채로운 서비스(리포트, 굿즈 등) 제공을 위해 안전하게 관리됩니다.
+    {consentDeniedFlash ? (
+      <div
+        role="status"
+        className="pointer-events-none fixed bottom-6 left-1/2 z-[200] -translate-x-1/2 rounded-full bg-[#2F2F2F]/95 px-5 py-2.5 text-sm font-medium text-white shadow-lg"
+      >
+        동의가 필요합니다
+      </div>
+    ) : null}
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={(e) => {
+        if (!consentAcknowledged) {
+          e.preventDefault()
+          setConsentDeniedFlash(true)
+          window.setTimeout(() => setConsentDeniedFlash(false), 3200)
+        }
+      }}
+      className="space-y-8"
+    >
+      <div className="px-0.5 pt-2 sm:px-1">
+        <p className="text-[13px] leading-[1.75] text-[#4A4A4A] sm:text-sm sm:leading-[1.8]">
+          아이가 그린 소중한 세계를 킨드라에 맡겨주셔서 감사해요. 보내주신 그림과 정보는 아이를 위한 리포트 작성과 킨드라의
+          다채로운 서비스(굿즈, 혜택 안내 등)를 준비하는 데에만 소중하고 안전하게 사용됩니다. 킨드라가 그림 속에 담긴 아이의
+          마음을 조심스럽게 읽고 정성을 다해 돌려드릴게요.
         </p>
-        <p className="mt-2.5 text-[11px] leading-relaxed text-[#6B6B6B] sm:text-xs">
+
+        <label className="mt-7 flex cursor-pointer items-start gap-3 sm:mt-8">
+          <input
+            type="checkbox"
+            name="allInOneConsent"
+            checked={consentAcknowledged}
+            onChange={(e) => setConsentAcknowledged(e.target.checked)}
+            disabled={pending}
+            className="mt-1 h-4 w-4 shrink-0 rounded border-[#D4DED0] accent-[#7C9070] disabled:opacity-60"
+          />
+          <span className="text-[13px] leading-[1.65] text-[#3D3D3D] sm:text-sm">
+            [필수] 리포트 분석 및 맞춤형 서비스(굿즈, 이벤트 알림 등) 제공을 위한 개인정보 및 콘텐츠 활용에 전체 동의합니다.
+          </span>
+        </label>
+
+        <p className="mt-5 text-[11px] leading-relaxed text-[#9A9A9A] sm:text-xs">
           (그림을 받은 후 24시간 이내 발송을 목표로 해요. 꼼꼼히 살펴보느라 조금 늦어질 수 있어요.)
         </p>
+
+        <hr className="mt-10 border-0 border-t border-[#E8E4DC] sm:mt-12" />
       </div>
 
       <div className="space-y-5">
@@ -322,8 +362,8 @@ function ApplyIntegratedFormFields({
             아이 생년월일 <span className="text-[#B85C5C]">*</span>
           </label>
           <p className="mb-2 text-[11px] leading-relaxed text-[#9A9A9A]">
-            리포트는 <span className="font-medium text-[#6B7568]">오늘 날짜</span>를 기준으로 생후 개월 수를 계산합니다. 그림을 그린 날과 무관하게{' '}
-            <span className="font-semibold text-[#5A6F52]">현재 시점</span> 분석이에요.
+            아래 생후 개월 수 안내는 <span className="font-medium text-[#6B7568]">신청일 기준</span>이에요. 각 그림 칸에
+            언제·무엇을 그렸는지 적어 주시면 리포트 맥락에 반영돼요.
           </p>
           <div className="flex flex-wrap items-end gap-3 sm:gap-4">
             <div className="min-w-[12rem] flex-1">
@@ -342,9 +382,9 @@ function ApplyIntegratedFormFields({
             <div className="flex min-h-[42px] min-w-[12rem] flex-1 flex-col justify-center rounded-xl border border-[#E8F0E4] bg-[#F4F7F2] px-4 py-2.5 sm:min-w-[11rem]">
               <p className="text-sm font-semibold tabular-nums text-[#4F6048]">
                 {birthPreview.months === null ? (
-                  <span className="font-normal text-[#9A9A9A]">생후 --개월</span>
+                  <span className="font-normal text-[#9A9A9A]">신청일 기준 — 생후 --개월</span>
                 ) : (
-                  <>생후 {String(birthPreview.months).padStart(2, '0')}개월</>
+                  <>신청일 기준 — 생후 {String(birthPreview.months).padStart(2, '0')}개월</>
                 )}
               </p>
             </div>
@@ -363,6 +403,9 @@ function ApplyIntegratedFormFields({
             />
             <span>지금 키·몸무게를 모릅니다 (입력 안 함)</span>
           </label>
+          <p className="text-[11px] leading-relaxed text-[#7A8A72] sm:text-xs">
+            성장기 아이들의 개인차를 고려하여 넓은 범위를 수용하고 있습니다.
+          </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="childHeightCm" className="mb-1.5 block text-xs font-medium text-[#5A5A5A]">
@@ -379,7 +422,7 @@ function ApplyIntegratedFormFields({
                 className="w-full rounded-xl border border-[#E8E4DC] bg-[#FDFBF9] px-4 py-3 text-sm text-[#3D3D3D] outline-none ring-[#7C9070]/25 focus:border-[#7C9070]/50 focus:ring-2 disabled:opacity-60"
               />
               <p className="mt-1.5 text-[11px] leading-relaxed text-[#9A9A9A]">
-                40~140cm 범위만 분석에 반영돼요. 모르실 경우 위의 &apos;모릅니다&apos; 항목을 선택해 주세요.
+                40~170cm 범위만 분석에 반영돼요. 모르실 경우 위의 &apos;모릅니다&apos; 항목을 선택해 주세요.
               </p>
             </div>
             <div>
@@ -396,7 +439,9 @@ function ApplyIntegratedFormFields({
                 placeholder="예: 18.2"
                 className="w-full rounded-xl border border-[#E8E4DC] bg-[#FDFBF9] px-4 py-3 text-sm text-[#3D3D3D] outline-none ring-[#7C9070]/25 focus:border-[#7C9070]/50 focus:ring-2 disabled:opacity-60"
               />
-              <p className="mt-1.5 text-[11px] leading-relaxed text-[#9A9A9A]">1~55kg 범위만 분석에 반영돼요.</p>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-[#9A9A9A]">
+                3~90kg 범위만 분석에 반영돼요.
+              </p>
             </div>
           </div>
         </div>
@@ -482,19 +527,37 @@ function ApplyIntegratedFormFields({
               ) : (
                 <p className="mt-3 text-center text-[11px] text-[#B0B0B0]">미리보기 없음</p>
               )}
-              <div className="mt-4">
-                <label htmlFor={`drawingMemo-${i}`} className="mb-1.5 block text-[11px] font-medium text-[#6B6B6B]">
-                  이 그림에 대해 알려주실 내용이 있나요?
-                </label>
-                <textarea
-                  id={`drawingMemo-${i}`}
-                  name={`drawingMemo${i + 1}`}
-                  rows={2}
-                  maxLength={500}
-                  disabled={pending}
-                  placeholder="그림을 그린 시기나 당시의 상황을 적어주시면 더 정확한 분석이 가능합니다"
-                  className="w-full resize-y rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-xs text-[#3D3D3D] outline-none ring-[#7C9070]/20 focus:border-[#7C9070]/45 focus:ring-1 disabled:opacity-60"
-                />
+              <div className="mt-4 space-y-3 rounded-lg border border-[#EDE8E0] bg-white/90 p-3">
+                <p className="text-[11px] font-medium text-[#6B6B6B]">이 그림에 대해 알려주실 내용이 있나요?</p>
+                <div>
+                  <label htmlFor={`drawingTimeNote-${i}`} className="mb-1 block text-[11px] text-[#6B6B6B]">
+                    언제 그렸나요?
+                  </label>
+                  <input
+                    id={`drawingTimeNote-${i}`}
+                    name={`drawingTimeNote${i + 1}`}
+                    type="text"
+                    maxLength={120}
+                    disabled={pending}
+                    placeholder="3개월 전"
+                    autoComplete="off"
+                    className="w-full rounded-lg border border-[#E8E4DC] bg-[#FDFBF9] px-3 py-2 text-xs text-[#3D3D3D] outline-none placeholder:text-[#B8B8B8] ring-[#7C9070]/20 focus:border-[#7C9070]/45 focus:ring-1 disabled:opacity-60"
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`drawingWhatNote-${i}`} className="mb-1 block text-[11px] text-[#6B6B6B]">
+                    무엇을 그렸나요?
+                  </label>
+                  <textarea
+                    id={`drawingWhatNote-${i}`}
+                    name={`drawingWhatNote${i + 1}`}
+                    rows={3}
+                    maxLength={500}
+                    disabled={pending}
+                    placeholder="동생 생일파티에요. 가족여행이에요. 길어도 돼요."
+                    className="w-full resize-y rounded-lg border border-[#E8E4DC] bg-[#FDFBF9] px-3 py-2 text-xs text-[#3D3D3D] outline-none placeholder:text-[#B8B8B8] ring-[#7C9070]/20 focus:border-[#7C9070]/45 focus:ring-1 disabled:opacity-60"
+                  />
+                </div>
               </div>
             </div>
           ))}
@@ -515,44 +578,13 @@ function ApplyIntegratedFormFields({
           />
         </div>
 
-        <div className="space-y-6 rounded-xl border border-[#E8E4DC] bg-[#FDFBF9] px-4 py-5 sm:px-6 sm:py-6">
-          <fieldset disabled={pending} className="min-w-0 border-0 p-0">
-            <legend className="text-xs font-semibold text-[#4A4A4A]">
-              마케팅 동의 <span className="text-[#B85C5C]">*</span>
-            </legend>
-            <p className="mt-2 text-[12px] leading-relaxed text-[#5A5A5A] sm:text-sm">
-              킨드라 정식 오픈 소식과 사전 신청 혜택 알림을 받을게요.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-5">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-[#3D3D3D]">
-                <input
-                  type="radio"
-                  name="marketingOptIn"
-                  value="yes"
-                  required
-                  className="h-4 w-4 shrink-0 accent-[#7C9070]"
-                />
-                예
-              </label>
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-[#3D3D3D]">
-                <input
-                  type="radio"
-                  name="marketingOptIn"
-                  value="no"
-                  className="h-4 w-4 shrink-0 accent-[#7C9070]"
-                />
-                아니오
-              </label>
-            </div>
-          </fieldset>
-
+        <div className="space-y-5 rounded-xl border border-[#E8E4DC] bg-[#FDFBF9] px-4 py-5 sm:px-6 sm:py-6">
           <fieldset disabled={pending} className="min-w-0 border-0 p-0">
             <legend className="text-xs font-semibold text-[#4A4A4A]">
               서비스 이용료에 대한 설문조사 <span className="text-[#B85C5C]">*</span>
             </legend>
             <p className="mt-2 text-[12px] leading-relaxed text-[#5A5A5A] sm:text-sm">
-              킨드라는 구간별 할인가 또는 정상가로 분석을 제공해요. 현재 예상 구간은 신청 화면 상단 안내를 참고해 주세요. 정상가{' '}
-              {NORMAL_PRICE_WON.toLocaleString('ko-KR')}원 수준으로 이용하실 의향이 있으신가요?
+              킨드라 그림 분석 서비스의 이용료는 {formatPriceWon(LIST_PRICE_WON)}입니다. 이 가격이 적당하다고 생각하십니까?
             </p>
             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
               <label className="flex cursor-pointer items-center gap-2 text-sm text-[#3D3D3D]">
@@ -598,7 +630,7 @@ function ApplyIntegratedFormFields({
 
       <button
         type="submit"
-        disabled={pending || imageBusyIndex !== null}
+        disabled={pending || imageBusyIndex !== null || !consentAcknowledged}
         className="w-full rounded-full bg-[#7C9070] py-3.5 text-sm font-semibold text-white shadow-[0_8px_24px_-8px_rgba(124,144,112,0.55)] transition hover:bg-[#687D5D] disabled:opacity-60"
       >
         {pending ? '전송 중…' : '신청서와 그림 전송하기'}
@@ -617,7 +649,7 @@ function ApplyIntegratedFormFields({
 
 export type ApplyIntegratedFormProps = {
   variant?: 'apply' | 'intake'
-  onIntakeSuccess?: (tier: PriceTier, reportRowId?: string) => void
+  onIntakeSuccess?: (reportRowId?: string) => void
   submitPriceHint?: string | null
 }
 
@@ -640,8 +672,8 @@ export function ApplyIntegratedForm(props: ApplyIntegratedFormProps = {}) {
     <ApplyIntegratedFormFields
       variant="apply"
       onSuccess={() => {}}
-      onApplyPaymentRedirect={(tier, reportRowId) => {
-        router.push(buildApplyPaymentPath(tier, reportRowId ?? null))
+      onApplyPaymentRedirect={(reportRowId) => {
+        router.push(buildApplyPaymentPath(reportRowId ?? null))
       }}
       submitPriceHint={submitPriceHint ?? null}
     />

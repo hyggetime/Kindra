@@ -1,10 +1,3 @@
-import type { PriceTier } from '@lib/constants'
-
-export function parseTierParam(raw: string | undefined): PriceTier {
-  if (raw === 'discount' || raw === 'normal' || raw === 'free') return raw
-  return 'free'
-}
-
 export function parseReportIdParam(raw: string | undefined): string | null {
   if (!raw || typeof raw !== 'string') return null
   const t = raw.trim()
@@ -18,9 +11,9 @@ export function parseReportIdParam(raw: string | undefined): string | null {
   return t
 }
 
-export function buildApplyPaymentPath(tier: PriceTier, reportId: string | null): string {
+export function buildApplyPaymentPath(reportId: string | null): string {
   const q = new URLSearchParams()
-  q.set('tier', tier)
   if (reportId) q.set('report', reportId)
-  return `/apply/payment?${q.toString()}`
+  const s = q.toString()
+  return s ? `/apply/payment?${s}` : '/apply/payment'
 }

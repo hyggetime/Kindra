@@ -1,41 +1,91 @@
 'use client'
 
 import { ANONYMOUS, loadTossPayments } from '@tosspayments/tosspayments-sdk'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
-import { type PriceTier, formatPriceWon } from '@lib/constants'
-import { effectiveTossChargeWonForTier } from '@lib/payment/payment-charge-override'
+import { previewCheckoutCoupon } from '@app/actions/payment-coupon-preview'
+import { formatPriceWon } from '@lib/constants'
+import { getPaymentRedirectOrigin } from '@lib/payment/payment-redirect-origin'
 import { getTossClientKey, isTossPaymentsConfigured } from '@lib/payment/toss-payments-config'
 
 type SectionProps = {
-  tier: PriceTier
   reportId: string | null
+  listedPriceWon: number
+  /** 무통장 블록 등과 금액 맞추기 — 쿠폰 적용·결제 직전 미리보기 후 호출 */
+  onResolvedAmount?: (amountWon: number) => void
   /** `bankFirst` 일 때는 시각적 강조를 약하게(무통장이 위에 있을 때) */
   secondaryPlacement?: boolean
 }
 
 /**
- * 토스페이먼츠 API 개별 연동 키 — 통합결제창 (`payment().requestPayment`, method CARD).
- * @see https://docs.tosspayments.com/guides/v2/payment-window/integration
+ * 쿠폰 입력 → 토스페이먼츠 통합결제창 (`payment().requestPayment`, method CARD).
  */
-export function IntakeTossPaymentsWidgetSection({ tier, reportId, secondaryPlacement = false }: SectionProps) {
+export function IntakeTossPaymentsWidgetSection({
+  reportId,
+  listedPriceWon,
+  onResolvedAmount,
+  secondaryPlacement = false,
+}: SectionProps) {
   const clientKey = getTossClientKey()
   const sdkReady = isTossPaymentsConfigured()
-  const chargeWon = effectiveTossChargeWonForTier(tier)
-  const priceLabel = formatPriceWon(chargeWon)
-
+  const [couponInput, setCouponInput] = useState('')
+  const [displayAmount, setDisplayAmount] = useState(listedPriceWon)
+  const [couponNote, setCouponNote] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setDisplayAmount(listedPriceWon)
+  }, [listedPriceWon])
+
+  const pushResolved = useCallback(
+    (n: number) => {
+      setDisplayAmount(n)
+      onResolvedAmount?.(n)
+    },
+    [onResolvedAmount],
+  )
+
+  const runPreview = useCallback(
+    async (code: string) => {
+      const r = await previewCheckoutCoupon(listedPriceWon, code)
+      if (!r.ok) return r
+      pushResolved(r.amountWon)
+      setCouponNote(
+        r.discountWon > 0
+          ? `할인 ${formatPriceWon(r.discountWon)} 반영 · 최종 ${formatPriceWon(r.amountWon)}`
+          : '정상가로 진행해요.',
+      )
+      return r
+    },
+    [listedPriceWon, pushResolved],
+  )
+
+  const onApplyCoupon = useCallback(async () => {
+    setError(null)
+    setCouponNote(null)
+    const r = await runPreview(couponInput.trim())
+    if (!r.ok) {
+      setError(r.message)
+      pushResolved(listedPriceWon)
+    }
+  }, [couponInput, listedPriceWon, pushResolved, runPreview])
 
   const openPaymentWindow = useCallback(async () => {
     if (!sdkReady) return
     setError(null)
     setBusy(true)
     try {
+      const prev = await runPreview(couponInput.trim())
+      if (!prev.ok) {
+        setError(prev.message)
+        return
+      }
+
       const res = await fetch('/api/payments/toss/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier, reportId }),
+        body: JSON.stringify({ reportId, couponCode: couponInput.trim() }),
       })
       const data = (await res.json()) as {
         error?: string
@@ -50,7 +100,11 @@ export function IntakeTossPaymentsWidgetSection({ tier, reportId, secondaryPlace
 
       const tossPayments = await loadTossPayments(clientKey)
       const pay = tossPayments.payment({ customerKey: ANONYMOUS })
-      const origin = window.location.origin
+      const origin = getPaymentRedirectOrigin()
+      if (!origin) {
+        setError('결제 리다이렉트 주소를 확인할 수 없어요.')
+        return
+      }
 
       await pay.requestPayment({
         method: 'CARD',
@@ -74,7 +128,9 @@ export function IntakeTossPaymentsWidgetSection({ tier, reportId, secondaryPlace
     } finally {
       setBusy(false)
     }
-  }, [clientKey, reportId, sdkReady, tier])
+  }, [clientKey, couponInput, reportId, runPreview, sdkReady])
+
+  const priceLabel = formatPriceWon(displayAmount)
 
   return (
     <section
@@ -87,7 +143,39 @@ export function IntakeTossPaymentsWidgetSection({ tier, reportId, secondaryPlace
         <p id="toss-payment-heading" className="text-xs font-semibold uppercase tracking-wide text-[#7C9070]">
           카드 · 간편결제
         </p>
-        <p className="mt-3 text-lg font-semibold tabular-nums text-[#3D3D3D]">{priceLabel}</p>
+
+        <div className="mt-4 rounded-xl border border-[#E8E4DC] bg-[#FAFAF8]/90 px-4 py-3 text-left">
+          <p className="text-[11px] font-medium text-[#5A5A5A]">쿠폰 코드</p>
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input
+              type="text"
+              value={couponInput}
+              onChange={(e) => {
+                setCouponInput(e.target.value)
+                setCouponNote(null)
+              }}
+              placeholder="코드가 있으면 입력 후 적용"
+              disabled={busy}
+              autoComplete="off"
+              className="min-h-[44px] w-full flex-1 rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm text-[#3D3D3D] outline-none ring-[#7C9070]/15 focus:border-[#7C9070]/40 focus:ring-2 disabled:opacity-60"
+            />
+            <button
+              type="button"
+              onClick={() => void onApplyCoupon()}
+              disabled={busy}
+              className="shrink-0 rounded-lg border border-[#7C9070]/40 bg-[#F4F7F2] px-4 py-2 text-xs font-semibold text-[#4F6048] transition hover:bg-[#E8F0E4] disabled:opacity-50"
+            >
+              적용
+            </button>
+          </div>
+          {couponNote ? <p className="mt-2 text-[11px] text-[#5A6F52]">{couponNote}</p> : null}
+          <p className="mt-2 text-[10px] leading-relaxed text-[#9A9A9A]">
+            정상가 {formatPriceWon(listedPriceWon)} · 결제 전 쿠폰을 적용하거나, 바로 결제하기를 눌러도 현재 입력값으로
+            다시 계산돼요.
+          </p>
+        </div>
+
+        <p className="mt-4 text-lg font-semibold tabular-nums text-[#3D3D3D]">{priceLabel}</p>
 
         <div className="mt-6">
           {sdkReady ? (
