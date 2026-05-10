@@ -16,7 +16,7 @@ import { getSiteOrigin } from '@lib/site-origin'
 import { IntakeReportDocument } from '@/components/intake/IntakeReportDocument'
 import { ReportDocument } from '@/views/reports/ReportDocument'
 
-import { ReportReviewSection } from '../ReportReviewSection'
+import { ReportFeedbackSection } from '../ReportFeedbackSection'
 
 type PageProps = { params: Promise<{ uuid: string }> }
 
@@ -82,15 +82,21 @@ export default async function ReportByUuidPage({ params }: PageProps) {
   const supabase = await createServerSupabaseClient()
   const { data, error } = await supabase
     .from('kindra_reports')
-    .select('report_json, review_text')
+    .select('report_json')
     .eq('id', uuid)
     .maybeSingle()
 
   if (error || !data?.report_json) notFound()
 
-  const reviewText = typeof (data as { review_text?: unknown }).review_text === 'string'
-    ? (data as { review_text: string }).review_text
-    : null
+  const { data: feedbackRow, error: feedbackError } = await supabase
+    .from('kindra_feedbacks')
+    .select('id')
+    .eq('report_id', uuid)
+    .maybeSingle()
+  if (feedbackError && !/relation|does not exist/i.test(feedbackError.message)) {
+    console.warn('[reports] kindra_feedbacks probe:', feedbackError.message)
+  }
+  const initialHasFeedback = Boolean(!feedbackError && feedbackRow?.id)
 
   const resolved = resolveReportJson(data.report_json as unknown)
   if (!resolved) {
@@ -106,14 +112,18 @@ export default async function ReportByUuidPage({ params }: PageProps) {
     return (
       <>
         <IntakeReportDocument payload={resolved.session} reportUuid={uuid} />
-        <ReportReviewSection reportId={uuid} initialReviewText={reviewText} />
+        <ReportFeedbackSection
+          reportId={uuid}
+          initialHasFeedback={initialHasFeedback}
+          applicantSalutation={resolved.session.subject.applicantLabel}
+        />
       </>
     )
   }
   return (
     <>
       <ReportDocument data={resolved.data} canonicalReportUuid={uuid} />
-      <ReportReviewSection reportId={uuid} initialReviewText={reviewText} />
+      <ReportFeedbackSection reportId={uuid} initialHasFeedback={initialHasFeedback} />
     </>
   )
 }
