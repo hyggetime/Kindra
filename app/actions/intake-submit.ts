@@ -21,6 +21,7 @@ import {
 import { randomUUID } from 'node:crypto'
 
 import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-session'
+import { buildReportSessionImageFields } from '@lib/intake/report-session-images.server'
 import { buildIntakeReportIdentifiers } from '@lib/intake/report-id'
 import { LIST_PRICE_WON } from '@lib/constants'
 import { setReportAccessCookie } from '@lib/payment/report-access-cookie.server'
@@ -392,6 +393,9 @@ export async function submitIntegratedIntake(
       `${childDisplayName}의 그림 ${slots.length}장`,
       '마음의 무늬를 차분히 살펴봤어요',
     ]
+
+    const { heroImageDataUrl, drawingThumbDataUrls } = await buildReportSessionImageFields(slots)
+
     const sessionPayload: IntakeReportSessionPayload = {
       v: 2,
       reportId,
@@ -404,6 +408,8 @@ export async function submitIntegratedIntake(
       },
       childShortName: childDisplayName,
       heroTitleLines,
+      heroImageDataUrl,
+      drawingThumbDataUrls,
       drawnAtIso: drawnAtIso,
       childAgeInMonthsAtDrawing: childAgeMonthsAtDrawing,
     }

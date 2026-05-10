@@ -56,8 +56,15 @@ function isHashtagOnlyParagraph(p: string): boolean {
   })
 }
 
+/** 「통합 마음 지도」 본문 끝에 모델이 반복하는 `#키워드` — 상단 칩과 중복되므로 제거 */
+function stripTrailingHashtagsFromParagraph(p: string): string {
+  return p.replace(/(?:\s+#[가-힣A-Za-z0-9_]+)+$/u, '').trim()
+}
+
 function mindMapDisplayParagraphs(body: string): string[] {
-  return bodyToParagraphs(body).filter((p) => !isHashtagOnlyParagraph(p))
+  return bodyToParagraphs(body)
+    .filter((p) => !isHashtagOnlyParagraph(p))
+    .map((p) => stripTrailingHashtagsFromParagraph(p))
 }
 
 /** 반복되던 '통합 관찰' 대신 섹션마다 짧은 눈길 제목 */
