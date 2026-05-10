@@ -13,6 +13,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "gemini:token-probe": "tsx scripts/gemini-token-probe.ts",
+    "cleanup:expired-intakes": "tsx scripts/cleanup-expired-intakes.ts",
+    "cleanup:expired-intakes:dry": "tsx scripts/cleanup-expired-intakes.ts --dry-run",
     "sb": "supabase",
     "sb:login": "supabase login",
     "sb:push": "supabase db push",
