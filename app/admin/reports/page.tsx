@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
+import { getRequestSiteOrigin } from '@lib/site-origin-request.server'
+
 import { AdminReportsTable } from './AdminReportsTable'
 import { loadAdminReportRows } from './load-rows'
 
@@ -23,7 +25,7 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
   const loaded = await loadAdminReportRows(pw)
   if (!loaded.ok) notFound()
 
-  const origin = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kindra.ai').replace(/\/$/, '')
+  const origin = await getRequestSiteOrigin()
 
   return (
     <main className="min-h-screen bg-[#FAF8F5] px-4 py-10 sm:px-6">
