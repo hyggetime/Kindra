@@ -47,16 +47,14 @@ export async function updateSession(request: NextRequest) {
     const unlock = request.cookies.get(KINDRA_REPORT_UNLOCK_COOKIE)?.value?.toLowerCase() ?? ''
 
     if (!user) {
-      const login = new URL('/auth/login', request.url)
-      login.searchParams.set('next', `/reports/${gateKey}`)
-      login.searchParams.set('reason', 'login_required')
-      return NextResponse.redirect(login)
+      const gatePage = new URL('/auth/report-access-expired', request.url)
+      gatePage.searchParams.set('next', `/reports/${gateKey}`)
+      return NextResponse.redirect(gatePage)
     }
     if (unlock !== gateKey) {
-      const login = new URL('/auth/login', request.url)
-      login.searchParams.set('next', `/reports/${gateKey}`)
-      login.searchParams.set('reason', 'magic_link_only')
-      return NextResponse.redirect(login)
+      const gatePage = new URL('/auth/report-access-expired', request.url)
+      gatePage.searchParams.set('next', `/reports/${gateKey}`)
+      return NextResponse.redirect(gatePage)
     }
   }
 

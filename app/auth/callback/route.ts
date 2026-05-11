@@ -8,7 +8,8 @@ import {
 
 /**
  * 이메일 매직링크(PKCE) 수신 — `code` 가 있을 때만 세션을 만들고 `next` 로 이동합니다.
- * `/reports/{uuid}` 로 갈 때 잠금 해제 쿠키를 십니다.
+ * `/reports/{uuid}` 로 갈 때 잠금 해제 쿠키를 십니다. 매 호출마다 `maxAge` 가 `KINDRA_REPORT_UNLOCK_MAX_AGE`(30일)로 새로 설정되어,
+ * 부모님이 안내 메일 링크로 들어올 때마다 그 시점부터 30일이 갱신됩니다.
  */
 export async function GET(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL

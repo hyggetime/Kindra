@@ -27,6 +27,7 @@ import { LIST_PRICE_WON } from '@lib/constants'
 import { setReportAccessCookie } from '@lib/payment/report-access-cookie.server'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
 import { createServiceRoleClient } from '@lib/supabase/admin'
+import { isSkipPaymentForAnalysis } from '@lib/intake/skip-payment-for-analysis'
 
 const MAX_BYTES_PER_IMAGE = 4 * 1024 * 1024
 const IMAGE_FIELDS = ['image1', 'image2', 'image3', 'image4', 'image5'] as const
@@ -223,10 +224,6 @@ export async function submitIntegratedIntake(
 
   const buffers = slots.map((s) => s.buf)
   const mimes = slots.map((s) => s.mime)
-  const blobs: GeminiInlineImage[] = slots.map((s) => ({
-    mimeType: s.mime,
-    base64: s.buf.toString('base64'),
-  }))
 
   let admin
   try {
@@ -261,7 +258,7 @@ export async function submitIntegratedIntake(
       content_utilization_agreed: true,
       pricing_intent: pricingIntent,
       updated_at: now,
-      gemini_status: 'running',
+      gemini_status: isSkipPaymentForAnalysis() ? 'running' : 'pending',
       gemini_error: null,
       gemini_report_markdown: null,
     })
@@ -332,59 +329,149 @@ export async function submitIntegratedIntake(
     })
     .eq('id', intakeId)
 
-  try {
-    const refForAnalysis = drawnDay
-    const parentNoteForGemini = buildStructuredParentNoteForGemini({
-      analysisDateIso: isoDateLocal(refForAnalysis),
-      ageHintLine: childAgeHint || '(없음)',
-      childNote,
-      drawingMemos,
-    })
-
-    let reportMarkdown = await generateKindraMultimodalReport(blobs, {
-      childDisplayName,
-      childGenderLabel,
-      childAgeHint: childAgeHint || undefined,
-      parentNote: parentNoteForGemini,
-      completedMonths: childAgeMonthsAtDrawing,
-    })
-
-    const growthRaw = loadGrowthStatsJsonRaw()
-    const growthStats = growthRaw ? parseGrowthStatsJson(growthRaw) : null
-    if (growthStats) {
-      const physio = buildPhysioEmotionalSectionMarkdown(growthStats, {
-        childShortName: childDisplayName,
-        sex: childGenderCode,
-        completedMonths: childAgeMonthsAtDrawing,
-        heightCm: childHeightCm,
-        weightKg: childWeightKg,
+  if (isSkipPaymentForAnalysis()) {
+    try {
+      const blobs: GeminiInlineImage[] = slots.map((s) => ({
+        mimeType: s.mime,
+        base64: s.buf.toString('base64'),
+      }))
+      const refForAnalysis = drawnDay
+      const parentNoteForGemini = buildStructuredParentNoteForGemini({
+        analysisDateIso: isoDateLocal(refForAnalysis),
+        ageHintLine: childAgeHint || '(없음)',
+        childNote,
+        drawingMemos,
       })
-      if (physio) {
-        reportMarkdown = injectPhysioMarkdownBeforeParentsSection(reportMarkdown, physio)
+
+      let reportMarkdown = await generateKindraMultimodalReport(blobs, {
+        childDisplayName,
+        childGenderLabel,
+        childAgeHint: childAgeHint || undefined,
+        parentNote: parentNoteForGemini,
+        completedMonths: childAgeMonthsAtDrawing,
+      })
+
+      const growthRaw = loadGrowthStatsJsonRaw()
+      const growthStats = growthRaw ? parseGrowthStatsJson(growthRaw) : null
+      if (growthStats) {
+        const physio = buildPhysioEmotionalSectionMarkdown(growthStats, {
+          childShortName: childDisplayName,
+          sex: childGenderCode,
+          completedMonths: childAgeMonthsAtDrawing,
+          heightCm: childHeightCm,
+          weightKg: childWeightKg,
+        })
+        if (physio) {
+          reportMarkdown = injectPhysioMarkdownBeforeParentsSection(reportMarkdown, physio)
+        }
+        if (
+          shouldAppendBodyGrowthRangeDisclaimer(
+            growthStats,
+            childGenderCode,
+            childAgeMonthsAtDrawing,
+            childHeightCm,
+            childWeightKg,
+          )
+        ) {
+          reportMarkdown = `${reportMarkdown.trimEnd()}\n\n${BODY_GROWTH_DISCLAIMER_MARKDOWN}\n`
+        }
       }
-      if (
-        shouldAppendBodyGrowthRangeDisclaimer(
-          growthStats,
-          childGenderCode,
-          childAgeMonthsAtDrawing,
-          childHeightCm,
-          childWeightKg,
+
+      await admin
+        .from('kindra_intakes')
+        .update({
+          gemini_report_markdown: reportMarkdown,
+          gemini_status: 'completed',
+          gemini_error: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', intakeId)
+
+      const birthLine = formatBirthLineForReportCard(birthParts.y, birthParts.m, birthParts.d, drawnDay)
+      const birthAndMaterials = [birthLine, `제출 그림 ${slots.length}장`].join(' · ')
+      const { reportId } = buildIntakeReportIdentifiers(childDisplayName, intakeId)
+
+      const heroTitleLines: [string, string] = [
+        `${childDisplayName}의 그림 ${slots.length}장`,
+        '마음의 무늬를 차분히 살펴봤어요',
+      ]
+
+      const { heroImageDataUrl, drawingThumbDataUrls } = await buildReportSessionImageFields(slots)
+
+      const sessionPayload: IntakeReportSessionPayload = {
+        v: 2,
+        reportId,
+        intakeId,
+        markdown: reportMarkdown,
+        subject: {
+          applicantLabel: `${parentName} 님`,
+          childLabel: `${childDisplayName} (${childGenderLabel})`,
+          birthAndMaterials,
+        },
+        childShortName: childDisplayName,
+        heroTitleLines,
+        heroImageDataUrl,
+        drawingThumbDataUrls,
+        drawnAtIso: drawnAtIso,
+        childAgeInMonthsAtDrawing: childAgeMonthsAtDrawing,
+        analysisPending: false,
+        drawingMemos,
+      }
+
+      const reportUuid = randomUUID()
+      const { error: reportInsertError } = await admin.from('kindra_reports').insert({
+        id: reportUuid,
+        owner_email: email,
+        title: `${childDisplayName} · 통합 리포트`,
+        listed_price_won: LIST_PRICE_WON,
+        intake_id: intakeId,
+        report_json: {
+          schema: STORED_KINDRA_INTAKE_SCHEMA,
+          childName: childDisplayName,
+          parentEmail: email,
+          session: sessionPayload,
+        },
+      })
+
+      if (reportInsertError) {
+        return {
+          ok: false,
+          message: '그림은 잘 받았어요. 리포트 생성 중 문제가 생겼으니 카카오톡으로 알려 주시면 바로 도와드릴게요.',
+        }
+      }
+
+      try {
+        await setReportAccessCookie(reportUuid)
+      } catch (e) {
+        console.error(
+          '[intake-submit] setReportAccessCookie — 무통장 입금자명 저장 쿠키 미설정. REPORT_ACCESS_SIGNING_SECRET 또는 TOSS_SECRET_KEY 확인:',
+          e,
         )
-      ) {
-        reportMarkdown = `${reportMarkdown.trimEnd()}\n\n${BODY_GROWTH_DISCLAIMER_MARKDOWN}\n`
+      }
+
+      return {
+        ok: true,
+        message: '전송이 완료됐어요. 리포트는 24시간 이내 이메일로 보내 드릴게요.',
+        reportRowId: reportUuid,
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      await admin
+        .from('kindra_intakes')
+        .update({
+          gemini_status: 'failed',
+          gemini_error: msg,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', intakeId)
+      return {
+        ok: false,
+        message: '그림은 안전하게 받았어요. 분석 중 문제가 생겼으니 카카오톡으로 알려 주시면 바로 도와드릴게요.',
       }
     }
+  }
 
-    await admin
-      .from('kindra_intakes')
-      .update({
-        gemini_report_markdown: reportMarkdown,
-        gemini_status: 'completed',
-        gemini_error: null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', intakeId)
-
+  try {
     const birthLine = formatBirthLineForReportCard(birthParts.y, birthParts.m, birthParts.d, drawnDay)
     const birthAndMaterials = [birthLine, `제출 그림 ${slots.length}장`].join(' · ')
     const { reportId } = buildIntakeReportIdentifiers(childDisplayName, intakeId)
@@ -400,7 +487,9 @@ export async function submitIntegratedIntake(
       v: 2,
       reportId,
       intakeId,
-      markdown: reportMarkdown,
+      markdown: '',
+      analysisPending: true,
+      drawingMemos,
       subject: {
         applicantLabel: `${parentName} 님`,
         childLabel: `${childDisplayName} (${childGenderLabel})`,
@@ -432,7 +521,7 @@ export async function submitIntegratedIntake(
     if (reportInsertError) {
       return {
         ok: false,
-        message: '그림은 잘 받았어요. 리포트 생성 중 문제가 생겼으니 카카오톡으로 알려 주시면 바로 도와드릴게요.',
+        message: '그림은 잘 받았어요. 저장 중 문제가 생겼으니 카카오톡으로 알려 주시면 바로 도와드릴게요.',
       }
     }
 
@@ -447,7 +536,8 @@ export async function submitIntegratedIntake(
 
     return {
       ok: true,
-      message: '전송이 완료됐어요. 리포트는 24시간 이내 이메일로 보내 드릴게요.',
+      message:
+        '신청과 그림을 잘 받았어요. 결제가 완료되면 킨드라 AI 분석이 시작되며, 완료 후 이 페이지에서 리포트를 확인하실 수 있어요.',
       reportRowId: reportUuid,
     }
   } catch (e) {
@@ -462,7 +552,7 @@ export async function submitIntegratedIntake(
       .eq('id', intakeId)
     return {
       ok: false,
-      message: '그림은 안전하게 받았어요. 분석 중 문제가 생겼으니 카카오톡으로 알려 주시면 바로 도와드릴게요.',
+      message: '그림은 안전하게 받았어요. 처리 중 문제가 생겼으니 카카오톡으로 알려 주시면 바로 도와드릴게요.',
     }
   }
 }

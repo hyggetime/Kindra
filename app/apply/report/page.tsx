@@ -1,4 +1,7 @@
 import type { Metadata } from 'next'
+import { parseReportIdParam } from '@lib/payment/parse-payment-page-params'
+import { createServerSupabaseClient } from '@lib/supabase/server'
+
 import { IntakeReportView } from './IntakeReportView'
 
 export const metadata: Metadata = {
@@ -8,6 +11,28 @@ export const metadata: Metadata = {
   alternates: { canonical: '/apply/report' },
 }
 
-export default function ApplyReportPage() {
-  return <IntakeReportView />
+type PageProps = {
+  searchParams: Promise<{ report?: string }>
+}
+
+export default async function ApplyReportPage({ searchParams }: PageProps) {
+  const { report } = await searchParams
+  const reportUuid = parseReportIdParam(report)
+  let initialHasFeedback = false
+  if (reportUuid) {
+    const supabase = await createServerSupabaseClient()
+    const { data, error } = await supabase
+      .from('kindra_feedbacks')
+      .select('id')
+      .eq('report_id', reportUuid)
+      .maybeSingle()
+    if (!error && data?.id) initialHasFeedback = true
+  }
+
+  return (
+    <IntakeReportView
+      reportUuidForFeedback={reportUuid}
+      initialHasFeedback={initialHasFeedback}
+    />
+  )
 }

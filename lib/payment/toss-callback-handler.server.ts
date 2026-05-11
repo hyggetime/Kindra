@@ -7,6 +7,8 @@ import { confirmTossWidgetPayment } from '@lib/payment/toss-confirm-payment.serv
 import { deleteTossCheckoutSession, loadTossCheckoutSession } from '@lib/payment/toss-checkout-session.server'
 import { decodeCheckoutCookie, isCheckoutExpired } from '@lib/payment/toss-checkout-token.server'
 import { attachTossPaymentKeyToReport } from '@lib/payment/toss-record-payment.server'
+import { triggerAiAnalysis } from '@lib/intake/trigger-ai-analysis.server'
+import { createServiceRoleClient } from '@lib/supabase/admin'
 
 const CHECKOUT_COOKIE = 'kindra_toss_checkout'
 
@@ -72,6 +74,22 @@ export async function handleTossPaymentCallbackGet(request: Request): Promise<Ne
     couponCode: checkout.couponCode,
     chargedAmountWon: amount,
   })
+
+  try {
+    const admin = createServiceRoleClient()
+    const { data: rep } = await admin.from('kindra_reports').select('intake_id').eq('id', checkout.reportId).maybeSingle()
+    const intakeId =
+      rep && typeof (rep as { intake_id?: string | null }).intake_id === 'string'
+        ? (rep as { intake_id: string }).intake_id
+        : null
+    if (intakeId) {
+      void triggerAiAnalysis(intakeId).then((r) => {
+        if (!r.ok) console.warn('[kindra:toss-callback] triggerAiAnalysis', r.message)
+      })
+    }
+  } catch (e) {
+    console.warn('[kindra:toss-callback] triggerAiAnalysis dispatch', e)
+  }
 
   return NextResponse.redirect(resultUrl(origin, 'success'), 302)
 }

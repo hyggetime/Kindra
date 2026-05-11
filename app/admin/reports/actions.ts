@@ -1,6 +1,7 @@
 'use server'
 
 import { createServiceRoleClient } from '@lib/supabase/admin'
+import { triggerAiAnalysis } from '@lib/intake/trigger-ai-analysis.server'
 
 function assertAdminPassword(pw: string): boolean {
   const expected = process.env.ADMIN_PASSWORD
@@ -60,11 +61,33 @@ export async function updateKindraReportDepositConfirmed(
   if (!uuidRe.test(id)) return { ok: false }
 
   const supabase = createServiceRoleClient()
+  const { data: before } = await supabase.from('kindra_reports').select('intake_id').eq('id', id).maybeSingle()
+  const intakeId =
+    before && typeof (before as { intake_id?: string | null }).intake_id === 'string'
+      ? (before as { intake_id: string }).intake_id
+      : null
+
   const { error } = await supabase.from('kindra_reports').update({ deposit_confirmed: depositConfirmed }).eq('id', id)
 
   if (error) {
     console.error('[admin/reports] update deposit_confirmed', error.message)
     return { ok: false }
   }
+
+  if (depositConfirmed && intakeId) {
+    const now = new Date().toISOString()
+    const { error: pErr } = await supabase
+      .from('kindra_intakes')
+      .update({ payment_confirmed_at: now })
+      .eq('id', intakeId)
+    if (pErr) {
+      console.error('[admin/reports] payment_confirmed_at on intake', pErr.message)
+    }
+    const ai = await triggerAiAnalysis(intakeId)
+    if (!ai.ok) {
+      console.error('[admin/reports] triggerAiAnalysis', ai.message)
+    }
+  }
+
   return { ok: true }
 }

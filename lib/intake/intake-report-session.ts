@@ -28,4 +28,8 @@ export type IntakeReportSessionPayload = {
   childAgeInMonthsAtDrawing?: number
   /** 작은 JPEG data URL — 그림별 요약 UI (없으면 그라데이션만) */
   drawingThumbDataUrls?: string[]
+  /** 결제·분석 대기 중이면 true — 본문 마크다운이 아직 없을 수 있음 */
+  analysisPending?: boolean
+  /** 신청 시 그림별 메모(재분석 시 Gemini 입력으로 사용) */
+  drawingMemos?: string[]
 }

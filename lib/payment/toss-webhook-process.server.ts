@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { triggerAiAnalysis } from '@lib/intake/trigger-ai-analysis.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { fetchTossPaymentByPaymentKey } from '@lib/payment/toss-fetch-payment.server'
 
@@ -135,6 +136,15 @@ export async function processTossWebhookPayload(payload: TossWebhookPayload): Pr
             payment_cancelled_at: null,
           })
           .eq('id', resolved.intakeId)
+        void triggerAiAnalysis(resolved.intakeId).then((r) => {
+          if (!r.ok) {
+            console.warn('[kindra:toss-webhook] triggerAiAnalysis', r.message)
+            return
+          }
+          if (r.skipped) {
+            console.info('[kindra:toss-webhook] triggerAiAnalysis skipped', r.reason ?? '')
+          }
+        })
       } else if (status === 'ABORTED' || status === 'EXPIRED') {
         await admin
           .from('kindra_intakes')

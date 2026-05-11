@@ -3,10 +3,17 @@
 import { startTransition, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { APPLY_FORM_HREF } from '@lib/apply-href'
+import { ReportFeedbackSection } from '@app/reports/ReportFeedbackSection'
 import { IntakeReportDocument } from '@/components/intake/IntakeReportDocument'
 import { ApplyPageShell } from '../ApplyPageShell'
 import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-session'
 import { INTAKE_REPORT_SESSION_KEY } from '@lib/intake/intake-report-session'
+
+type Props = {
+  /** `/apply/report?report=<kindra_reports.id>` 일 때만 피드백 블록 표시 */
+  reportUuidForFeedback: string | null
+  initialHasFeedback: boolean
+}
 
 const LEGACY_MARKDOWN_KEY = 'kindra:intakeReportMarkdown:v1'
 
@@ -37,7 +44,10 @@ function parseSessionPayload(raw: string | null): IntakeReportSessionPayload | n
   }
 }
 
-export function IntakeReportView() {
+export function IntakeReportView({
+  reportUuidForFeedback,
+  initialHasFeedback,
+}: Props) {
   const [payload, setPayload] = useState<IntakeReportSessionPayload | null | undefined>(undefined)
 
   useEffect(() => {
@@ -80,5 +90,16 @@ export function IntakeReportView() {
     )
   }
 
-  return <IntakeReportDocument payload={payload} />
+  return (
+    <>
+      <IntakeReportDocument payload={payload} />
+      {reportUuidForFeedback ? (
+        <ReportFeedbackSection
+          reportId={reportUuidForFeedback}
+          initialHasFeedback={initialHasFeedback}
+          applicantSalutation={payload.subject.applicantLabel}
+        />
+      ) : null}
+    </>
+  )
 }

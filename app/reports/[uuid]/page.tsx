@@ -82,11 +82,30 @@ export default async function ReportByUuidPage({ params }: PageProps) {
   const supabase = await createServerSupabaseClient()
   const { data, error } = await supabase
     .from('kindra_reports')
-    .select('report_json')
+    .select('report_json, intake_id')
     .eq('id', uuid)
     .maybeSingle()
 
   if (error || !data?.report_json) notFound()
+
+  let intakeGeminiStatus: string | null = null
+  let intakeGeminiError: string | null = null
+  const intakeFk = (data as { intake_id?: string | null }).intake_id
+  if (intakeFk && typeof intakeFk === 'string') {
+    const ir = await supabase
+      .from('kindra_intakes')
+      .select('gemini_status, gemini_error')
+      .eq('id', intakeFk)
+      .maybeSingle()
+    if (ir.data) {
+      intakeGeminiStatus =
+        typeof (ir.data as { gemini_status?: string }).gemini_status === 'string'
+          ? (ir.data as { gemini_status: string }).gemini_status
+          : null
+      const ge = (ir.data as { gemini_error?: string | null }).gemini_error
+      intakeGeminiError = typeof ge === 'string' ? ge : null
+    }
+  }
 
   const { data: feedbackRow, error: feedbackError } = await supabase
     .from('kindra_feedbacks')
@@ -109,14 +128,26 @@ export default async function ReportByUuidPage({ params }: PageProps) {
   }
 
   if (resolved.variant === 'intake_session') {
+    const analysisWaiting =
+      intakeGeminiStatus === 'pending' ||
+      intakeGeminiStatus === 'running' ||
+      (Boolean(resolved.session.analysisPending) && !String(resolved.session.markdown ?? '').trim())
+
     return (
       <>
-        <IntakeReportDocument payload={resolved.session} reportUuid={uuid} />
-        <ReportFeedbackSection
-          reportId={uuid}
-          initialHasFeedback={initialHasFeedback}
-          applicantSalutation={resolved.session.subject.applicantLabel}
+        <IntakeReportDocument
+          payload={resolved.session}
+          reportUuid={uuid}
+          intakeGeminiStatus={intakeGeminiStatus}
+          intakeGeminiError={intakeGeminiError}
         />
+        {!analysisWaiting && intakeGeminiStatus !== 'failed' ? (
+          <ReportFeedbackSection
+            reportId={uuid}
+            initialHasFeedback={initialHasFeedback}
+            applicantSalutation={resolved.session.subject.applicantLabel}
+          />
+        ) : null}
       </>
     )
   }

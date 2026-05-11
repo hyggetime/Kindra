@@ -7,13 +7,35 @@ const UUID_V4_RE =
 const ALLOWED_APPLY_HASHES = new Set(['', '#apply-form', '#apply-steps', '#apply-analysis'])
 
 /**
+ * `next=` 등에 붙은 값이 전체 URL(`https://…/reports/…`)일 때, 허용된 origin이면 pathname+search+hash만 남깁니다.
+ * 브라우저 주소창은 `https://`를 숨겨 보여도 실제 값은 포함되는 경우가 많고, 복사 시 전체 URL이 오기도 합니다.
+ */
+function stripToInternalPathIfAbsoluteUrl(raw: string): string | null {
+  const t = raw.trim()
+  if (!/^https?:\/\//i.test(t)) return null
+  try {
+    const u = new URL(t)
+    const site = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kindra.vercel.app').replace(/\/$/, '')
+    const allowedOrigins = new Set([site, 'https://kindra.vercel.app'])
+    const local =
+      u.hostname === 'localhost' || u.hostname === '127.0.0.1' || u.hostname === '[::1]'
+    if (!local && !allowedOrigins.has(u.origin)) return null
+    return `${u.pathname}${u.search}${u.hash}`
+  } catch {
+    return null
+  }
+}
+
+/**
  * 이메일 매직링크 `emailRedirectTo` 등에 넣을 `next` — 오픈 리다이렉트 방지.
  * 허용: `/`, `/apply`(및 동일 경로의 허용된 `#` 앵커), `/apply/payment`·레거시 `/intake/success`(report 쿼리만), `/reports/{uuid v4}` (리포트 PK).
  * 레거시 `/report/jio` 는 고정 UUID 경로로 치환합니다.
+ * 동일 사이트의 전체 URL 문자열(`https://host/path`)도 허용 origin이면 위 경로 규칙으로 환산합니다.
  */
 export function sanitizeInternalNextPath(raw: string | null | undefined): string {
   if (!raw || typeof raw !== 'string') return '/'
-  const s = raw.trim()
+  const absoluteStripped = stripToInternalPathIfAbsoluteUrl(raw)
+  const s = (absoluteStripped ?? raw).trim()
   if (!s.startsWith('/') || s.startsWith('//')) return '/'
 
   if (s === '/') return '/'

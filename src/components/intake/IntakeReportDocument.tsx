@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { KINDRA_PHILOSOPHY } from '@lib/gemini/prompts'
 import {
   extractHashtagTokens,
@@ -18,8 +19,6 @@ import { useSectionEngagement } from '@/hooks/useSectionEngagement'
 const PHILOSOPHY_TITLE = '킨드라의 약속'
 
 const FOOTER = {
-  disclaimer:
-    '본 리포트는 의학·임상심리 진단이 아니며, 관찰과 경향 제시를 목적으로 합니다. 필요 시 전문 기관 상담과 병행해 주세요.',
   securityNote: '이 페이지는 고유 링크를 가진 분들만 확인하실 수 있는 프라이빗 리포트입니다.',
   ctaLabel: '킨드라 리포트 신청 안내',
 } as const
@@ -28,6 +27,9 @@ type Props = {
   payload: IntakeReportSessionPayload
   /** `/reports/{uuid}` 에서만 설정 — 최근 리포트 띠·방문 기록용 */
   reportUuid?: string
+  /** `kindra_intakes.gemini_status` (서버에서 전달, 없으면 session 기반으로 대기 판정) */
+  intakeGeminiStatus?: string | null
+  intakeGeminiError?: string | null
 }
 
 function bodyToParagraphs(body: string): string[] {
@@ -76,7 +78,7 @@ function sectionEyebrow(title: string): string {
   if (/한\s*장에서/.test(t)) return '이 한 장에서'
   if (/통합\s*마음/.test(t)) return '핵심 요약'
   if (/마음의\s*결|각도/.test(t) || /심층/.test(t)) return '심층 읽기'
-  if (/부모님께|Hygge/i.test(t)) return '함께 이어가기'
+  if (/부모님께|Hygge/i.test(t)) return '부모님께'
   if (/한계|안내/.test(t)) return '안내'
   if (/몸과\s*마음이\s*함께|신체[-\s]*정서|신체와\s*마음/.test(t)) return '몸과 마음'
   return '이어지는 이야기'
@@ -211,7 +213,12 @@ function DrawingMagazineSection({ body, thumbs }: { body: string; thumbs: string
   )
 }
 
-export function IntakeReportDocument({ payload, reportUuid }: Props) {
+export function IntakeReportDocument({
+  payload,
+  reportUuid,
+  intakeGeminiStatus = null,
+  intakeGeminiError = null,
+}: Props) {
   const [copyDone, setCopyDone] = useState(false)
   const { reportId, subject, childShortName, markdown, heroTitleLines, drawingThumbDataUrls, heroImageDataUrl } =
     payload
@@ -228,6 +235,13 @@ export function IntakeReportDocument({ payload, reportUuid }: Props) {
     () => sections.some((s) => Boolean(s.title) && isIntegratedMindMapTitle(s.title)),
     [sections],
   )
+  /** 통합 마음 지도의 첫 번째 비-해시태그 문단 = 헤드라인 인사이트 */
+  const headlineSentence = useMemo(() => {
+    const mindSec = sections.find((s) => Boolean(s.title) && isIntegratedMindMapTitle(s.title))
+    if (!mindSec) return ''
+    const paras = mindMapDisplayParagraphs(mindSec.body)
+    return paras[0] ?? ''
+  }, [sections])
 
   useEffect(() => {
     if (reportUuid) {
@@ -249,6 +263,88 @@ export function IntakeReportDocument({ payload, reportUuid }: Props) {
     } catch {
       setCopyDone(false)
     }
+  }
+
+  const analysisFailed = intakeGeminiStatus === 'failed'
+
+  const analysisWaiting =
+    !analysisFailed &&
+    (intakeGeminiStatus === 'pending' ||
+      intakeGeminiStatus === 'running' ||
+      (Boolean(payload.analysisPending) && !String(markdown ?? '').trim()))
+
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!analysisWaiting || !reportUuid) return
+    const t = setInterval(() => {
+      router.refresh()
+    }, 8000)
+    return () => clearInterval(t)
+  }, [analysisWaiting, reportUuid, router])
+
+  if (analysisFailed && reportUuid) {
+    return (
+      <div className="report-print-root min-h-svh bg-[#FDFBF9] font-sans text-[#4A4A4A] antialiased">
+        <header className="report-screen-header sticky top-0 z-40 border-b border-[#EDE8E0] bg-[#FDFBF9]/95 backdrop-blur-md">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-3.5">
+            <Link href="/" className="text-sm font-medium text-[#7C9070] transition hover:text-[#687D5D]">
+              ← Kindra 홈
+            </Link>
+            <div className="rounded-xl border border-[#D4DED0] bg-white px-3 py-2">
+              <span className="block font-mono text-[11px] font-semibold text-[#2F3D2E]">{reportId}</span>
+            </div>
+          </div>
+        </header>
+        <main className="mx-auto max-w-2xl px-5 py-20 text-center">
+          <p className="text-base font-medium text-[#B85C5C]">분석을 완료하지 못했어요.</p>
+          <p className="mt-3 text-sm leading-relaxed text-[#6B6B6B]">
+            {intakeGeminiError?.trim()
+              ? intakeGeminiError
+              : '잠시 후 새로고침해 보시거나, 카카오톡으로 문의해 주시면 도와드릴게요.'}
+          </p>
+        </main>
+      </div>
+    )
+  }
+
+  if (analysisWaiting && reportUuid) {
+    return (
+      <div className="report-print-root min-h-svh bg-[#FDFBF9] font-sans text-[#4A4A4A] antialiased">
+        <header className="report-screen-header sticky top-0 z-40 border-b border-[#EDE8E0] bg-[#FDFBF9]/95 backdrop-blur-md print:hidden">
+          <div className="mx-auto flex max-w-3xl items-start justify-between gap-4 px-5 py-3.5 sm:items-center">
+            <Link href="/" className="text-sm font-medium text-[#7C9070] transition hover:text-[#687D5D]">
+              ← Kindra 홈
+            </Link>
+            <div className="rounded-xl border border-[#D4DED0] bg-white px-3 py-2 shadow-[0_1px_0_rgba(74,74,74,0.04)] ring-1 ring-[#E8F0E4]/80">
+              <span className="block font-mono text-[11px] font-semibold leading-none tracking-[0.12em] text-[#2F3D2E] sm:text-xs">
+                {reportId}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-2xl px-5 pb-24 pt-10 sm:pt-12">
+          <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#E8F0E4] via-[#F0EDE6] to-[#EDE4D8] px-6 py-12 sm:px-10 sm:py-14">
+            {heroDrawing1Src ? (
+              <div className="pointer-events-none mx-auto mb-8 max-h-[200px] w-full max-w-md overflow-hidden rounded-2xl opacity-90 ring-1 ring-black/[0.06]">
+                <img src={heroDrawing1Src} alt="" className="h-full w-full object-cover object-center" />
+              </div>
+            ) : null}
+            <div className="flex flex-col items-center text-center">
+              <div
+                className="mb-6 h-10 w-10 animate-spin rounded-full border-2 border-[#7C9070]/30 border-t-[#7C9070]"
+                aria-hidden
+              />
+              <p className="text-base font-semibold leading-snug text-[#2F3D2E] sm:text-lg">
+                킨드라 AI가 아이의 마음을 꼼꼼히 읽고 있습니다.
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-[#5C5C5C]">잠시만 기다려 주세요.</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -320,7 +416,18 @@ export function IntakeReportDocument({ payload, reportUuid }: Props) {
           )}
         </div>
 
-        <dl className="mx-auto mt-10 rounded-2xl border border-[#EDE8E0] bg-white/90 px-5 py-5 text-sm shadow-sm print:shadow-none">
+        {headlineSentence ? (
+          <div className="mx-2 mt-6 rounded-2xl bg-[#FFF8EF] px-6 py-5 ring-1 ring-[#E9B96A]/40 sm:mx-0">
+            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.24em] text-[#C4883A]/80">
+              오늘의 발견
+            </p>
+            <p className="font-sans text-[1.0rem] font-medium leading-[1.88] tracking-tight text-[#7A4B1A]">
+              {headlineSentence}
+            </p>
+          </div>
+        ) : null}
+
+        <dl className="mx-auto mt-8 rounded-2xl border border-[#EDE8E0] bg-white/90 px-5 py-5 text-sm shadow-sm print:shadow-none">
           <div className="flex flex-row items-start justify-between gap-3 border-b border-[#F0EBE4] pb-4 sm:gap-8 sm:pb-3.5">
             <div className="min-w-0 flex-1 basis-0">
               <dt className="text-xs font-medium text-[#8A8A8A]">신청자</dt>
@@ -336,11 +443,6 @@ export function IntakeReportDocument({ payload, reportUuid }: Props) {
             <dd className="mt-1 font-medium text-[#4A4A4A]">{subject.birthAndMaterials}</dd>
           </div>
         </dl>
-
-        <div className="mt-10 rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-6 py-5 sm:px-7 sm:py-6 print:border-[#DDDDDD] print:bg-white">
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7C9070]/85">{PHILOSOPHY_TITLE}</p>
-          <p className="text-[0.9rem] leading-[2] text-[#5A5A5A]">{KINDRA_PHILOSOPHY}</p>
-        </div>
 
         {tagsFromMarkdown.length > 0 && !hasIntegratedMindSection ? (
           <div className="mt-12 rounded-2xl border border-[#E8E4DC] bg-white/80 px-5 py-4 sm:px-6">
@@ -375,19 +477,26 @@ export function IntakeReportDocument({ payload, reportUuid }: Props) {
                 : isMind
                   ? tagsFromMarkdown
                   : []
-            const paragraphs = isMind ? mindMapDisplayParagraphs(sec.body) : bodyToParagraphs(sec.body)
+            const allParagraphs = isMind ? mindMapDisplayParagraphs(sec.body) : bodyToParagraphs(sec.body)
+            /** 헤드라인 인사이트를 상단에서 이미 표시했으면 통합 마음 지도의 첫 단락 중복 제거 */
+            const paragraphs = isMind && headlineSentence ? allParagraphs.slice(1) : allParagraphs
             const isDrawingSummary =
               Boolean(sec.title) &&
               /그림별/.test(sec.title) &&
               /시각/.test(sec.title) &&
               heroThumbs.length > 0
             const eyebrow = sec.title ? sectionEyebrow(sec.title) : ''
+            const isHyggeTipSection = eyebrow === '부모님께'
             return (
               <section key={key} className="break-inside-avoid scroll-mt-28" data-track-section={key}>
                 {sec.title ? (
                   <>
                     {eyebrow ? (
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7C9070]/85">{eyebrow}</p>
+                      <p
+                        className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${isHyggeTipSection ? 'text-[#5B8DB8]/90' : 'text-[#7C9070]/85'}`}
+                      >
+                        {eyebrow}
+                      </p>
                     ) : null}
                     <h3
                       className={`font-bold tracking-tight text-[#2F342E] ${eyebrow ? 'mt-2.5' : ''} text-[1.0625rem] leading-snug sm:text-[1.125rem]`}
@@ -437,7 +546,14 @@ export function IntakeReportDocument({ payload, reportUuid }: Props) {
           })}
         </div>
 
-        <div className="my-16 h-px bg-[#EDE8E0] print:hidden" />
+        <div className="my-14 h-px bg-[#EDE8E0] print:hidden" />
+
+        <div className="rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-6 py-5 sm:px-7 sm:py-6 print:border-[#DDDDDD] print:bg-white">
+          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7C9070]/85">{PHILOSOPHY_TITLE}</p>
+          <p className="text-[0.9rem] leading-[2] text-[#5A5A5A]">{KINDRA_PHILOSOPHY}</p>
+        </div>
+
+        <div className="my-10 h-px bg-[#EDE8E0] print:hidden" />
 
         <section className="mx-auto max-w-md print:hidden">
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-5 py-6 text-center">
@@ -454,9 +570,8 @@ export function IntakeReportDocument({ payload, reportUuid }: Props) {
           </div>
         </section>
 
-        <footer className="mt-14 border-t border-[#EDE8E0] px-1 pb-8 pt-10 text-center print:mt-10 print:border-[#DDDDDD] print:pt-8">
-          <p className="text-xs leading-[1.85] text-[#8A8A8A]">{FOOTER.disclaimer}</p>
-          <p className="mx-auto mt-4 max-w-lg text-[11px] leading-[1.75] text-[#B0B0B0]">{FOOTER.securityNote}</p>
+        <footer className="mt-10 border-t border-[#EDE8E0] px-1 pb-8 pt-10 text-center print:mt-10 print:border-[#DDDDDD] print:pt-8">
+          <p className="mx-auto max-w-lg text-[11px] leading-[1.75] text-[#B0B0B0]">{FOOTER.securityNote}</p>
           <Link
             href="/#request"
             className="mt-8 inline-flex min-h-[48px] items-center justify-center rounded-full bg-[#7C9070] px-8 text-sm font-medium text-white shadow-[0_8px_24px_-8px_rgba(124,144,112,0.5)] transition hover:bg-[#687D5D] print:hidden"
