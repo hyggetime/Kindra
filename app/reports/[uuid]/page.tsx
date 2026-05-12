@@ -10,6 +10,7 @@ import {
   metadataForResolvedReport,
   reportShareTitle,
 } from '@lib/reports/report-share-metadata'
+import { fetchKindraReportRowForPublicUuid } from '@lib/reports/fetch-report-for-public-page.server'
 import { resolveReportJson } from '@lib/reports/resolve-report-json'
 import { createServerSupabaseClient } from '@lib/supabase/server'
 import { getSiteOrigin } from '@lib/site-origin'
@@ -37,21 +38,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return metadataForResolvedReport(resolved, origin, data.childShortName)
   }
 
-  const supabase = await createServerSupabaseClient()
-  const { data, error } = await supabase
-    .from('kindra_reports')
-    .select('report_json')
-    .eq('id', uuid)
-    .maybeSingle()
-
-  if (error || !data?.report_json) {
+  const row = await fetchKindraReportRowForPublicUuid(uuid)
+  if (!row?.report_json) {
     return {
       ...fallbackReportListMetadata(),
       title: reportShareTitle(undefined),
     }
   }
 
-  const resolved = resolveReportJson(data.report_json as unknown)
+  const resolved = resolveReportJson(row.report_json as unknown)
   if (!resolved) {
     return fallbackReportListMetadata()
   }
@@ -65,8 +60,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 /**
- * Supabase `kindra_reports.report_json` (RLS: JWT 이메일 = 행의 email) 또는
- * 고정 UUID 예시 리포트(`data/reports/jio.json`).
+ * Supabase `kindra_reports` — 로그인 시 RLS(본인 이메일), 비로그인 시 **발송·결제 징후**가 있는 행만
+ * 서버에서 읽어 메일/복사 링크로 열 수 있게 함. 고정 UUID 예시(`data/reports/jio.json`) 포함.
  */
 export default async function ReportByUuidPage({ params }: PageProps) {
   const { uuid: raw } = await params
@@ -79,18 +74,14 @@ export default async function ReportByUuidPage({ params }: PageProps) {
     return <ReportDocument data={data} canonicalReportUuid={uuid} />
   }
 
-  const supabase = await createServerSupabaseClient()
-  const { data, error } = await supabase
-    .from('kindra_reports')
-    .select('report_json, intake_id')
-    .eq('id', uuid)
-    .maybeSingle()
+  const data = await fetchKindraReportRowForPublicUuid(uuid)
+  if (!data?.report_json) notFound()
 
-  if (error || !data?.report_json) notFound()
+  const supabase = await createServerSupabaseClient()
 
   let intakeGeminiStatus: string | null = null
   let intakeGeminiError: string | null = null
-  const intakeFk = (data as { intake_id?: string | null }).intake_id
+  const intakeFk = data.intake_id
   if (intakeFk && typeof intakeFk === 'string') {
     const ir = await supabase
       .from('kindra_intakes')
