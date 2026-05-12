@@ -60,6 +60,10 @@ export function AdminReportsTable({ rows, adminPw, origin }: Props) {
           }
           if (r.reason === 'deposit_required') {
             setBlockHint('카드 결제 완료 또는 무통장 입금 확인을 먼저 처리한 뒤 발송 완료를 표시할 수 있어요.')
+          } else {
+            setBlockHint(
+              '발송 완료 표시를 저장하지 못했어요. 새로고침 후 다시 시도하거나, Supabase에서 해당 리포트의 is_sent 값을 확인해 주세요.',
+            )
           }
         })
       })
