@@ -3,6 +3,16 @@ import 'server-only'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { createServerSupabaseClient } from '@lib/supabase/server'
 
+/** Postgres/드라이버에 따라 boolean 이 문자열로 올 수 있음 */
+function dbBoolTrue(v: unknown): boolean {
+  if (v === true) return true
+  if (typeof v === 'string') {
+    const t = v.trim().toLowerCase()
+    return t === 'true' || t === 't' || t === '1' || t === 'yes'
+  }
+  return false
+}
+
 export type KindraReportPublicRow = {
   report_json: unknown
   intake_id: string | null
@@ -45,13 +55,28 @@ export async function fetchKindraReportRowForPublicUuid(uuid: string): Promise<K
       .eq('id', uuid)
       .maybeSingle()
 
-    if (pubErr || !pub?.report_json) return null
+    if (pubErr) {
+      console.error('[reports/public-fetch] supabase:', pubErr.code, pubErr.message)
+      return null
+    }
 
-    const sent = Boolean((pub as { is_sent?: boolean | null }).is_sent)
-    const dep = Boolean((pub as { deposit_confirmed?: boolean | null }).deposit_confirmed)
+    if (!pub?.report_json) {
+      if (pub && !pub.report_json) {
+        console.warn('[reports/public-fetch] row without report_json', uuid.slice(0, 8))
+      } else if (!pub) {
+        console.warn('[reports/public-fetch] no row', uuid.slice(0, 8))
+      }
+      return null
+    }
+
+    const sent = dbBoolTrue((pub as { is_sent?: unknown }).is_sent)
+    const dep = dbBoolTrue((pub as { deposit_confirmed?: unknown }).deposit_confirmed)
     const tpk = (pub as { toss_payment_key?: string | null }).toss_payment_key
     const hasCard = typeof tpk === 'string' && tpk.trim().length > 0
-    if (!sent && !dep && !hasCard) return null
+    if (!sent && !dep && !hasCard) {
+      console.warn('[reports/public-fetch] row not eligible for public view', uuid.slice(0, 8))
+      return null
+    }
 
     return {
       report_json: pub.report_json,
@@ -60,7 +85,9 @@ export async function fetchKindraReportRowForPublicUuid(uuid: string): Promise<K
           ? (pub as { intake_id: string }).intake_id
           : null,
     }
-  } catch {
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[reports/public-fetch] service_role path failed:', msg)
     return null
   }
 }

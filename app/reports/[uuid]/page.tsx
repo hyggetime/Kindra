@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import jioJson from '@/data/reports/jio.json'
 import type { KindraReportPageData } from '@/types/kindraReportPage'
-import { isReportsUuidSegment } from '@lib/auth/internal-next'
+import { isReportsUuidSegment, normalizeReportUrlUuid } from '@lib/auth/internal-next'
 import { KINDRA_JIO_REPORT_UUID } from '@lib/reports/kindra-static-demo-report'
 import {
   fallbackReportListMetadata,
@@ -25,7 +25,7 @@ export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { uuid: raw } = await params
-  const uuid = raw.trim().toLowerCase()
+  const uuid = normalizeReportUrlUuid(raw)
   const origin = getSiteOrigin()
 
   if (!isReportsUuidSegment(uuid)) {
@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  */
 export default async function ReportByUuidPage({ params }: PageProps) {
   const { uuid: raw } = await params
-  const uuid = raw.trim().toLowerCase()
+  const uuid = normalizeReportUrlUuid(raw)
 
   if (!isReportsUuidSegment(uuid)) notFound()
 

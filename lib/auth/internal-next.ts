@@ -1,8 +1,20 @@
 import { KINDRA_JIO_REPORT_UUID } from '@lib/reports/kindra-static-demo-report'
 
-/** UUID v4 (경로 세그먼트 검증용) */
-const UUID_V4_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+/**
+ * `/reports/{uuid}` 등에 쓰이는 UUID 문자열 검증 (버전 니블 완화).
+ * 예전에는 v4만 허용해 `…-7xxx-…` 등 다른 RFC 변형이면 DB에 행이 있어도 404가 났습니다.
+ */
+const REPORT_URL_UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/** 메일·클립보드에 섞인 ZWSP/BOM 등 제거 후 소문자 (경로 세그먼트용). */
+export function normalizeReportUrlUuid(raw: string): string {
+  return raw
+    .trim()
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF\u2060\u00AD]/g, '')
+    .toLowerCase()
+}
 
 const ALLOWED_APPLY_HASHES = new Set(['', '#apply-form', '#apply-steps', '#apply-analysis'])
 
@@ -28,7 +40,7 @@ function stripToInternalPathIfAbsoluteUrl(raw: string): string | null {
 
 /**
  * 이메일 매직링크 `emailRedirectTo` 등에 넣을 `next` — 오픈 리다이렉트 방지.
- * 허용: `/`, `/apply`(및 동일 경로의 허용된 `#` 앵커), `/apply/payment`·레거시 `/intake/success`(report 쿼리만), `/reports/{uuid v4}` (리포트 PK).
+ * 허용: `/`, `/apply`(및 동일 경로의 허용된 `#` 앵커), `/apply/payment`·레거시 `/intake/success`(report 쿼리만), `/reports/{uuid}` (표준 8-4-4-4-12 형태, 리포트 PK).
  * 레거시 `/report/jio` 는 고정 UUID 경로로 치환합니다.
  * 동일 사이트의 전체 URL 문자열(`https://host/path`)도 허용 origin이면 위 경로 규칙으로 환산합니다.
  */
@@ -60,7 +72,7 @@ export function sanitizeInternalNextPath(raw: string | null | undefined): string
       const out = new URLSearchParams()
       if (reportRaw) {
         const rid = reportRaw.trim().toLowerCase()
-        if (UUID_V4_RE.test(rid)) out.set('report', rid)
+        if (REPORT_URL_UUID_RE.test(rid)) out.set('report', rid)
       }
       const qs = out.toString()
       return qs ? `/apply/payment?${qs}` : '/apply/payment'
@@ -72,7 +84,7 @@ export function sanitizeInternalNextPath(raw: string | null | undefined): string
   const reports = /^\/reports\/([0-9a-fA-F-]{36})\/?$/.exec(s)
   if (reports) {
     const id = reports[1].toLowerCase()
-    return UUID_V4_RE.test(id) ? `/reports/${id}` : '/'
+    return REPORT_URL_UUID_RE.test(id) ? `/reports/${id}` : '/'
   }
 
   const legacy = /^\/report\/([^/]+)\/?$/.exec(s)
@@ -85,7 +97,7 @@ export function sanitizeInternalNextPath(raw: string | null | undefined): string
   return '/'
 }
 
-/** `/reports/[uuid]` 의 uuid 가 UUID v4 인지 */
+/** `/reports/[uuid]` 의 uuid 가 표준 8-4-4-4-12 형태인지 */
 export function isReportsUuidSegment(id: string): boolean {
-  return UUID_V4_RE.test(id.trim())
+  return REPORT_URL_UUID_RE.test(id.trim())
 }
