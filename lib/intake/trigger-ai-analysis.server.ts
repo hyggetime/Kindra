@@ -20,7 +20,6 @@ import {
 import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-session'
 import { buildReportSessionImageFields, type ReportSlotBuffer } from '@lib/intake/report-session-images.server'
 import { buildIntakeReportIdentifiers } from '@lib/intake/report-id'
-import { LIST_PRICE_WON } from '@lib/constants'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { isPaymentConfirmedForAi } from '@lib/intake/intake-payment-confirmed.server'
