@@ -231,10 +231,6 @@ export function IntakeReportDocument({
 
   const sections = useMemo(() => splitIntakeMarkdownByH3(markdown), [markdown])
   const tagsFromMarkdown = useMemo(() => extractHashtagTokens(markdown), [markdown])
-  const hasIntegratedMindSection = useMemo(
-    () => sections.some((s) => Boolean(s.title) && isIntegratedMindMapTitle(s.title)),
-    [sections],
-  )
   /** 통합 마음 지도의 첫 번째 비-해시태그 문단 = 헤드라인 인사이트 */
   const headlineSentence = useMemo(() => {
     const mindSec = sections.find((s) => Boolean(s.title) && isIntegratedMindMapTitle(s.title))
@@ -242,6 +238,16 @@ export function IntakeReportDocument({
     const paras = mindMapDisplayParagraphs(mindSec.body)
     return paras[0] ?? ''
   }, [sections])
+
+  /** 통합 마음 지도 섹션의 키워드 태그 — 헤드라인 바로 아래 상단 표시용 */
+  const mindMapTags = useMemo(() => {
+    const mindSec = sections.find((s) => Boolean(s.title) && isIntegratedMindMapTitle(s.title))
+    if (mindSec) {
+      const fromBody = extractHashtagTokens(mindSec.body)
+      if (fromBody.length > 0) return fromBody
+    }
+    return tagsFromMarkdown
+  }, [sections, tagsFromMarkdown])
 
   useEffect(() => {
     if (reportUuid) {
@@ -427,7 +433,27 @@ export function IntakeReportDocument({
           </div>
         ) : null}
 
-        <dl className="mx-auto mt-8 rounded-2xl border border-[#EDE8E0] bg-white/90 px-5 py-5 text-sm shadow-sm print:shadow-none">
+        {mindMapTags.length > 0 ? (
+          <div className="mx-2 mt-3 sm:mx-0">
+            <div className="flex flex-wrap gap-2 print:hidden">
+              {mindMapTags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-[#EDF2EB] px-3.5 py-1.5 text-xs font-medium text-[#4F6048]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <ul className="mt-2 hidden list-disc pl-5 text-sm leading-relaxed text-[#4A4A4A] print:block">
+              {mindMapTags.map((tag) => (
+                <li key={tag}>{tag.replace(/^#/, '')}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        <dl className="mx-auto mt-7 rounded-2xl border border-[#EDE8E0] bg-white/90 px-5 py-5 text-sm shadow-sm print:shadow-none">
           <div className="flex flex-row items-start justify-between gap-3 border-b border-[#F0EBE4] pb-4 sm:gap-8 sm:pb-3.5">
             <div className="min-w-0 flex-1 basis-0">
               <dt className="text-xs font-medium text-[#8A8A8A]">신청자</dt>
@@ -444,42 +470,20 @@ export function IntakeReportDocument({
           </div>
         </dl>
 
-        {tagsFromMarkdown.length > 0 && !hasIntegratedMindSection ? (
-          <div className="mt-12 rounded-2xl border border-[#E8E4DC] bg-white/80 px-5 py-4 sm:px-6">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7C9070]">키워드</p>
-            <div className="mt-3 flex flex-wrap gap-2 print:hidden">
-              {tagsFromMarkdown.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-[#EDF2EB] px-3.5 py-1.5 text-xs font-medium text-[#4F6048]"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-            <ul className="mt-2 hidden list-disc pl-5 text-sm leading-relaxed text-[#4A4A4A] print:block">
-              {tagsFromMarkdown.map((tag) => (
-                <li key={tag}>{tag.replace(/^#/, '')}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
-        <div className="my-16 h-px bg-[#EDE8E0] print:bg-[#DDDDDD]" />
+        <div className="my-12 h-px bg-[#EDE8E0] print:bg-[#DDDDDD]" />
 
         <div className="space-y-16 sm:space-y-20">
           {sections.map((sec, idx) => {
             const key = sec.title || `preamble-${idx}`
-            const isMind = Boolean(sec.title && isIntegratedMindMapTitle(sec.title))
-            const mindTags =
-              isMind && extractHashtagTokens(sec.body).length > 0
-                ? extractHashtagTokens(sec.body)
-                : isMind
-                  ? tagsFromMarkdown
-                  : []
-            const allParagraphs = isMind ? mindMapDisplayParagraphs(sec.body) : bodyToParagraphs(sec.body)
-            /** 헤드라인 인사이트를 상단에서 이미 표시했으면 통합 마음 지도의 첫 단락 중복 제거 */
-            const paragraphs = isMind && headlineSentence ? allParagraphs.slice(1) : allParagraphs
+
+            /** 통합 마음 지도: 헤드라인+태그를 이미 상단에서 표시했으므로 본문에서 완전 제거 */
+            if (sec.title && isIntegratedMindMapTitle(sec.title)) return null
+
+            const paragraphs = bodyToParagraphs(sec.body)
+
+            /** 해시태그만으로 이루어진 섹션(이어지는 이야기 등 오류 섹션) 방어 필터 */
+            if (paragraphs.length > 0 && paragraphs.every((p) => isHashtagOnlyParagraph(p))) return null
+
             const isDrawingSummary =
               Boolean(sec.title) &&
               /그림별/.test(sec.title) &&
@@ -503,25 +507,6 @@ export function IntakeReportDocument({
                     >
                       {sec.title}
                     </h3>
-                    {isMind && mindTags.length > 0 ? (
-                      <>
-                        <div className="mt-4 flex flex-wrap gap-2 print:hidden">
-                          {mindTags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="rounded-full bg-[#EDF2EB] px-3.5 py-1.5 text-xs font-medium text-[#4F6048]"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <ul className="mt-3 hidden list-disc pl-5 text-sm leading-relaxed text-[#4A4A4A] print:block">
-                          {mindTags.map((tag) => (
-                            <li key={tag}>{tag.replace(/^#/, '')}</li>
-                          ))}
-                        </ul>
-                      </>
-                    ) : null}
                   </>
                 ) : null}
                 <div className={sec.title ? 'mt-5' : ''}>
