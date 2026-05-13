@@ -92,6 +92,8 @@ export function IntakeTossPaymentsWidgetSection({
         orderId?: string
         amount?: number
         orderName?: string
+        /** 서버가 `prepare` 요청 Host 기준으로 내려줌 — 폰에서 localhost 로 열린 창과 무관하게 LAN 등으로 맞출 수 있음 */
+        redirectOrigin?: string
       }
       if (!res.ok) {
         setError(data.error ?? '결제 준비에 실패했어요.')
@@ -100,7 +102,11 @@ export function IntakeTossPaymentsWidgetSection({
 
       const tossPayments = await loadTossPayments(clientKey)
       const pay = tossPayments.payment({ customerKey: ANONYMOUS })
-      const origin = getPaymentRedirectOrigin()
+      const fromPrepare =
+        typeof data.redirectOrigin === 'string' && data.redirectOrigin.trim().length > 0
+          ? data.redirectOrigin.trim().replace(/\/$/, '')
+          : ''
+      const origin = fromPrepare || getPaymentRedirectOrigin()
       if (!origin) {
         setError('결제 리다이렉트 주소를 확인할 수 없어요.')
         return

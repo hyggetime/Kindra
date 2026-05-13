@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { resolveCheckoutAmountWon } from '@lib/payment/coupon-resolve.server'
+import { getRedirectOriginForTossCallbacks } from '@lib/payment/redirect-origin-from-request.server'
 import { saveTossCheckoutSession } from '@lib/payment/toss-checkout-session.server'
 import { encodeCheckoutCookie, type TossCheckoutPayload } from '@lib/payment/toss-checkout-token.server'
 import { getListedPriceWonForReport } from '@lib/payment/report-checkout.server'
@@ -81,10 +82,12 @@ export async function POST(req: Request) {
   })
 
   const orderName = '킨드라 아이 그림 심리 관찰 리포트'
+  const redirectOrigin = getRedirectOriginForTossCallbacks(req)
 
   return NextResponse.json({
     orderId,
     amount,
     orderName,
+    redirectOrigin,
   })
 }
