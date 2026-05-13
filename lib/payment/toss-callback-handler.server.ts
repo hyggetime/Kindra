@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { cookies } from 'next/headers'
+import { after } from 'next/server'
 import { NextResponse } from 'next/server'
 
 import { confirmTossWidgetPayment } from '@lib/payment/toss-confirm-payment.server'
@@ -68,12 +69,13 @@ export async function handleTossPaymentCallbackGet(request: Request): Promise<Ne
     return NextResponse.redirect(resultUrl(origin, 'confirm_failed', { detail }), 302)
   }
 
-  jar.delete(CHECKOUT_COOKIE)
-  await deleteTossCheckoutSession(orderId)
+  /** 결제 키를 먼저 저장해야 웹훅이 `toss_payment_key` 로 행을 찾을 수 있음. 세션 삭제는 그 뒤에. */
   await attachTossPaymentKeyToReport(checkout.reportId, paymentKey, {
     couponCode: checkout.couponCode,
     chargedAmountWon: amount,
   })
+  jar.delete(CHECKOUT_COOKIE)
+  await deleteTossCheckoutSession(orderId)
 
   try {
     const admin = createServiceRoleClient()
@@ -83,8 +85,15 @@ export async function handleTossPaymentCallbackGet(request: Request): Promise<Ne
         ? (rep as { intake_id: string }).intake_id
         : null
     if (intakeId) {
-      void triggerAiAnalysis(intakeId).then((r) => {
-        if (!r.ok) console.warn('[kindra:toss-callback] triggerAiAnalysis', r.message)
+      /** Vercel 등은 응답(302) 후 람다가 바로 종료될 수 있어 `void` 백그라운드는 끊길 수 있음 — `after` 로 연장 */
+      after(async () => {
+        try {
+          const r = await triggerAiAnalysis(intakeId)
+          if (!r.ok) console.warn('[kindra:toss-callback] triggerAiAnalysis', r.message)
+          else if (r.skipped) console.info('[kindra:toss-callback] triggerAiAnalysis skipped', r.reason ?? '')
+        } catch (e) {
+          console.warn('[kindra:toss-callback] triggerAiAnalysis threw', e)
+        }
       })
     }
   } catch (e) {
