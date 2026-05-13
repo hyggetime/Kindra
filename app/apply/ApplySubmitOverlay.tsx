@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
+import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+
 import { KINDRA_PHILOSOPHY } from '@lib/gemini/prompts'
 
 export type SubmitOverlayPhase = 'submitting' | 'uploading' | 'done'
@@ -18,7 +20,7 @@ const UPLOADING_LINES = [
   '거의 완료되었어요.',
 ]
 
-const DONE_LINES = ['그림과 정보를 모두 받았어요.', '이제 킨드라가 살펴볼게요.']
+const DONE_LINES = ['그림과 정보를 모두 받았어요.', '이제 짧은 시간 안에 마음을 읽어 볼게요.']
 
 type Props = {
   phase: SubmitOverlayPhase
@@ -61,7 +63,9 @@ export function ApplySubmitOverlay({ phase }: Props) {
           </p>
           {phase !== 'done' ? (
             <p className="mt-8 text-sm leading-relaxed text-white/75">
-              전송 완료 후 <span className="font-semibold text-white/95">24시간 이내 발송</span> 예정이에요.
+              전송이 끝나면 안내에 따라 결제·확인이 이어진 뒤,{' '}
+              <span className="font-semibold text-white/95">{REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일 발송</span>을 목표로
+              해요.
             </p>
           ) : (
             <p className="mt-8 text-sm leading-relaxed text-white/80">잠시 후 안내 화면으로 이어질 거예요.</p>

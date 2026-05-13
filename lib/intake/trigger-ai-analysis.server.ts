@@ -19,7 +19,7 @@ import {
 } from '@lib/intake/physio-emotional-from-growth'
 import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-session'
 import { buildReportSessionImageFields, type ReportSlotBuffer } from '@lib/intake/report-session-images.server'
-import { buildIntakeReportIdentifiers } from '@lib/intake/report-id'
+import { allocateKindraReportSerial } from '@lib/intake/report-serial-allocation.server'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { isPaymentConfirmedForAi } from '@lib/intake/intake-payment-confirmed.server'
@@ -82,6 +82,16 @@ function drawingMemosFromReportJson(reportJson: unknown): string[] {
   const memos = (session as Record<string, unknown>).drawingMemos
   if (!Array.isArray(memos)) return []
   return memos.filter((x): x is string => typeof x === 'string')
+}
+
+function readSessionReportIdFromReportJson(reportJson: unknown): string | null {
+  if (!reportJson || typeof reportJson !== 'object') return null
+  const session = (reportJson as Record<string, unknown>).session
+  if (!session || typeof session !== 'object') return null
+  const rid = (session as Record<string, unknown>).reportId
+  if (typeof rid !== 'string') return null
+  const t = rid.trim()
+  return t.length > 0 ? t : null
 }
 
 /**
@@ -275,7 +285,13 @@ export async function triggerAiAnalysis(intakeIdRaw: string): Promise<TriggerAiA
 
     const birthLine = formatBirthLineForReportCard(birthParts.y, birthParts.m, birthParts.d, drawnDay)
     const birthAndMaterials = [birthLine, `제출 그림 ${slots.length}장`].join(' · ')
-    const { reportId } = buildIntakeReportIdentifiers(row.child_display_name, intakeId)
+    const reportId =
+      readSessionReportIdFromReportJson(rep.report_json) ??
+      (await allocateKindraReportSerial(admin, {
+        ownerEmail: row.email.trim().toLowerCase(),
+        childDisplayName: row.child_display_name,
+        excludeReportRowId: rep.id,
+      }))
 
     const heroTitleLines: [string, string] = [
       `${row.child_display_name}의 그림 ${slots.length}장`,

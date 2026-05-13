@@ -1,7 +1,9 @@
+import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+
 const ITEMS: { q: string; a: string }[] = [
   {
     q: '리포트는 언제 받을 수 있나요?',
-    a: '그림과 신청서를 받은 후, 24시간 이내에 이메일로 리포트를 보내드리는 것을 목표로 해요. 꼼꼼히 살펴보다 보면 조금 늦어질 수도 있어요.',
+    a: `그림과 신청서를 받고 필요한 확인이 끝나면, ${REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일로 통합 리포트를 보내드리는 것을 목표로 해요. ${REPORT_EMAIL_SLA_DELAY_NOTE}`,
   },
   {
     q: '결제는 꼭 해야 하나요?',

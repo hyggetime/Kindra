@@ -11,13 +11,12 @@ function ChevronIcon({ className }: { className?: string }) {
 /**
  * `/apply` — 킨드라 분석 관점(HTP·LMT 등) 요약. 상세는 `/tools`.
  * 기본 접힘으로 스크롤 부담을 줄입니다.
+ * 앵커 id는 `<details>`가 아닌 래퍼에 둡니다(URL `#apply-analysis` 시 브라우저가 details를 열어 하이드레이션 불일치가 나는 것을 방지).
  */
 export function ApplyAnalysisIntroSection() {
   return (
-    <details
-      id="apply-analysis"
-      className="group mt-10 scroll-mt-24 rounded-2xl border border-[#E8E4DC] bg-white shadow-sm open:shadow-md"
-    >
+    <section id="apply-analysis" className="mt-10 scroll-mt-24">
+      <details className="group rounded-2xl border border-[#E8E4DC] bg-white shadow-sm open:shadow-md">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-5 py-4 outline-none ring-[#7C9070]/30 marker:content-none focus-visible:ring-2 sm:px-7 sm:py-5 [&::-webkit-details-marker]:hidden">
         <span className="text-base font-semibold text-[#3D3D3D]">분석은 어떻게 이루어지나요?</span>
         <ChevronIcon className="h-5 w-5 shrink-0 text-[#7C9070] transition group-open:rotate-180" />
@@ -73,5 +72,6 @@ export function ApplyAnalysisIntroSection() {
       </div>
       </div>
     </details>
+    </section>
   )
 }

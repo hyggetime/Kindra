@@ -54,7 +54,7 @@ export function ApplyPaymentView({ reportId, bankTransfer, listedPriceWon, hideB
           신청서와 그림이 안전하게 전달됐어요. 쿠폰이 있으면 입력한 뒤 카드 결제 또는 무통장 안내를 이용해 주세요.
         </p>
         <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#9A9A9A]">
-          한국 아동 그림 56,000건(심허브) 데이터를 배경으로 꼼꼼히 살펴볼게요.
+          한국 아동 그림 56,000건(심허브) 데이터를 참고해, 짧은 시간 안에도 놓치지 않도록 집중해서 살펴볼게요.
         </p>
       </header>
 

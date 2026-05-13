@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 
 import { saveBankDepositorName } from '@app/actions/save-bank-depositor'
+import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
 import { formatPriceWon } from '@lib/constants'
 import { isPaymentHideBankTransferEnabled } from '@lib/payment/hide-bank-transfer-env'
 import type { BankTransferDisplay } from '@lib/payment/bank-transfer'
@@ -200,7 +201,8 @@ export function PaymentSection({
     <>
       {emphasis ? null : (
         <p className="mx-auto mt-6 max-w-lg text-sm leading-[1.95] text-[#5A5A5A]">
-          신청이 접수됐어요. 아래에서 카드·간편결제 또는 무통장 입금으로 결제를 이어가 주시면, 확인 후 리포트를 보내드릴게요.
+          신청이 접수됐어요. 아래에서 카드·간편결제 또는 무통장 입금으로 결제를 이어가 주시면, 확인 후 리포트를
+          보내드릴게요. (이메일 발송은 {REPORT_EMAIL_SLA_MAX_PHRASE}를 목표로 해요.)
         </p>
       )}
 
@@ -208,17 +210,19 @@ export function PaymentSection({
         {emphasis && tossConfigured && !hideBankForTossFocus ? (
           <p className="text-sm leading-[1.85] text-[#5A5A5A]">
             신청이 접수됐어요. 아래에서 카드·간편결제 또는 무통장으로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요.
+            (이메일 발송은 {REPORT_EMAIL_SLA_MAX_PHRASE}를 목표로 해요.)
           </p>
         ) : null}
         {emphasis && tossConfigured && hideBankForTossFocus ? (
           <p className="text-sm leading-[1.85] text-[#5A5A5A]">
-            신청이 접수됐어요. 아래에서 카드·간편결제로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요.
+            신청이 접수됐어요. 아래에서 카드·간편결제로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요. (이메일 발송은{' '}
+            {REPORT_EMAIL_SLA_MAX_PHRASE}를 목표로 해요.)
           </p>
         ) : null}
         {emphasis && !tossConfigured ? (
           <p className="text-sm leading-[1.85] text-[#5A5A5A]">
-            감사해요. 아래 무통장 입금으로 결제를 이어가 주시면, 확인 후 리포트를 보내드릴게요. 화면이 비어 보인다면 잠시
-            후 새로고침해 주세요.
+            감사해요. 아래 무통장 입금으로 결제를 이어가 주시면, 확인 후 리포트를 보내드릴게요. (이메일 발송은{' '}
+            {REPORT_EMAIL_SLA_MAX_PHRASE}를 목표로 해요.) 화면이 비어 보인다면 잠시 후 새로고침해 주세요.
           </p>
         ) : null}
 

@@ -221,8 +221,7 @@ export function IntakeReportDocument({
   intakeGeminiError = null,
 }: Props) {
   const [copyDone, setCopyDone] = useState(false)
-  const { reportId, subject, childShortName, markdown, heroTitleLines, drawingThumbDataUrls, heroImageDataUrl } =
-    payload
+  const { reportId, subject, markdown, heroTitleLines, drawingThumbDataUrls, heroImageDataUrl } = payload
   const heroThumbs = drawingThumbDataUrls ?? []
   /** 히어로: 고해상도 그림 1 우선, 없으면 썸네일 */
   const heroDrawing1Src = heroImageDataUrl ?? heroThumbs[0]

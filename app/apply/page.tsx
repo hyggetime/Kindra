@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { APPLY_FORM_HREF } from '@lib/apply-href'
+import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
 import { SITE_OG_IMAGE } from '@lib/site-og'
 
 import { ApplyAnalysisIntroSection } from '@/components/apply/ApplyAnalysisIntroSection'
@@ -38,10 +39,11 @@ export default function ApplyPage() {
       </p>
       <h1 className="text-2xl font-bold tracking-tight text-[#3D3D3D] sm:text-3xl">아이의 그림을 보내주세요</h1>
       <p className="mt-5 text-[0.95rem] leading-[1.95] text-[#5A5A5A]">
-        그림과 간단한 정보를 남겨 주시면, 킨드라가 차분히 살펴보고{' '}
+        그림과 간단한 정보를 남겨 주시면, 킨드라가 정성껏 살펴보고{' '}
         <strong className="font-semibold text-[#4A4A4A]">통합 마음 지도 리포트</strong>를 준비해 드려요. 전송이 완료되면
-        안내 화면으로 이어지며, 리포트는 24시간 이내 이메일로 발송될 예정이에요.
+        안내 화면으로 이어지며, 리포트는 {REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일로 발송되는 것을 목표로 해요.
       </p>
+      <p className="mt-3 text-[11px] leading-relaxed text-[#9A9A9A] sm:text-xs">{REPORT_EMAIL_SLA_DELAY_NOTE}</p>
       <p className="mt-4">
         <a
           href={APPLY_FORM_HREF}

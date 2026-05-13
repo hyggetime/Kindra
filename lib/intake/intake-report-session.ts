@@ -13,7 +13,7 @@ export type IntakeReportSessionSubject = {
 
 export type IntakeReportSessionPayload = {
   v: 2
-  /** 예: `KINDRA-2026-JIO` — 연도·아이 식별 슬러그 */
+  /** 예: `KINDRA-26-TK-01` — 연도(2자)·아이 이니셜·동일 아이 누적 순번 */
   reportId: string
   intakeId: string
   markdown: string

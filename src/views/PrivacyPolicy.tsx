@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
+import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
 
 const EFFECTIVE_DATE = '2026년 5월 7일'
 const COMPANY = BUSINESS_INFO.companyDisplay
@@ -90,7 +91,10 @@ export function PrivacyPolicyPage() {
 
         <Section title="2. 개인정보의 수집 및 이용 목적">
           <Table rows={[
-            ['리포트 작성·제공', '제공된 그림·신청 정보를 바탕으로 아동 그림 심리 관찰 리포트를 작성·저장하고, 로그인된 이용자에게 웹으로 열람할 수 있게 제공'],
+            [
+              '리포트 작성·제공',
+              `제공된 그림·신청 정보를 바탕으로 아동 그림 심리 관찰 리포트를 작성·저장하고, 로그인된 이용자에게 웹으로 열람할 수 있게 제공합니다. 통상 신청 시 기재한 이메일로, ${REPORT_EMAIL_SLA_MAX_PHRASE}에 통합 리포트를 발송하는 것을 목표로 합니다.`,
+            ],
             [
               '맞춤형 부가 서비스',
               '아이 그림을 활용한 맞춤형 콘텐츠(굿즈 등) 안내 및 제작 서비스 제공, 성장 기록·갤러리 등 킨드라가 안내하는 지속 보관형 기능(해당 시 별도 동의·절차에 따름)',

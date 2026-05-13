@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { submitIntegratedIntake } from '@app/actions/intake-submit'
+import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
 import { formatPriceWon, LIST_PRICE_WON } from '@lib/constants'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
 import { completedMonthsFromDaysSinceBirth, parseBirthDateIso } from '@lib/intake/age-months'
@@ -72,6 +73,7 @@ function ApplyIntegratedFormFields({
 
   const [consentAcknowledged, setConsentAcknowledged] = useState(false)
   const [consentDeniedFlash, setConsentDeniedFlash] = useState(false)
+  const [drawingFormatHint, setDrawingFormatHint] = useState<string | null>(null)
   const [slots, setSlots] = useState<(Slot | null)[]>([null, null, null, null, null])
   const [imageBusyIndex, setImageBusyIndex] = useState<number | null>(null)
   const [birthDate, setBirthDate] = useState('')
@@ -145,6 +147,7 @@ function ApplyIntegratedFormFields({
   async function onPick(index: number, input: HTMLInputElement) {
     const file = input.files?.[0] ?? null
     if (!file) {
+      setDrawingFormatHint(null)
       setSlots((prev) => {
         const next = [...prev] as (Slot | null)[]
         if (next[index]?.url) URL.revokeObjectURL(next[index]!.url)
@@ -155,8 +158,12 @@ function ApplyIntegratedFormFields({
     }
     if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
       input.value = ''
+      setDrawingFormatHint(
+        '이 형식은 아직 지원하지 않아요. JPEG·PNG·WebP만 올릴 수 있어요. (아이폰 사진이 HEIC이면 사진 앱에서 JPEG으로 보내거나, 카메라 설정을「가장 호환되는」으로 바꾼 뒤 다시 찍어 주세요.)',
+      )
       return
     }
+    setDrawingFormatHint(null)
 
     setImageBusyIndex(index)
     try {
@@ -261,7 +268,8 @@ function ApplyIntegratedFormFields({
         </label>
 
         <p className="mt-5 text-[11px] leading-relaxed text-[#9A9A9A] sm:text-xs">
-          (그림을 받은 후 24시간 이내 발송을 목표로 해요. 꼼꼼히 살펴보느라 조금 늦어질 수 있어요.)
+          (접수·결제 등 확인이 끝나면 {REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일로 발송하는 것을 목표로 해요.{' '}
+          {REPORT_EMAIL_SLA_DELAY_NOTE})
         </p>
 
         <hr className="mt-10 border-0 border-t border-[#E8E4DC] sm:mt-12" />
@@ -463,6 +471,11 @@ function ApplyIntegratedFormFields({
       <div className="space-y-4">
         <h2 className="text-sm font-semibold text-[#4A4A4A]">아이의 그림을 올려 주세요</h2>
         <p className="text-[11px] leading-relaxed text-[#8A8A8A]">그림 5칸 · JPEG / PNG / WebP, 각 4MB 이하</p>
+        {drawingFormatHint ? (
+          <p className="rounded-lg border border-amber-200/90 bg-amber-50/90 px-3 py-2 text-[11px] leading-relaxed text-amber-950 sm:text-xs">
+            {drawingFormatHint}
+          </p>
+        ) : null}
         <p className="text-xs leading-relaxed text-[#6B6B6B]">
           그림 1장만 필수예요. 여러 장을 올려 주실수록 아이의 이야기를 더 풍부하게 읽을 수 있어요. 방향이 어긋난 그림은
           각 칸의 회전 버튼으로 맞춰 주세요.

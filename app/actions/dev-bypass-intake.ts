@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto'
 
 import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-session'
 import { isDevIntakeBypassEnabled } from '@lib/intake/dev-intake-bypass'
-import { buildIntakeReportIdentifiers } from '@lib/intake/report-id'
+import { allocateKindraReportSerial } from '@lib/intake/report-serial-allocation.server'
 import { LIST_PRICE_WON } from '@lib/constants'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
 import { setReportAccessCookie } from '@lib/payment/report-access-cookie.server'
@@ -33,7 +33,10 @@ export async function createDevBypassIntakeReport(): Promise<DevBypassIntakeResu
   const reportMarkdown =
     '# 로컬 바이패스 리포트\n\n개발용 더미 마크다운입니다. 실제 신청·분석 없이 생성된 행이에요.\n'
   const birthAndMaterials = '테스트 · 제출 그림 0장'
-  const { reportId: stableReportId } = buildIntakeReportIdentifiers(childDisplayName, intakeId)
+  const stableReportId = await allocateKindraReportSerial(admin, {
+    ownerEmail: email.trim().toLowerCase(),
+    childDisplayName,
+  })
 
   const heroTitleLines: [string, string] = [`${childDisplayName}의 그림 (바이패스)`, '테스트용 더미']
   const sessionPayload: IntakeReportSessionPayload = {
