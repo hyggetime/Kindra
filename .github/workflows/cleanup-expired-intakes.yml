@@ -8,7 +8,8 @@ name: Cleanup expired intakes
 # Repository Secrets: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 # Vercel Cron 과 동시 사용 시 같은 DB 에 하루 4회 실행되므로 한쪽만 쓰는 것을 권장합니다.
 #
-# npm ci 실패( lock 과 package.json 불일치 ) 시: 로컬에서 `npm install` 후 package-lock.json 커밋.
+# npm ci 실패( lock 과 package.json 불일치, 예: Missing … from lock file ) 시:
+#   빈 폴더에 package.json·package-lock.json 만 복사 후 `npm ci` 로 재현 → `npm install` 로 락 재생성 후 커밋.
 
 on:
   schedule:
@@ -28,9 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
