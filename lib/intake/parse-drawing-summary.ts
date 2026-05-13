@@ -17,8 +17,8 @@ function splitParagraphs(body: string): string[] {
 }
 
 const BULLET_LINE = /^-\s*그림\s*(\d+)\s*[:：]\s*(.*)$/
-/** `그림 2` / `**그림 2**` / `그림 2:` / `그림 2에서` 등 */
-const PARA_LEAD = /^(\*{0,2})?그림\s*(\d+)\s*([\s*:.：—–-]|에서|은|는|을|를|의)?\s*/
+/** `그림 2` / `**그림 2**` / `* 그림 2:` / `그림 2에서` 등 — 앞에 `* ` 불릿이 있어도 인식 */
+const PARA_LEAD = /^(?:\*+\s+)?(?:\*{0,2})?그림\s*(\d+)\s*([\s*:.：—–-]|에서|은|는|을|를|의)?\s*/
 
 function parseBulletLineStyle(body: string, imageCount: number): { captions: string[]; remainder: string } {
   const captions: string[] = Array.from({ length: imageCount }, () => '')
@@ -59,7 +59,7 @@ export function parseDrawingSummaryCaptions(
   for (const p of splitParagraphs(normalized)) {
     const m = PARA_LEAD.exec(p)
     if (m) {
-      const idx = Number(m[2]) - 1
+      const idx = Number(m[1]) - 1
       const rest = p.slice(m[0].length).trim()
       if (idx >= 0 && idx < n) {
         captions[idx] = captions[idx] ? `${captions[idx]}\n\n${rest}`.trim() : rest

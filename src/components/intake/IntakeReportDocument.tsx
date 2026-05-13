@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+
+import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
 import { KINDRA_PHILOSOPHY } from '@lib/gemini/prompts'
 import {
   extractHashtagTokens,
@@ -20,7 +22,6 @@ const PHILOSOPHY_TITLE = '킨드라의 약속'
 
 const FOOTER = {
   securityNote: '이 페이지는 고유 링크를 가진 분들만 확인하실 수 있는 프라이빗 리포트입니다.',
-  ctaLabel: '킨드라 리포트 신청 안내',
 } as const
 
 type Props = {
@@ -343,9 +344,13 @@ export function IntakeReportDocument({
                 aria-hidden
               />
               <p className="text-base font-semibold leading-snug text-[#2F3D2E] sm:text-lg">
-                킨드라 AI가 아이의 마음을 꼼꼼히 읽고 있습니다.
+                통합 리포트를 준비하고 있어요.
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#5C5C5C]">잠시만 기다려 주세요.</p>
+              <p className="mt-3 text-sm leading-relaxed text-[#5C5C5C]">
+                제출해 주신 그림과 메모를 반영해 분석 중이에요. 완료와 이메일 안내는 {REPORT_EMAIL_SLA_MAX_PHRASE}를
+                목표로 하고 있어요. 준비가 되면 이 화면이 바뀌거나, 신청 시 남겨 주신 이메일로도 보내 드려요.{' '}
+                {REPORT_EMAIL_SLA_DELAY_NOTE}
+              </p>
             </div>
           </div>
         </main>
@@ -491,39 +496,61 @@ export function IntakeReportDocument({
               heroThumbs.length > 0
             const eyebrow = sec.title ? sectionEyebrow(sec.title) : ''
             const isHyggeTipSection = eyebrow === '부모님께'
+            const isDeepReadSection = eyebrow === '심층 읽기'
+            /** 눈썹 색상을 h3 제목에 직접 적용 — 작은 글씨 레이블 없이 */
+            const titleColor = isHyggeTipSection ? 'text-[#5B8DB8]' : 'text-[#7C9070]'
             return (
               <section key={key} className="break-inside-avoid scroll-mt-28" data-track-section={key}>
                 {sec.title ? (
-                  <>
-                    {eyebrow ? (
-                      <p
-                        className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${isHyggeTipSection ? 'text-[#5B8DB8]/90' : 'text-[#7C9070]/85'}`}
-                      >
-                        {eyebrow}
-                      </p>
-                    ) : null}
-                    <h3
-                      className={`font-bold tracking-tight text-[#2F342E] ${eyebrow ? 'mt-2.5' : ''} text-[1.0625rem] leading-snug sm:text-[1.125rem]`}
-                    >
-                      {sec.title}
-                    </h3>
-                  </>
+                  <h3 className={`font-bold tracking-tight text-[1.0625rem] leading-snug sm:text-[1.125rem] ${titleColor}`}>
+                    {sec.title}
+                  </h3>
                 ) : null}
                 <div className={sec.title ? 'mt-5' : ''}>
                   {isDrawingSummary ? (
                     <DrawingMagazineSection body={sec.body} thumbs={heroThumbs} />
                   ) : (
-                    paragraphs.map((para, i) => (
-                      <RichParagraph
-                        key={`${key}-p-${i}`}
-                        text={para}
-                        className={
-                          i > 0
-                            ? 'mt-4 font-sans text-[0.9rem] leading-[1.95] text-[#4A4A4A]'
-                            : 'font-sans text-[0.9rem] leading-[1.95] text-[#4A4A4A]'
-                        }
-                      />
-                    ))
+                    paragraphs.map((para, i) => {
+                      /** 심층읽기 섹션에서 **볼드로 시작**하는 문단 = 소제목 → SVG 아이콘 */
+                      const isBoldSubHead = isDeepReadSection && /^\*\*[^*]+\*\*/.test(para.trimStart())
+                      if (isBoldSubHead) {
+                        return (
+                          <div key={`${key}-p-${i}`} className={`flex items-start gap-2.5 ${i > 0 ? 'mt-7' : ''}`}>
+                            <span className="mt-[0.42em] shrink-0" aria-hidden>
+                              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                                <circle cx="4" cy="4" r="4" fill="#7C9070" fillOpacity="0.55" />
+                              </svg>
+                            </span>
+                            <RichParagraph
+                              text={para}
+                              className="flex-1 font-sans text-[0.9rem] leading-[1.95] text-[#4A4A4A]"
+                            />
+                          </div>
+                        )
+                      }
+                      /** Hygge Tips: 항목 사이 구분선 */
+                      if (isHyggeTipSection && i > 0) {
+                        return (
+                          <div key={`${key}-p-${i}`} className="mt-7 border-t border-[#EDE8E0] pt-6">
+                            <RichParagraph
+                              text={para}
+                              className="font-sans text-[0.9rem] leading-[1.95] text-[#4A4A4A]"
+                            />
+                          </div>
+                        )
+                      }
+                      return (
+                        <RichParagraph
+                          key={`${key}-p-${i}`}
+                          text={para}
+                          className={
+                            i > 0
+                              ? 'mt-4 font-sans text-[0.9rem] leading-[1.95] text-[#4A4A4A]'
+                              : 'font-sans text-[0.9rem] leading-[1.95] text-[#4A4A4A]'
+                          }
+                        />
+                      )
+                    })
                   )}
                 </div>
               </section>
@@ -540,29 +567,26 @@ export function IntakeReportDocument({
 
         <div className="my-10 h-px bg-[#EDE8E0] print:hidden" />
 
-        <section className="mx-auto max-w-md print:hidden">
-          <div className="flex flex-col items-center gap-3 rounded-2xl border border-[#E8E4DC] bg-[#F7F5F2] px-5 py-6 text-center">
+        <section className="print:hidden">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={handleCopyUrl}
-              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-[#D4CFC4] bg-white px-6 text-sm font-medium text-[#4A4A4A] shadow-sm transition hover:border-[#7C9070]/50 hover:bg-[#F0F5EF] hover:text-[#7C9070]"
+              className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full border border-[#D4CFC4] bg-white px-4 text-sm font-medium text-[#4A4A4A] shadow-sm transition hover:border-[#7C9070]/50 hover:bg-[#F0F5EF] hover:text-[#7C9070]"
             >
-              {copyDone ? '링크를 복사했습니다.' : '리포트 공유하기'}
+              {copyDone ? '링크 복사됨 ✓' : '리포트 공유하기'}
             </button>
-            <p className="text-[11px] leading-relaxed text-[#9A9A9A]">
-              {childShortName}의 마음 기록을 가족에게 나눠 보세요.
-            </p>
+            <Link
+              href="/#request"
+              className="inline-flex min-h-[48px] flex-1 items-center justify-center rounded-full bg-[#7C9070] px-4 text-sm font-medium text-white shadow-[0_6px_20px_-6px_rgba(124,144,112,0.5)] transition hover:bg-[#687D5D]"
+            >
+              리포트 신청하기
+            </Link>
           </div>
         </section>
 
-        <footer className="mt-10 border-t border-[#EDE8E0] px-1 pb-8 pt-10 text-center print:mt-10 print:border-[#DDDDDD] print:pt-8">
+        <footer className="mt-10 border-t border-[#EDE8E0] px-1 pb-8 pt-8 text-center print:mt-10 print:border-[#DDDDDD] print:pt-8">
           <p className="mx-auto max-w-lg text-[11px] leading-[1.75] text-[#B0B0B0]">{FOOTER.securityNote}</p>
-          <Link
-            href="/#request"
-            className="mt-8 inline-flex min-h-[48px] items-center justify-center rounded-full bg-[#7C9070] px-8 text-sm font-medium text-white shadow-[0_8px_24px_-8px_rgba(124,144,112,0.5)] transition hover:bg-[#687D5D] print:hidden"
-          >
-            {FOOTER.ctaLabel}
-          </Link>
         </footer>
       </main>
     </div>
