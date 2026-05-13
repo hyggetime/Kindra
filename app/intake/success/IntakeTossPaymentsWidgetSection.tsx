@@ -15,6 +15,11 @@ type SectionProps = {
   onResolvedAmount?: (amountWon: number) => void
   /** `bankFirst` 일 때는 시각적 강조를 약하게(무통장이 위에 있을 때) */
   secondaryPlacement?: boolean
+  /** 환불 불가·법정대리인 등 결제 직전 필수 동의 — 부모에서 상태 관리 */
+  agreeDigitalNoRefund: boolean
+  agreeGuardianCollect: boolean
+  onAgreeDigitalNoRefund: (value: boolean) => void
+  onAgreeGuardianCollect: (value: boolean) => void
 }
 
 /**
@@ -25,7 +30,12 @@ export function IntakeTossPaymentsWidgetSection({
   listedPriceWon,
   onResolvedAmount,
   secondaryPlacement = false,
+  agreeDigitalNoRefund,
+  agreeGuardianCollect,
+  onAgreeDigitalNoRefund,
+  onAgreeGuardianCollect,
 }: SectionProps) {
+  const consentsOk = agreeDigitalNoRefund && agreeGuardianCollect
   const clientKey = getTossClientKey()
   const sdkReady = isTossPaymentsConfigured()
   const [couponInput, setCouponInput] = useState('')
@@ -73,6 +83,10 @@ export function IntakeTossPaymentsWidgetSection({
 
   const openPaymentWindow = useCallback(async () => {
     if (!sdkReady) return
+    if (!consentsOk) {
+      setError('결제 전 필수 동의 항목을 확인해 주세요.')
+      return
+    }
     setError(null)
     setBusy(true)
     try {
@@ -134,7 +148,7 @@ export function IntakeTossPaymentsWidgetSection({
     } finally {
       setBusy(false)
     }
-  }, [clientKey, couponInput, reportId, runPreview, sdkReady])
+  }, [clientKey, consentsOk, couponInput, reportId, runPreview, sdkReady])
 
   const priceLabel = formatPriceWon(displayAmount)
 
@@ -183,12 +197,53 @@ export function IntakeTossPaymentsWidgetSection({
 
         <p className="mt-4 text-lg font-semibold tabular-nums text-[#3D3D3D]">{priceLabel}</p>
 
+        {sdkReady ? (
+          <div
+            className="mt-5 rounded-xl border border-[#D4E0D0] bg-[#FAFAF8]/95 px-4 py-4 text-left text-[11px] leading-relaxed text-[#4A4A4A] sm:text-xs"
+            role="group"
+            aria-labelledby="toss-payment-consents-heading"
+          >
+            <p id="toss-payment-consents-heading" className="font-semibold text-[#3D3D3D]">
+              결제 전 필수 동의
+            </p>
+            <ul className="mt-3 list-none space-y-3.5 p-0">
+              <li className="flex gap-3">
+                <input
+                  id="toss-consent-digital-refund"
+                  type="checkbox"
+                  checked={agreeDigitalNoRefund}
+                  onChange={(e) => onAgreeDigitalNoRefund(e.target.checked)}
+                  disabled={busy}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#C8C4BC] text-[#7C9070] focus:ring-[#7C9070]/30 disabled:opacity-50"
+                />
+                <label htmlFor="toss-consent-digital-refund" className="cursor-pointer select-none">
+                  (필수) 결제 완료와 동시에 맞춤형 AI 분석이 즉시 시작되므로, 디지털 콘텐츠 특성상 환불이 불가능함에
+                  동의합니다.
+                </label>
+              </li>
+              <li className="flex gap-3">
+                <input
+                  id="toss-consent-guardian"
+                  type="checkbox"
+                  checked={agreeGuardianCollect}
+                  onChange={(e) => onAgreeGuardianCollect(e.target.checked)}
+                  disabled={busy}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#C8C4BC] text-[#7C9070] focus:ring-[#7C9070]/30 disabled:opacity-50"
+                />
+                <label htmlFor="toss-consent-guardian" className="cursor-pointer select-none">
+                  (필수) 나는 만 14세 미만 아동의 법정대리인이며, 서비스 이용을 위한 정보 수집에 동의합니다.
+                </label>
+              </li>
+            </ul>
+          </div>
+        ) : null}
+
         <div className="mt-6">
           {sdkReady ? (
             <button
               type="button"
               onClick={() => void openPaymentWindow()}
-              disabled={busy}
+              disabled={busy || !consentsOk}
               className="w-full rounded-xl bg-[#0064FF] py-3.5 text-sm font-bold text-white shadow-[0_10px_28px_-12px_rgba(0,100,255,0.55)] transition hover:bg-[#0056E0] disabled:opacity-60"
             >
               {busy ? '결제창 여는 중…' : '결제하기'}

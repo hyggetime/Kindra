@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
 import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
 
-const EFFECTIVE_DATE = '2026년 4월 18일'
+const EFFECTIVE_DATE = '2026년 5월 13일'
 const COMPANY = BUSINESS_INFO.companyDisplay
 const SERVICE = '킨드라(Kindra)'
 const EMAIL = BUSINESS_INFO.supportEmail
@@ -63,6 +63,10 @@ export function TermsOfServicePage() {
           <ul className="ml-4 list-disc space-y-2">
             <li><strong>서비스:</strong> 회사가 제공하는 아동 그림 심리 관찰 리포트 작성 서비스</li>
             <li><strong>이용자:</strong> 이 약관에 동의하고 서비스를 신청하거나 이용하는 자</li>
+            <li>
+              <strong>이메일 인증:</strong> 별도의 회원 가입이나 통상적인 로그인(아이디·비밀번호) 없이, 이용자가
+              기재한 이메일로 발송되는 인증(매직) 링크를 통해 본인 확인 및 리포트 열람 등에 접근하는 방식을 말합니다.
+            </li>
             <li><strong>리포트:</strong> 이용자가 제공한 아동 그림 이미지를 바탕으로 회사가 작성한 심리 관찰 문서</li>
             <li><strong>콘텐츠:</strong> 서비스 내 텍스트, 이미지, 디자인 등 회사가 제작한 모든 창작물</li>
           </ul>
@@ -75,7 +79,12 @@ export function TermsOfServicePage() {
               회사는 관련 법령을 위배하지 않는 범위에서 약관을 변경할 수 있으며,
               변경된 약관은 서비스 내 공지사항 게시 또는 이메일 통보를 통해 효력이 발생합니다.
             </li>
-            <li>이용자가 변경된 약관에 동의하지 않을 경우 서비스 이용을 중단하고 탈퇴를 요청할 수 있습니다.</li>
+            <li>
+              이용자가 변경된 약관에 동의하지 않을 경우 서비스 이용을 중단하거나, 이메일 등 회사가 안내하는
+              절차에 따라 개인정보 삭제·이용 중단을 요청할 수 있습니다. 본 서비스는 별도의 회원제 가입이나 통상적인
+              로그인(아이디·비밀번호) 없이 이메일 인증으로 운영되므로, 통상의 &apos;회원 탈퇴&apos; 절차와는 형태가
+              다를 수 있습니다.
+            </li>
           </ul>
         </Section>
 
@@ -111,11 +120,16 @@ export function TermsOfServicePage() {
               창·약관은 결제 대행사의 정책이 추가로 적용될 수 있습니다.
             </li>
             <li>
-              <strong>청약철회·환불:</strong> 「전자상거래 등에서의 소비자보호에 관한 법률」 등 관련 법령 및
-              회사가 서비스 화면·고객 응대 정책에서 정하는 바에 따릅니다. 리포트는{' '}
-              <strong>이용자에게 맞춤 제공되는 디지털 콘텐츠</strong>에 해당할 수 있으며,{' '}
-              <strong>분석(작성)이 시작된 이후</strong> 또는 <strong>리포트가 이메일 등으로 제공된 이후</strong>에는
-              법령이 정한 바에 따라 <strong>청약철회가 제한</strong>되고 <strong>환불이 어려울 수 있습니다.</strong>
+              <strong>청약철회·환불:</strong> 본 서비스의 <strong>리포트는 개별 제작되는 디지털 콘텐츠</strong>
+              에 해당합니다. 「전자상거래 등에서의 소비자보호에 관한 법률」(이하 &apos;전자상거래법&apos;) 제17조
+              제2항에 의거, <strong>분석이 시작되거나 리포트가 발송된 이후에는 청약철회 및 환불이 불가능합니다.</strong>{' '}
+              <strong>
+                전자결제(카드·간편결제 등)의 경우 결제 완료(승인)와 동시에 맞춤형 AI 분석이 즉시 개시되므로, 그
+                시점 이후에는 청약철회가 제한됩니다.
+              </strong>{' '}
+              무통장 입금 등으로 결제가 이루어지는 경우에는 회사가 입금을 확인한 때부터 분석이 개시될 수 있습니다. 그
+              이전 단계에서의 취소·환불 가능 여부는 관련 법령 및 회사가 서비스 화면·고객 응대 정책에서 정하는 바에
+              따릅니다.
             </li>
             <li>
               결제·환불·분쟁과 관련한 구체적 기준·절차는 유료 신청·결제 화면의 안내, 본 약관 개정,
@@ -140,6 +154,10 @@ export function TermsOfServicePage() {
           <p>이용자는 서비스 이용 시 다음 행위를 하여서는 안 됩니다.</p>
           <ul className="ml-4 mt-2 list-disc space-y-2">
             <li>허위 정보 제공 및 타인의 정보 도용</li>
+            <li>
+              이메일 주소를 부정확하게 기재하거나, 인증(매직) 링크를 타인과 공유·노출하여 본인이 아닌 자가
+              서비스에 접근하게 하는 등 <strong>이메일 및 인증 링크를 소홀히 관리</strong>하는 행위
+            </li>
             <li>제3자의 저작권, 초상권, 개인정보 등 권리를 침해하는 이미지 업로드</li>
             <li>서비스 및 관련 시스템에 대한 해킹, 바이러스 유포 등 악의적 행위</li>
             <li>회사의 사전 서면 동의 없이 서비스를 상업적으로 이용하거나 복제·배포하는 행위</li>
@@ -179,6 +197,12 @@ export function TermsOfServicePage() {
                 아동 발달 심리학의 그림 분석 기법을 참고한 관찰 기록이며, 참고 자료로만 활용하시기 바랍니다.
               </li>
               <li>
+                회사는 <strong>생성형 AI 기술</strong>을 이용하여 리포트를 작성합니다. 생성형 AI의 기술적
+                특성상 분석 결과에는 <strong>오류나 부정확한 표현이 포함될 수 있습니다.</strong> 이용자는 리포트를{' '}
+                <strong>절대적인 진단·평가로 신뢰해서는 안 되며</strong>, 리포트를 근거로 한{' '}
+                <strong>모든 판단과 그에 따른 책임은 이용자 본인</strong>에게 있습니다.
+              </li>
+              <li>
                 리포트의 내용은 제공된 그림 이미지와 분석 시점을 기준으로 하며,
                 아동의 심리 상태는 다양한 요인에 의해 변화할 수 있습니다.
               </li>
@@ -188,9 +212,9 @@ export function TermsOfServicePage() {
             </ul>
           </div>
           <p className="mt-4">
-            회사는 위 안내 사항에도 불구하고 이용자가 리포트를 전문 진단으로 오해하여 발생하는
-            손해에 대해 책임을 지지 않습니다. 단, 회사의 고의 또는 중대한 과실로 인한
-            손해에 대해서는 관련 법령에 따라 책임을 집니다.
+            회사는 위 안내 사항에도 불구하고 이용자가 리포트를 전문 진단으로 오해하거나, AI 결과의 한계를
+            고려하지 않고 내린 판단으로 발생하는 손해에 대해 책임을 지지 않습니다. 단, 회사의 고의 또는 중대한
+            과실로 인한 손해에 대해서는 관련 법령에 따라 책임을 집니다.
           </p>
         </Section>
 

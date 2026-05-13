@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
 import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
 
-const EFFECTIVE_DATE = '2026년 5월 7일'
+const EFFECTIVE_DATE = '2026년 5월 13일'
 const COMPANY = BUSINESS_INFO.companyDisplay
 const EMAIL = BUSINESS_INFO.supportEmail
 const SERVICE = '킨드라(Kindra)'
@@ -76,7 +76,7 @@ export function PrivacyPolicyPage() {
               '수집 항목',
               '이메일 주소, 부모(신청자) 표시 이름, 아이 호칭·이름, 아이 성별, 아이 생년월일(정확한 일자), 연령·발달 안내용 힌트·메모(선택), 신청 시 통합 동의 여부(개인정보 처리, 그림·콘텐츠 활용, 굿즈·이벤트 알림 등 마케팅에 관한 동의를 한 번에 기록), 가격 관련 설문 응답(필수), 아이 그림 이미지 파일, 유료 구간 이용 시 입금자명(해당 시) 등 신청·이용 과정에서 입력·업로드되는 정보',
             ],
-            ['수집 방법', '웹사이트 내 신청·결제·문의 절차, 이메일 매직 링크 로그인, 서버(Supabase) 및 스토리지에의 저장'],
+            ['수집 방법', '웹사이트 내 신청·결제·문의 절차, 이메일 매직 링크 인증, 서버(Supabase) 및 스토리지에의 저장'],
             [
               '필수·선택 여부',
               '이메일, 부모 표시 이름, 아이 호칭·이름, 아이 성별, 아이 생년월일, 그림 이미지, 신청 시 통합 동의(개인정보·콘텐츠·마케팅 활용), 가격 설문: 필수 / 부모·아이 메모: 선택',
@@ -93,7 +93,7 @@ export function PrivacyPolicyPage() {
           <Table rows={[
             [
               '리포트 작성·제공',
-              `제공된 그림·신청 정보를 바탕으로 아동 그림 심리 관찰 리포트를 작성·저장하고, 로그인된 이용자에게 웹으로 열람할 수 있게 제공합니다. 통상 신청 시 기재한 이메일로, ${REPORT_EMAIL_SLA_MAX_PHRASE}에 통합 리포트를 발송하는 것을 목표로 합니다.`,
+              `제공된 그림·신청 정보를 바탕으로 아동 그림 심리 관찰 리포트를 작성·저장하고, 이메일 인증(매직 링크)으로 접속한 이용자에게 웹으로 열람할 수 있게 제공합니다. 통상 신청 시 기재한 이메일로, ${REPORT_EMAIL_SLA_MAX_PHRASE}에 통합 리포트를 발송하는 것을 목표로 합니다.`,
             ],
             [
               '맞춤형 부가 서비스',
@@ -103,7 +103,7 @@ export function PrivacyPolicyPage() {
               '신청 시 통합 동의에 따른 이용',
               '그림·신청 정보를 바탕으로 한 리포트 작성·분석, 굿즈·혜택 안내 등 맞춤형 부가 서비스 준비, 이벤트·프로모션 알림(동의한 범위 내에서 이메일 등으로 안내)',
             ],
-            ['본인 확인·서비스 운영', '이메일 기반 로그인(매직 링크), 신청·유료 구간(입금 확인 등) 처리, 부정 이용 방지'],
+            ['본인 확인·서비스 운영', '이메일 기반 인증(매직 링크), 신청·유료 구간(입금 확인 등) 처리, 부정 이용 방지'],
             ['서비스 품질 향상', '서비스 개선을 위한 내부 분석 (가능한 범위에서 비식별·통계 형태로 활용)'],
             ['고객 응대', '리포트·결제 관련 문의 응답(이메일·카카오톡 채널 등 회사가 안내하는 채널)'],
           ]} />
@@ -111,17 +111,28 @@ export function PrivacyPolicyPage() {
 
         <Section title="3. 개인정보의 보유 및 이용 기간">
           <p>
-            회사는 개인정보 수집 및 이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.
-            단, 관련 법령에 따라 보존할 필요가 있는 경우에는 아래 기간 동안 보관합니다.
+            회사는 개인정보의 수집 및 이용 목적에 필요한 범위에서 아래 기준에 따라 보유·이용하며,
+            보유 기간이 경과하거나 처리 목적이 달성된 항목은 지체 없이 파기합니다. 관련 법령에 따라
+            보존할 필요가 있는 경우에는 해당 법령이 정한 기간 동안 별도 보관합니다.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed">
+            서비스 특성상 <strong>시계열 분석·성장 기록·재열람</strong> 등을 위해 신청·리포트·그림 등
+            일반 개인정보는 원칙적으로 <strong>서비스 종료 시까지 또는 이용자 탈퇴 시까지</strong> 보관·이용할 수
+            있습니다. 본 서비스는 별도의 계정 생성 절차 없이 이메일 인증으로 운영되므로, 여기서 말하는
+            &apos;탈퇴&apos;는 이용 중단·삭제 요청이 처리되는 경우를 포함합니다. 삭제·파기를 요청하시는 경우에는
+            관련 법령과 내부 절차에 따라 조속히 처리합니다.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed">
+            관련 법령에 따라 별도 보존이 필요한 항목은 아래 기간 동안 보관합니다.
           </p>
           <Table rows={[
-            ['리포트 제공 완료 후', '신청자 요청 시 즉시 삭제, 별도 요청 없을 시 서비스 제공일로부터 1년'],
             ['계좌이체(무통장 입금) 등 대금 관련 기록', '5년 (전자상거래 등에서의 소비자보호에 관한 법률)'],
             ['소비자 불만·분쟁 기록', '3년 (동법)'],
           ]} />
           <p className="mt-3 text-sm leading-relaxed">
-            단, 이용자가 &apos;아이 그림 보관함&apos; 또는 &apos;성장 갤러리&apos; 등 지속적인 보관 서비스에
-            동의하거나 굿즈 제작 등을 위해 보존을 요청한 경우, 해당 서비스 제공 완료 시까지 보유합니다.
+            이용자가 &apos;아이 그림 보관함&apos; 또는 &apos;성장 갤러리&apos; 등 지속적인 보관 서비스에
+            별도로 동의하거나, 굿즈 제작 등을 위해 보존을 요청한 경우에는 해당 동의·요청 범위와 서비스
+            제공 완료 시점에 맞추어 보유 기간이 달라질 수 있으며, 그 내용은 신청·안내 화면에 따릅니다.
           </p>
         </Section>
 
@@ -140,7 +151,7 @@ export function PrivacyPolicyPage() {
           <p>서비스 제공을 위해 아래와 같이 개인정보 처리 업무를 위탁(또는 재수탁)하고 있습니다.</p>
           <Table rows={[
             ['수탁자', '위탁 업무 내용'],
-            ['Supabase Inc.', '회원 인증·데이터베이스 및 파일 스토리지 등 클라우드 인프라(신청·리포트·그림 파일 저장)'],
+            ['Supabase Inc.', '이용자 인증(이메일·매직 링크 등)·데이터베이스 및 파일 스토리지 등 클라우드 인프라(신청·리포트·그림 파일 저장)'],
             ['Google LLC', '생성형 AI(Google Gemini API 등)를 이용한 그림·텍스트 기반 분석 처리'],
             ['Vercel Inc.', '웹 애플리케이션 호스팅 및 배포, 접속·성능 관련 지표 처리'],
             [
@@ -152,6 +163,14 @@ export function PrivacyPolicyPage() {
             ※ 위탁 계약 시 개인정보 보호 관련 법규 준수, 개인정보 보호를 위한 기술적·관리적 보호조치,
             재위탁 제한, 수탁자에 대한 관리·감독 및 손해배상 등을 계약서에 명시합니다.
           </p>
+          <div className="mt-4 rounded-xl border-2 border-[#7C9070]/35 bg-[#F0F5EC] px-4 py-3.5 text-xs leading-relaxed text-[#2F3D2E] shadow-sm">
+            <p className="font-semibold text-[#2F3D2E]">Google Gemini API — AI 학습 비사용(강조 안내)</p>
+            <p className="mt-2">
+              회사는 <strong>Google Gemini API</strong>를 통해 분석을 수행하며, 수탁자에게 전달된 정보는{' '}
+              <strong>당해 분석 목적에 한하여</strong> 사용됩니다. 이용자가 제공한{' '}
+              <strong>아동의 그림과 개인정보는 AI 모델 학습에 절대 사용되지 않습니다.</strong>
+            </p>
+          </div>
           <div className="mt-4 rounded-xl border border-[#E8E4DC] bg-[#F7F5F2] px-4 py-3 text-xs leading-relaxed text-[#5A5A5A]">
             <p className="font-semibold text-[#3D3D3D]">토스페이먼츠(주) 위탁 안내</p>
             <p className="mt-2">
@@ -208,7 +227,7 @@ export function PrivacyPolicyPage() {
         <Section title="10. 쿠키(Cookie) 사용">
           <p>
             서비스는 원활한 이용과 보안을 위해 쿠키 및 이와 유사한 기술을 사용할 수 있습니다. 예를 들어
-            로그인 세션 유지, 리포트 열람 권한과 관련된 쿠키, 사이트 이용 분석(Google Analytics 4),
+            이메일 인증 세션 유지, 리포트 열람 권한과 관련된 쿠키, 사이트 이용 분석(Google Analytics 4),
             호스팅사 제공 접속 분석(Vercel Analytics) 등이 있습니다. 브라우저 설정에서 쿠키 저장을
             거부할 수 있으나, 일부 기능이 제한될 수 있습니다.
           </p>

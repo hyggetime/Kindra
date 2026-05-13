@@ -40,6 +40,9 @@ export function PaymentSection({
   const [pending, startTransition] = useTransition()
   const saveLockRef = useRef(false)
   const [checkoutWon, setCheckoutWon] = useState(listedPriceWon)
+  const [agreeDigitalNoRefund, setAgreeDigitalNoRefund] = useState(false)
+  const [agreeGuardianCollect, setAgreeGuardianCollect] = useState(false)
+  const paymentConsentsOk = agreeDigitalNoRefund && agreeGuardianCollect
 
   useEffect(() => {
     setCheckoutWon(listedPriceWon)
@@ -73,6 +76,11 @@ export function PaymentSection({
 
   const onSaveDepositor = useCallback(() => {
     if (!reportId || saveLockRef.current) return
+    if (!paymentConsentsOk) {
+      setFormMsg('무통장 입금을 이어가시려면 아래 필수 동의에 체크해 주세요.')
+      setFormOk(false)
+      return
+    }
     setFormMsg(null)
     setFormOk(false)
     saveLockRef.current = true
@@ -90,7 +98,7 @@ export function PaymentSection({
           saveLockRef.current = false
         })
     })
-  }, [reportId, depositor])
+  }, [paymentConsentsOk, reportId, depositor])
 
   const idSuffix = emphasis ? 'pay' : 'ok'
 
@@ -158,7 +166,7 @@ export function PaymentSection({
         />
         <button
           type="button"
-          disabled={pending || !depositor.trim()}
+          disabled={pending || !depositor.trim() || !paymentConsentsOk}
           onClick={() => onSaveDepositor()}
           className="mt-3 w-full rounded-full bg-[#7C9070] py-3 text-sm font-semibold text-white shadow-[0_6px_20px_-6px_rgba(124,144,112,0.5)] transition hover:bg-[#687D5D] disabled:opacity-50"
         >
@@ -194,6 +202,10 @@ export function PaymentSection({
       listedPriceWon={listedPriceWon}
       reportId={reportId}
       onResolvedAmount={setCheckoutWon}
+      agreeDigitalNoRefund={agreeDigitalNoRefund}
+      agreeGuardianCollect={agreeGuardianCollect}
+      onAgreeDigitalNoRefund={setAgreeDigitalNoRefund}
+      onAgreeGuardianCollect={setAgreeGuardianCollect}
     />
   )
 
@@ -232,15 +244,56 @@ export function PaymentSection({
         >
           <p className="font-semibold text-[#3D3D3D]">디지털 콘텐츠(맞춤 리포트) · 환불 안내</p>
           <p className="mt-1.5">
-            본 서비스는 이용자 맞춤형 <strong>디지털 콘텐츠</strong>에 해당할 수 있습니다.{' '}
-            <strong>분석이 시작된 이후</strong> 또는 <strong>리포트가 제공된 이후</strong>에는 관련 법령에 따라{' '}
-            <strong>청약철회가 제한</strong>될 수 있고, <strong>환불이 어려울 수 있어요.</strong> 결제를 진행하기 전에{' '}
+            본 서비스의 리포트는 이용자의 신청에 따라 <strong>개별 제작되는 디지털 콘텐츠</strong>에 해당할 수
+            있습니다. 「전자상거래 등에서의 소비자보호에 관한 법률」 제17조 제2항에 의거,{' '}
+            <strong>분석이 시작되거나 리포트가 발송된 이후에는 청약철회 및 환불이 불가능합니다.</strong> 카드·간편결제
+            등 전자결제는 <strong>결제 완료와 동시에 맞춤형 AI 분석이 즉시 시작</strong>될 수 있어, 그 이후 단계에서의
+            청약철회가 제한됩니다. 무통장 입금은 입금 확인 후 분석이 개시될 수 있습니다. 진행 전에{' '}
             <Link href="/terms" className="font-semibold text-[#5A6F52] underline underline-offset-2">
               이용약관
             </Link>
-            의 요금·환불 조항을 확인해 주세요.
+            의 요금·환불 조항을 함께 확인해 주세요.
           </p>
         </div>
+
+        {!tossConfigured ? (
+          <div
+            className="rounded-xl border border-[#D4E0D0] bg-[#FAFAF8]/95 px-4 py-4 text-[11px] leading-relaxed text-[#4A4A4A] sm:text-xs"
+            role="group"
+            aria-labelledby={`payment-consents-heading-${idSuffix}`}
+          >
+            <p id={`payment-consents-heading-${idSuffix}`} className="font-semibold text-[#3D3D3D]">
+              결제 전 필수 동의
+            </p>
+            <ul className="mt-3 list-none space-y-3.5 p-0">
+              <li className="flex gap-3">
+                <input
+                  id={`consent-digital-refund-${idSuffix}`}
+                  type="checkbox"
+                  checked={agreeDigitalNoRefund}
+                  onChange={(e) => setAgreeDigitalNoRefund(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#C8C4BC] text-[#7C9070] focus:ring-[#7C9070]/30"
+                />
+                <label htmlFor={`consent-digital-refund-${idSuffix}`} className="cursor-pointer select-none">
+                  (필수) 결제 완료와 동시에 맞춤형 AI 분석이 즉시 시작되므로, 디지털 콘텐츠 특성상 환불이 불가능함에
+                  동의합니다.
+                </label>
+              </li>
+              <li className="flex gap-3">
+                <input
+                  id={`consent-guardian-${idSuffix}`}
+                  type="checkbox"
+                  checked={agreeGuardianCollect}
+                  onChange={(e) => setAgreeGuardianCollect(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#C8C4BC] text-[#7C9070] focus:ring-[#7C9070]/30"
+                />
+                <label htmlFor={`consent-guardian-${idSuffix}`} className="cursor-pointer select-none">
+                  (필수) 나는 만 14세 미만 아동의 법정대리인이며, 서비스 이용을 위한 정보 수집에 동의합니다.
+                </label>
+              </li>
+            </ul>
+          </div>
+        ) : null}
 
         {tossConfigured ? (
           <>
