@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 
 import { ApplyPageShell } from '../../../ApplyPageShell'
 
@@ -36,7 +36,7 @@ export default async function TossPaymentResultPage({ searchParams }: PageProps)
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#2F3D2E]">감사합니다</h1>
           <p className="mt-4 text-sm leading-relaxed text-[#5A5A5A]">
             카드·간편결제가 완료되었어요. 확인이 끝나면 통합 리포트를 준비해 신청 시 남겨 주신 이메일로 보내 드릴게요.
-            통상 {REPORT_EMAIL_SLA_MAX_PHRASE}에 발송하는 것을 목표로 해요. {REPORT_EMAIL_SLA_DELAY_NOTE} 문의는 고객지원
+            {REPORT_EMAIL_DELIVERY_POLICY_CASUAL} 문의는 고객지원
             이메일 또는 카카오톡 채널로 연락 주세요.
           </p>
           <Link

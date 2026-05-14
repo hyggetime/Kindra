@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { submitIntegratedIntake } from '@app/actions/intake-submit'
-import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 import { formatPriceWon, LIST_PRICE_WON } from '@lib/constants'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
 import { completedMonthsFromDaysSinceBirth, parseBirthDateIso } from '@lib/intake/age-months'
@@ -268,8 +268,7 @@ function ApplyIntegratedFormFields({
         </label>
 
         <p className="mt-5 text-[11px] leading-relaxed text-[#9A9A9A] sm:text-xs">
-          (접수·결제 등 확인이 끝나면 {REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일로 발송하는 것을 목표로 해요.{' '}
-          {REPORT_EMAIL_SLA_DELAY_NOTE})
+          (접수·결제 확인이 끝난 뒤 이메일로 보내 드려요. {REPORT_EMAIL_DELIVERY_POLICY_CASUAL})
         </p>
 
         <hr className="mt-10 border-0 border-t border-[#E8E4DC] sm:mt-12" />

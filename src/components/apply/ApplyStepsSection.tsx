@@ -1,4 +1,4 @@
-import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 
 function ChevronIcon({ className }: { className?: string }) {
   return (
@@ -48,8 +48,8 @@ export function ApplyStepsSection() {
             <div>
               <p className="font-semibold text-[#3D3D3D]">리포트 수령</p>
               <p className="mt-1 text-sm leading-[1.85] text-[#5A5A5A]">
-                전송이 완료되면 필요한 확인이 끝난 뒤, {REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일로 통합 마음 지도 리포트를
-                보내드리는 것을 목표로 해요. {REPORT_EMAIL_SLA_DELAY_NOTE}
+                전송이 완료되면 필요한 확인이 끝난 뒤, 이메일로 통합 마음 지도 리포트를 보내 드려요.{' '}
+                {REPORT_EMAIL_DELIVERY_POLICY_CASUAL}
               </p>
             </div>
           </li>

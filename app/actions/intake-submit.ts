@@ -27,7 +27,7 @@ import { LIST_PRICE_WON } from '@lib/constants'
 import { setReportAccessCookie } from '@lib/payment/report-access-cookie.server'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
 import { createServiceRoleClient } from '@lib/supabase/admin'
-import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 import { isSkipPaymentForAnalysis } from '@lib/intake/skip-payment-for-analysis'
 
 const MAX_BYTES_PER_IMAGE = 4 * 1024 * 1024
@@ -455,7 +455,7 @@ export async function submitIntegratedIntake(
 
       return {
         ok: true,
-        message: `전송이 완료됐어요. 리포트는 ${REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일로 보내 드릴게요.`,
+        message: `전송이 완료됐어요. 리포트는 이메일로 보내 드릴게요. ${REPORT_EMAIL_DELIVERY_POLICY_CASUAL}`,
         reportRowId: reportUuid,
       }
     } catch (e) {

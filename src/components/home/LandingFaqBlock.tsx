@@ -1,9 +1,9 @@
-import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 
 const ITEMS: { q: string; a: string }[] = [
   {
     q: '리포트는 언제 받을 수 있나요?',
-    a: `그림과 신청서를 받고 필요한 확인이 끝나면, ${REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일로 통합 리포트를 보내드리는 것을 목표로 해요. ${REPORT_EMAIL_SLA_DELAY_NOTE}`,
+    a: `그림과 신청서를 받고 필요한 확인이 끝나면, 이메일로 통합 리포트를 보내 드려요. ${REPORT_EMAIL_DELIVERY_POLICY_CASUAL}`,
   },
   {
     q: '결제는 꼭 해야 하나요?',

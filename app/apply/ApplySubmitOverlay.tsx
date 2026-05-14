@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 
 import { KINDRA_PHILOSOPHY } from '@lib/gemini/prompts'
 
@@ -64,8 +64,7 @@ export function ApplySubmitOverlay({ phase }: Props) {
           {phase !== 'done' ? (
             <p className="mt-8 text-sm leading-relaxed text-white/75">
               전송이 끝나면 안내에 따라 결제·확인이 이어진 뒤,{' '}
-              <span className="font-semibold text-white/95">{REPORT_EMAIL_SLA_MAX_PHRASE}에 이메일 발송</span>을 목표로
-              해요.
+              <span className="font-semibold text-white/95">이메일로 리포트</span>를 보내 드려요. {REPORT_EMAIL_DELIVERY_POLICY_CASUAL}
             </p>
           ) : (
             <p className="mt-8 text-sm leading-relaxed text-white/80">잠시 후 안내 화면으로 이어질 거예요.</p>

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { REPORT_EMAIL_SLA_DELAY_NOTE, REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 import { KINDRA_PHILOSOPHY } from '@lib/gemini/prompts'
 import {
   extractHashtagTokens,
@@ -346,9 +346,8 @@ export function IntakeReportDocument({
                 통합 리포트를 준비하고 있어요.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-[#5C5C5C]">
-                제출해 주신 그림과 메모를 반영해 분석 중이에요. 완료와 이메일 안내는 {REPORT_EMAIL_SLA_MAX_PHRASE}를
-                목표로 하고 있어요. 준비가 되면 이 화면이 바뀌거나, 신청 시 남겨 주신 이메일로도 보내 드려요.{' '}
-                {REPORT_EMAIL_SLA_DELAY_NOTE}
+                제출해 주신 그림과 메모를 반영해 분석 중이에요. 완료와 이메일 안내는 준비가 되면 이 화면이 바뀌거나,
+                신청 시 남겨 주신 이메일로도 보내 드려요. {REPORT_EMAIL_DELIVERY_POLICY_CASUAL}
               </p>
             </div>
           </div>

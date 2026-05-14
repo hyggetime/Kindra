@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
-import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_FORMAL } from '@lib/copy/report-email-sla'
 
 const EFFECTIVE_DATE = '2026년 5월 13일'
 const COMPANY = BUSINESS_INFO.companyDisplay
@@ -93,7 +93,7 @@ export function PrivacyPolicyPage() {
           <Table rows={[
             [
               '리포트 작성·제공',
-              `제공된 그림·신청 정보를 바탕으로 아동 그림 심리 관찰 리포트를 작성·저장하고, 이메일 인증(매직 링크)으로 접속한 이용자에게 웹으로 열람할 수 있게 제공합니다. 통상 신청 시 기재한 이메일로, ${REPORT_EMAIL_SLA_MAX_PHRASE}에 통합 리포트를 발송하는 것을 목표로 합니다.`,
+              `제공된 그림·신청 정보를 바탕으로 아동 그림 심리 관찰 리포트를 작성·저장하고, 이메일 인증(매직 링크)으로 접속한 이용자에게 웹으로 열람할 수 있게 제공합니다. 신청 시 기재한 이메일로 통합 리포트를 발송하며, ${REPORT_EMAIL_DELIVERY_POLICY_FORMAL}`,
             ],
             [
               '맞춤형 부가 서비스',

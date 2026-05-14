@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import { BUSINESS_INFO, getBusinessPhone, getBusinessPremisesAddress } from '@lib/legal/business-info'
-import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_FORMAL } from '@lib/copy/report-email-sla'
 
 const EFFECTIVE_DATE = '2026년 5월 13일'
 const COMPANY = BUSINESS_INFO.companyDisplay
@@ -97,8 +97,8 @@ export function TermsOfServicePage() {
             </li>
             <li>
               통합 리포트는 신청서·그림 수집 및 유료 구간에서 결제(또는 입금) 확인 등 절차가 갖춰진 뒤 제공되며,
-              회사는 원칙적으로 <strong>{REPORT_EMAIL_SLA_MAX_PHRASE}에</strong> 신청 시 기재한 이메일로 발송하는 것을
-              목표로 합니다. 동시 접수, 결제·입금 확인 지연, 기술적 사유 등으로 그보다 늦어질 수 있습니다.
+              회사는 신청 시 기재한 이메일로 통합 리포트를 발송합니다. <strong>{REPORT_EMAIL_DELIVERY_POLICY_FORMAL}</strong>{' '}
+              동시 접수, 결제·입금 확인 지연, 기술적 사유 등으로 안내 또는 발송이 그보다 늦어질 수 있습니다.
             </li>
             <li>회사는 운영상·기술상 필요에 따라 서비스의 전부 또는 일부를 일시 중단하거나 종료할 수 있습니다.</li>
           </ul>
