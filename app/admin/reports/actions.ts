@@ -1,5 +1,6 @@
 'use server'
 
+import { recordCouponRedemptionAfterPayment } from '@lib/payment/coupon-campaigns.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { triggerAiAnalysis } from '@lib/intake/trigger-ai-analysis.server'
 
@@ -82,6 +83,18 @@ export async function updateKindraReportDepositConfirmed(
       .eq('id', intakeId)
     if (pErr) {
       console.error('[admin/reports] payment_confirmed_at on intake', pErr.message)
+    }
+    const { data: repRow } = await supabase
+      .from('kindra_reports')
+      .select('coupon_code_applied')
+      .eq('id', id)
+      .maybeSingle()
+    const cc =
+      repRow && typeof (repRow as { coupon_code_applied?: unknown }).coupon_code_applied === 'string'
+        ? (repRow as { coupon_code_applied: string }).coupon_code_applied.trim()
+        : ''
+    if (cc) {
+      await recordCouponRedemptionAfterPayment(id, cc, 'bank_deposit')
     }
     const ai = await triggerAiAnalysis(intakeId)
     if (!ai.ok) {

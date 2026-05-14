@@ -38,6 +38,8 @@ type IntakeRow = {
   child_display_name: string
   child_gender: string
   child_note: string | null
+  child_height_cm: number | null
+  child_weight_kg: number | null
   child_birthday: string | null
   drawn_at: string | null
   child_age_in_months: number | null
@@ -106,7 +108,7 @@ export async function triggerAiAnalysis(intakeIdRaw: string): Promise<TriggerAiA
   const { data: intake, error: iErr } = await admin
     .from('kindra_intakes')
     .select(
-      'id, email, parent_display_name, child_display_name, child_gender, child_note, child_birthday, drawn_at, child_age_in_months, child_age_hint, drawing_paths, gemini_status, payment_confirmed_at',
+      'id, email, parent_display_name, child_display_name, child_gender, child_note, child_height_cm, child_weight_kg, child_birthday, drawn_at, child_age_in_months, child_age_hint, drawing_paths, gemini_status, payment_confirmed_at',
     )
     .eq('id', intakeId)
     .maybeSingle()
@@ -231,6 +233,15 @@ export async function triggerAiAnalysis(intakeIdRaw: string): Promise<TriggerAiA
 
   const drawingMemos = drawingMemosFromReportJson(rep.report_json)
 
+  const childHeightCm =
+    typeof row.child_height_cm === 'number' && Number.isFinite(row.child_height_cm)
+      ? row.child_height_cm
+      : null
+  const childWeightKg =
+    typeof row.child_weight_kg === 'number' && Number.isFinite(row.child_weight_kg)
+      ? row.child_weight_kg
+      : null
+
   try {
     const parentNoteForGemini = buildStructuredParentNoteForGemini({
       analysisDateIso: isoDateLocal(drawnDay),
@@ -254,8 +265,8 @@ export async function triggerAiAnalysis(intakeIdRaw: string): Promise<TriggerAiA
         childShortName: row.child_display_name,
         sex: childGenderCode,
         completedMonths: childAgeMonthsAtDrawing,
-        heightCm: null,
-        weightKg: null,
+        heightCm: childHeightCm,
+        weightKg: childWeightKg,
       })
       if (physio) {
         reportMarkdown = injectPhysioMarkdownBeforeParentsSection(reportMarkdown, physio)
@@ -265,8 +276,8 @@ export async function triggerAiAnalysis(intakeIdRaw: string): Promise<TriggerAiA
           growthStats,
           childGenderCode,
           childAgeMonthsAtDrawing,
-          null,
-          null,
+          childHeightCm,
+          childWeightKg,
         )
       ) {
         reportMarkdown = `${reportMarkdown.trimEnd()}\n\n${BODY_GROWTH_DISCLAIMER_MARKDOWN}\n`

@@ -1,7 +1,11 @@
 'use server'
 
-import { resolveCheckoutAmountWon } from '@lib/payment/coupon-resolve.server'
+import { resolveCheckoutCouponAsync } from '@lib/payment/coupon-campaigns.server'
 
-export async function previewCheckoutCoupon(listedPriceWon: number, couponRaw: string) {
-  return resolveCheckoutAmountWon(listedPriceWon, couponRaw)
+export async function previewCheckoutCoupon(
+  listedPriceWon: number,
+  couponRaw: string,
+  reportId?: string | null,
+) {
+  return resolveCheckoutCouponAsync(listedPriceWon, couponRaw, reportId ?? null)
 }

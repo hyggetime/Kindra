@@ -161,7 +161,7 @@ export function AdminReportsTable({ rows, adminPw, origin }: Props) {
                     {row.chargedAmountWon != null ? (
                       formatPriceWon(row.chargedAmountWon)
                     ) : (
-                      <span title={`정상가 ${formatPriceWon(row.listedPriceWon)}`}>
+                      <span title={`청구 기준가 ${formatPriceWon(row.listedPriceWon)}`}>
                         미결제 <span className="text-[#B0B0B0]">({formatPriceWon(row.listedPriceWon)})</span>
                       </span>
                     )}

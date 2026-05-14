@@ -6,7 +6,6 @@ import { ApplyPaymentView } from './ApplyPaymentView'
 import { readBankTransferFromEnv } from '@lib/payment/bank-transfer-env.server'
 import { parseReportIdParam } from '@lib/payment/parse-payment-page-params'
 import { isPaymentHideBankTransferEnabled } from '@lib/payment/hide-bank-transfer-env'
-import { isPaymentHideTossWidgetEnabled } from '@lib/payment/hide-toss-widget-env'
 import { getListedPriceWonForReport } from '@lib/payment/report-checkout.server'
 
 export const metadata: Metadata = {
@@ -26,8 +25,6 @@ export default async function ApplyPaymentPage({ searchParams }: PageProps) {
   const bankTransfer = readBankTransferFromEnv()
   const listedPriceWon = await getListedPriceWonForReport(reportId)
   const hideBankTransferUi = isPaymentHideBankTransferEnabled()
-  const hideTossWidgetUi = isPaymentHideTossWidgetEnabled()
-
   return (
     <ApplyPageShell>
       <Suspense
@@ -42,7 +39,6 @@ export default async function ApplyPaymentPage({ searchParams }: PageProps) {
           bankTransfer={bankTransfer}
           listedPriceWon={listedPriceWon}
           hideBankTransferUi={hideBankTransferUi}
-          hideTossWidgetUi={hideTossWidgetUi}
         />
       </Suspense>
     </ApplyPageShell>

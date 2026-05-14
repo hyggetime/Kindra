@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import { PaymentSection } from '@/components/payment/PaymentSection'
+import { REPORT_EMAIL_DELIVERY_POLICY_PAYMENT_LINE } from '@lib/copy/report-email-sla'
 import { APPLY_FORM_HREF } from '@lib/apply-href'
 import { getKakaoChannelChatPageUrl, resolveKakaoChannelPublicId } from '@lib/kakao/kakao-channel-constants'
 import type { BankTransferDisplay } from '@lib/payment/bank-transfer'
@@ -15,19 +16,12 @@ type Props = {
   bankTransfer: BankTransferDisplay
   listedPriceWon: number
   hideBankTransferUi: boolean
-  hideTossWidgetUi: boolean
 }
 
 /**
  * 그림·신청서 전송 직후: 짧은 완료 뒤, **결제 안내**를 강조.
  */
-export function ApplyPaymentView({
-  reportId,
-  bankTransfer,
-  listedPriceWon,
-  hideBankTransferUi,
-  hideTossWidgetUi,
-}: Props) {
+export function ApplyPaymentView({ reportId, bankTransfer, listedPriceWon, hideBankTransferUi }: Props) {
   const [copied, setCopied] = useState(false)
   const [copyLinkBusy, setCopyLinkBusy] = useState(false)
 
@@ -54,15 +48,23 @@ export function ApplyPaymentView({
     <div className="space-y-8 sm:space-y-10">
       <header className="text-center">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#7C9070]/90">전송 완료</p>
-        <h1 className="mx-auto mt-3 max-w-md text-base font-bold leading-[1.65] tracking-tight text-[#2F3D2E] sm:text-lg">
-          아이의 마음을 살펴볼 준비가 끝났어요. 리포트를 받으시려면 아래에서 결제를 이어가 주세요.
+        <h1 className="mx-auto mt-3 max-w-lg text-left text-base font-bold leading-snug tracking-tight text-[#2F3D2E] sm:text-lg">
+          신청서와 그림이 안전하게 전달되었어요. 이어서 결제를 완료하시면 리포트가 발송됩니다.
         </h1>
-        <p className="mx-auto mt-4 max-w-md text-sm leading-[1.85] text-[#6B6B6B]">
-          신청서와 그림이 안전하게 전달됐어요. 아래에서 금액을 확인한 뒤 안내에 따라 결제를 이어가 주세요.
-        </p>
-        <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#9A9A9A]">
-          한국 아동 그림 56,000건(심허브) 데이터를 참고해, 짧은 시간 안에도 놓치지 않도록 집중해서 살펴볼게요.
-        </p>
+        <div className="mx-auto mt-5 max-w-lg text-left text-sm text-[#5A5A5A]">
+          <div className="flex flex-col">
+            <div className="flex flex-col gap-y-[0.325em] [&>p]:m-0 [&>p]:leading-[1.65]">
+              <p>신청 감사합니다. 전송하신 아이의 그림과 개인정보는 소중히 안전하게 사용 후 보관됩니다.</p>
+              <p>{REPORT_EMAIL_DELIVERY_POLICY_PAYMENT_LINE}</p>
+            </div>
+            <p className="mx-0 mb-0 mt-[0.65em] text-[#8A8A8A] leading-[1.65]">
+              <span aria-hidden className="mr-1.5 select-none">
+                •
+              </span>
+              화면이 비어 보인다면 잠시 후 &apos;새로고침&apos;해 주세요.
+            </p>
+          </div>
+        </div>
       </header>
 
       <PaymentSection
@@ -71,7 +73,6 @@ export function ApplyPaymentView({
         reportId={reportId}
         bankTransfer={bankTransfer}
         hideBankTransferUi={hideBankTransferUi}
-        hideTossWidgetUi={hideTossWidgetUi}
       />
 
       <div className="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">

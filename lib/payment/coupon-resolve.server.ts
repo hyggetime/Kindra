@@ -1,12 +1,14 @@
 import 'server-only'
 
-import { EVENT_COUPON_TO_MIN_CHECKOUT, LIST_PRICE_WON, MIN_CHECKOUT_WON } from '@lib/constants'
+import { LIST_PRICE_WON, MIN_CHECKOUT_WON } from '@lib/constants'
 
 export type CouponResolveOk = {
   ok: true
   amountWon: number
   discountWon: number
   couponNormalized: string | null
+  /** DB 캠페인 표시명(있을 때) */
+  displayName?: string | null
 }
 
 export type CouponResolveErr = { ok: false; message: string }
@@ -14,36 +16,19 @@ export type CouponResolveErr = { ok: false; message: string }
 export type CouponResolveResult = CouponResolveOk | CouponResolveErr
 
 /**
- * 정상가에서 쿠폰을 적용한 최종 청구 금액.
- * - 빈 문자열: 할인 없음(정상가).
- * - 알 수 없는 코드: 오류(고객에게 표시).
+ * 청구 기준가(listed)에서 차감분을 반영한 최종 청구액. 최소 결제(MIN_CHECKOUT_WON) 미만이면 바닥으로 맞춤.
  */
-export function resolveCheckoutAmountWon(listedPriceWon: number, couponRaw: string | null | undefined): CouponResolveResult {
+export function checkoutAmountAfterDiscountWon(listedPriceWon: number, discountWon: number): {
+  amountWon: number
+  discountWon: number
+} {
   const listed = Math.max(0, Math.round(Number(listedPriceWon) || 0))
-  const trimmed = String(couponRaw ?? '').trim()
-  if (!trimmed) {
-    return { ok: true, amountWon: listed, discountWon: 0, couponNormalized: null }
-  }
-
-  const code = trimmed.toUpperCase()
-
-  if (code === EVENT_COUPON_TO_MIN_CHECKOUT) {
-    const finalAmt = MIN_CHECKOUT_WON
-    return {
-      ok: true,
-      amountWon: finalAmt,
-      discountWon: Math.max(0, listed - finalAmt),
-      couponNormalized: code,
-    }
-  }
-
-  return {
-    ok: false,
-    message: '사용할 수 없는 쿠폰 코드예요. 코드를 확인하거나 비워 두고 진행해 주세요.',
-  }
+  const disc = Math.max(0, Math.round(Number(discountWon) || 0))
+  const amountWon = Math.max(MIN_CHECKOUT_WON, listed - disc)
+  return { amountWon, discountWon: listed - amountWon }
 }
 
-/** 미리보기·검증용 기본 정상가 */
+/** 미리보기·검증용 기본 청구 기준가(런칭 할인가) */
 export function defaultListedPriceWon(): number {
   return LIST_PRICE_WON
 }

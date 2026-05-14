@@ -249,6 +249,8 @@ export async function submitIntegratedIntake(
       child_display_name: childDisplayName,
       child_gender: childGenderLabel,
       child_note: childNote || null,
+      child_height_cm: childHeightCm,
+      child_weight_kg: childWeightKg,
       child_age_hint: childAgeHint || null,
       child_birthday: childBirthdayIso,
       drawn_at: drawnAtIso,

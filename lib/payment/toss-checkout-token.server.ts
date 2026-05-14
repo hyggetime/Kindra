@@ -10,7 +10,7 @@ export type TossCheckoutPayload = {
   exp: number
   /** 신청 리포트 UUID */
   reportId: string | null
-  /** 결제 시점 정상가 스냅샷 */
+  /** 결제 시점 청구 기준가(원) 스냅샷 */
   listedPriceWon: number
   /** 적용 쿠폰(대문자) 또는 없음 */
   couponCode: string | null

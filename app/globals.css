@@ -59,6 +59,35 @@ body {
   animation: kindra-philosophy-marquee 56s linear infinite;
 }
 
+/* 쿠폰 적용: 새 금액이 기존 자리(왼쪽)에 나타나고, 기존가는 우측으로 밀림 */
+@keyframes kindra-checkout-price-old {
+  from {
+    transform: translateX(-6.75ch);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes kindra-checkout-price-new {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.kindra-checkout-price-old {
+  animation: kindra-checkout-price-old 0.44s ease-out forwards;
+}
+
+.kindra-checkout-price-new {
+  animation: kindra-checkout-price-new 0.4s ease-out 0.05s both;
+}
+
 @media print {
   @page {
     margin: 14mm 12mm 18mm;

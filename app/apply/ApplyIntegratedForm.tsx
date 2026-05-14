@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { submitIntegratedIntake } from '@app/actions/intake-submit'
 import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
-import { formatPriceWon, LIST_PRICE_WON } from '@lib/constants'
+import { formatPriceWon, LIST_PRICE_MSRP_WON } from '@lib/constants'
+import { LaunchPricingCallout } from '@/components/pricing/LaunchPricingCallout'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
 import { completedMonthsFromDaysSinceBirth, parseBirthDateIso } from '@lib/intake/age-months'
 import {
@@ -591,12 +592,13 @@ function ApplyIntegratedFormFields({
         </div>
 
         <div className="space-y-5 rounded-xl border border-[#E8E4DC] bg-[#FDFBF9] px-4 py-5 sm:px-6 sm:py-6">
+          <LaunchPricingCallout compact />
           <fieldset disabled={pending} className="min-w-0 border-0 p-0">
             <legend className="text-xs font-semibold text-[#4A4A4A]">
               서비스 이용료에 대한 설문조사 <span className="text-[#B85C5C]">*</span>
             </legend>
             <p className="mt-2 text-[12px] leading-relaxed text-[#5A5A5A] sm:text-sm">
-              킨드라 그림 분석 서비스의 이용료는 {formatPriceWon(LIST_PRICE_WON)}입니다. 이 가격이 적당하다고 생각하십니까?
+              킨드라 그림 분석 서비스의 이용료는 {formatPriceWon(LIST_PRICE_MSRP_WON)}입니다. 이 가격이 적당하다고 생각하십니까?
             </p>
             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
               <label className="flex cursor-pointer items-center gap-2 text-sm text-[#3D3D3D]">

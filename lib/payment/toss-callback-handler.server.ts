@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server'
 import { confirmTossWidgetPayment } from '@lib/payment/toss-confirm-payment.server'
 import { deleteTossCheckoutSession, loadTossCheckoutSession } from '@lib/payment/toss-checkout-session.server'
 import { decodeCheckoutCookie, isCheckoutExpired } from '@lib/payment/toss-checkout-token.server'
+import { recordCouponRedemptionAfterPayment } from '@lib/payment/coupon-campaigns.server'
 import { attachTossPaymentKeyToReport } from '@lib/payment/toss-record-payment.server'
 import { triggerAiAnalysis } from '@lib/intake/trigger-ai-analysis.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
@@ -74,6 +75,7 @@ export async function handleTossPaymentCallbackGet(request: Request): Promise<Ne
     couponCode: checkout.couponCode,
     chargedAmountWon: amount,
   })
+  await recordCouponRedemptionAfterPayment(checkout.reportId, checkout.couponCode, 'toss')
   jar.delete(CHECKOUT_COOKIE)
   await deleteTossCheckoutSession(orderId)
 

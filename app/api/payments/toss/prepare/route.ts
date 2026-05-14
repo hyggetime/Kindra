@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { resolveCheckoutAmountWon } from '@lib/payment/coupon-resolve.server'
+import { resolveCheckoutCouponAsync } from '@lib/payment/coupon-campaigns.server'
 import { getRedirectOriginForTossCallbacks } from '@lib/payment/redirect-origin-from-request.server'
 import { saveTossCheckoutSession } from '@lib/payment/toss-checkout-session.server'
 import { encodeCheckoutCookie, type TossCheckoutPayload } from '@lib/payment/toss-checkout-token.server'
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
   const listedPriceWon = await getListedPriceWonForReport(reportId)
   const couponRaw = typeof body.couponCode === 'string' ? body.couponCode : ''
-  const resolved = resolveCheckoutAmountWon(listedPriceWon, couponRaw)
+  const resolved = await resolveCheckoutCouponAsync(listedPriceWon, couponRaw, reportId)
 
   if (!resolved.ok) {
     return NextResponse.json({ error: resolved.message }, { status: 400 })

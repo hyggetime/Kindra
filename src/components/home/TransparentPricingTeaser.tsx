@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import { APPLY_FORM_HREF, APPLY_STEPS_HREF } from '@lib/apply-href'
-import { LIST_PRICE_WON } from '@lib/constants'
+import { LaunchPricingCallout } from '@/components/pricing/LaunchPricingCallout'
 
 /**
  * 랜딩 하단 — 짧은 요금 안내(사전 인지).
@@ -21,20 +21,11 @@ export function TransparentPricingTeaser() {
           id="pricing-preview-title"
           className="mt-2.5 text-center text-base font-semibold text-[#3D3D3D] sm:text-lg"
         >
-          정상가와 쿠폰을 미리 알려드려요
+          런칭 이벤트 할인가 안내
         </h2>
-        <ul className="mt-5 space-y-2.5 text-left text-[13px] leading-[1.75] text-[#5A5A5A] sm:text-sm">
-          <li className="flex gap-2.5">
-            <span className="mt-0.5 shrink-0 text-[#7C9070]" aria-hidden>
-              ·
-            </span>
-            <span>
-              리포트 정상가{' '}
-              <strong className="text-[#4A4A4A]">{LIST_PRICE_WON.toLocaleString('ko-KR')}원</strong> — 결제 단계에서
-              프로모션 쿠폰을 입력하면 할인된 금액으로 이어가실 수 있어요.
-            </span>
-          </li>
-        </ul>
+        <div className="mt-5">
+          <LaunchPricingCallout />
+        </div>
         <p className="mt-5 text-center text-[11px] leading-relaxed text-[#8A8A8A] sm:text-xs">
           한국 아동 그림 56,000건(심허브)과 영유아 성장도표 데이터를 함께 활용해요.
         </p>

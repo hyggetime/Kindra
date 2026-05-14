@@ -35,8 +35,8 @@ export default async function IntakePage() {
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7C9070]/80">신청</p>
       <h1 className="text-2xl font-bold tracking-tight text-[#3D3D3D] sm:text-3xl">아이의 그림을 보내주세요</h1>
       <p className="mt-5 text-[0.95rem] leading-[1.95] text-[#5A5A5A]">
-        리포트 정상가는 <strong className="font-semibold text-[#5A6F52]">{priceLine}</strong> 이에요. 이벤트 쿠폰은 결제
-        직전에 입력할 수 있어요.
+        리포트 청구 기준가는 <strong className="font-semibold text-[#5A6F52]">{priceLine}</strong>이에요. 아래 신청서에서
+        런칭 혜택 안내를 확인하실 수 있고, 프로모션 코드는 결제 직전에 입력해 주세요.
       </p>
 
       <section className="mt-10 rounded-2xl border border-[#E8E4DC] bg-white px-6 py-8 shadow-sm">

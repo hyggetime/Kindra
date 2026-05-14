@@ -4,43 +4,41 @@ import { ANONYMOUS, loadTossPayments } from '@tosspayments/tosspayments-sdk'
 import { useCallback, useEffect, useState } from 'react'
 
 import { previewCheckoutCoupon } from '@app/actions/payment-coupon-preview'
-import { formatPriceWon } from '@lib/constants'
+import { CheckoutAnimatedPrice } from '@/components/payment/CheckoutAnimatedPrice'
 import { getPaymentRedirectOrigin } from '@lib/payment/payment-redirect-origin'
 import { getTossClientKey, isTossPaymentsConfigured } from '@lib/payment/toss-payments-config'
 
 type SectionProps = {
   reportId: string | null
   listedPriceWon: number
+  /** 부모에서 관리하는 쿠폰 입력값(쿠폰 패널과 동기화) */
+  couponInput: string
   /** 무통장 블록 등과 금액 맞추기 — 쿠폰 적용·결제 직전 미리보기 후 호출 */
   onResolvedAmount?: (amountWon: number) => void
-  /** `bankFirst` 일 때는 시각적 강조를 약하게(무통장이 위에 있을 때) */
+  /** `secondaryPlacement` 일 때는 시각적 강조를 약하게 */
   secondaryPlacement?: boolean
-  /** 환불 불가·법정대리인 등 결제 직전 필수 동의 — 부모에서 상태 관리 */
+  /** 환불 불가·법정대리인 등 결제 직전 필수 동의 — 부모에서 상태 관리(이 컴포넌트는 표시만 하지 않음) */
   agreeDigitalNoRefund: boolean
   agreeGuardianCollect: boolean
-  onAgreeDigitalNoRefund: (value: boolean) => void
-  onAgreeGuardianCollect: (value: boolean) => void
 }
 
 /**
- * 쿠폰 입력 → 토스페이먼츠 통합결제창 (`payment().requestPayment`, method CARD).
+ * 토스페이먼츠 통합결제창 (`payment().requestPayment`, method CARD).
+ * 쿠폰 입력은 `PaymentCouponPanel` 등 부모에서 배치합니다.
  */
 export function IntakeTossPaymentsWidgetSection({
   reportId,
   listedPriceWon,
+  couponInput,
   onResolvedAmount,
   secondaryPlacement = false,
   agreeDigitalNoRefund,
   agreeGuardianCollect,
-  onAgreeDigitalNoRefund,
-  onAgreeGuardianCollect,
 }: SectionProps) {
   const consentsOk = agreeDigitalNoRefund && agreeGuardianCollect
   const clientKey = getTossClientKey()
   const sdkReady = isTossPaymentsConfigured()
-  const [couponInput, setCouponInput] = useState('')
   const [displayAmount, setDisplayAmount] = useState(listedPriceWon)
-  const [couponNote, setCouponNote] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -58,28 +56,13 @@ export function IntakeTossPaymentsWidgetSection({
 
   const runPreview = useCallback(
     async (code: string) => {
-      const r = await previewCheckoutCoupon(listedPriceWon, code)
+      const r = await previewCheckoutCoupon(listedPriceWon, code, reportId)
       if (!r.ok) return r
       pushResolved(r.amountWon)
-      setCouponNote(
-        r.discountWon > 0
-          ? `할인 ${formatPriceWon(r.discountWon)} 반영 · 최종 ${formatPriceWon(r.amountWon)}`
-          : '정상가로 진행해요.',
-      )
       return r
     },
-    [listedPriceWon, pushResolved],
+    [listedPriceWon, pushResolved, reportId],
   )
-
-  const onApplyCoupon = useCallback(async () => {
-    setError(null)
-    setCouponNote(null)
-    const r = await runPreview(couponInput.trim())
-    if (!r.ok) {
-      setError(r.message)
-      pushResolved(listedPriceWon)
-    }
-  }, [couponInput, listedPriceWon, pushResolved, runPreview])
 
   const openPaymentWindow = useCallback(async () => {
     if (!sdkReady) return
@@ -93,6 +76,7 @@ export function IntakeTossPaymentsWidgetSection({
       const prev = await runPreview(couponInput.trim())
       if (!prev.ok) {
         setError(prev.message)
+        pushResolved(listedPriceWon)
         return
       }
 
@@ -106,7 +90,6 @@ export function IntakeTossPaymentsWidgetSection({
         orderId?: string
         amount?: number
         orderName?: string
-        /** 서버가 `prepare` 요청 Host 기준으로 내려줌 — 폰에서 localhost 로 열린 창과 무관하게 LAN 등으로 맞출 수 있음 */
         redirectOrigin?: string
       }
       if (!res.ok) {
@@ -150,8 +133,6 @@ export function IntakeTossPaymentsWidgetSection({
     }
   }, [clientKey, consentsOk, couponInput, reportId, runPreview, sdkReady])
 
-  const priceLabel = formatPriceWon(displayAmount)
-
   return (
     <section
       className={`rounded-2xl border border-[#E8E4DC] bg-white/90 shadow-inner ${
@@ -161,82 +142,10 @@ export function IntakeTossPaymentsWidgetSection({
     >
       <div className="text-center">
         <p id="toss-payment-heading" className="text-xs font-semibold uppercase tracking-wide text-[#7C9070]">
-          {sdkReady ? '카드 · 간편결제' : '할인 코드 (선택)'}
+          {sdkReady ? '카드 · 간편결제' : '전자결제'}
         </p>
 
-        <div className="mt-4 rounded-xl border border-[#E8E4DC] bg-[#FAFAF8]/90 px-4 py-3 text-left">
-          <p className="text-[11px] font-medium text-[#5A5A5A]">쿠폰 코드</p>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <input
-              type="text"
-              value={couponInput}
-              onChange={(e) => {
-                setCouponInput(e.target.value)
-                setCouponNote(null)
-              }}
-              placeholder="코드가 있으면 입력 후 적용"
-              disabled={busy}
-              autoComplete="off"
-              className="min-h-[44px] w-full flex-1 rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm text-[#3D3D3D] outline-none ring-[#7C9070]/15 focus:border-[#7C9070]/40 focus:ring-2 disabled:opacity-60"
-            />
-            <button
-              type="button"
-              onClick={() => void onApplyCoupon()}
-              disabled={busy}
-              className="shrink-0 rounded-lg border border-[#7C9070]/40 bg-[#F4F7F2] px-4 py-2 text-xs font-semibold text-[#4F6048] transition hover:bg-[#E8F0E4] disabled:opacity-50"
-            >
-              적용
-            </button>
-          </div>
-          {couponNote ? <p className="mt-2 text-[11px] text-[#5A6F52]">{couponNote}</p> : null}
-          <p className="mt-2 text-[10px] leading-relaxed text-[#9A9A9A]">
-            정상가 {formatPriceWon(listedPriceWon)} · 결제 전 쿠폰을 적용하거나, 바로 결제하기를 눌러도 현재 입력값으로
-            다시 계산돼요.
-          </p>
-        </div>
-
-        <p className="mt-4 text-lg font-semibold tabular-nums text-[#3D3D3D]">{priceLabel}</p>
-
-        {sdkReady ? (
-          <div
-            className="mt-5 rounded-xl border border-[#D4E0D0] bg-[#FAFAF8]/95 px-4 py-4 text-left text-[11px] leading-relaxed text-[#4A4A4A] sm:text-xs"
-            role="group"
-            aria-labelledby="toss-payment-consents-heading"
-          >
-            <p id="toss-payment-consents-heading" className="font-semibold text-[#3D3D3D]">
-              결제 전 필수 동의
-            </p>
-            <ul className="mt-3 list-none space-y-3.5 p-0">
-              <li className="flex gap-3">
-                <input
-                  id="toss-consent-digital-refund"
-                  type="checkbox"
-                  checked={agreeDigitalNoRefund}
-                  onChange={(e) => onAgreeDigitalNoRefund(e.target.checked)}
-                  disabled={busy}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#C8C4BC] text-[#7C9070] focus:ring-[#7C9070]/30 disabled:opacity-50"
-                />
-                <label htmlFor="toss-consent-digital-refund" className="cursor-pointer select-none">
-                  (필수) 결제 완료와 동시에 맞춤형 AI 분석이 즉시 시작되므로, 디지털 콘텐츠 특성상 환불이 불가능함에
-                  동의합니다.
-                </label>
-              </li>
-              <li className="flex gap-3">
-                <input
-                  id="toss-consent-guardian"
-                  type="checkbox"
-                  checked={agreeGuardianCollect}
-                  onChange={(e) => onAgreeGuardianCollect(e.target.checked)}
-                  disabled={busy}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-[#C8C4BC] text-[#7C9070] focus:ring-[#7C9070]/30 disabled:opacity-50"
-                />
-                <label htmlFor="toss-consent-guardian" className="cursor-pointer select-none">
-                  (필수) 나는 만 14세 미만 아동의 법정대리인이며, 서비스 이용을 위한 정보 수집에 동의합니다.
-                </label>
-              </li>
-            </ul>
-          </div>
-        ) : null}
+        <CheckoutAnimatedPrice listedPriceWon={listedPriceWon} amountWon={displayAmount} variant="toss" />
 
         <div className="mt-6">
           {sdkReady ? (
@@ -255,7 +164,10 @@ export function IntakeTossPaymentsWidgetSection({
           )}
 
           {error ? (
-            <p className="mt-3 rounded-lg border border-[#F0D9D9] bg-[#FFF8F8] px-3 py-2 text-center text-xs text-[#A34D4D]" role="alert">
+            <p
+              className="mt-3 rounded-lg border border-[#F0D9D9] bg-[#FFF8F8] px-3 py-2 text-center text-xs text-[#A34D4D]"
+              role="alert"
+            >
               {error}
             </p>
           ) : null}
