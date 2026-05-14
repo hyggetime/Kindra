@@ -15,12 +15,19 @@ type Props = {
   bankTransfer: BankTransferDisplay
   listedPriceWon: number
   hideBankTransferUi: boolean
+  hideTossWidgetUi: boolean
 }
 
 /**
  * 그림·신청서 전송 직후: 짧은 완료 뒤, **결제 안내**를 강조.
  */
-export function ApplyPaymentView({ reportId, bankTransfer, listedPriceWon, hideBankTransferUi }: Props) {
+export function ApplyPaymentView({
+  reportId,
+  bankTransfer,
+  listedPriceWon,
+  hideBankTransferUi,
+  hideTossWidgetUi,
+}: Props) {
   const [copied, setCopied] = useState(false)
   const [copyLinkBusy, setCopyLinkBusy] = useState(false)
 
@@ -51,7 +58,7 @@ export function ApplyPaymentView({ reportId, bankTransfer, listedPriceWon, hideB
           아이의 마음을 살펴볼 준비가 끝났어요. 리포트를 받으시려면 아래에서 결제를 이어가 주세요.
         </h1>
         <p className="mx-auto mt-4 max-w-md text-sm leading-[1.85] text-[#6B6B6B]">
-          신청서와 그림이 안전하게 전달됐어요. 쿠폰이 있으면 입력한 뒤 카드 결제 또는 무통장 안내를 이용해 주세요.
+          신청서와 그림이 안전하게 전달됐어요. 아래에서 금액을 확인한 뒤 안내에 따라 결제를 이어가 주세요.
         </p>
         <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-[#9A9A9A]">
           한국 아동 그림 56,000건(심허브) 데이터를 참고해, 짧은 시간 안에도 놓치지 않도록 집중해서 살펴볼게요.
@@ -64,6 +71,7 @@ export function ApplyPaymentView({ reportId, bankTransfer, listedPriceWon, hideB
         reportId={reportId}
         bankTransfer={bankTransfer}
         hideBankTransferUi={hideBankTransferUi}
+        hideTossWidgetUi={hideTossWidgetUi}
       />
 
       <div className="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">

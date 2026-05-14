@@ -4,9 +4,10 @@ import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 
 import { saveBankDepositorName } from '@app/actions/save-bank-depositor'
-import { REPORT_EMAIL_SLA_MAX_PHRASE } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_SHORT_CASUAL } from '@lib/copy/report-email-sla'
 import { formatPriceWon } from '@lib/constants'
 import { isPaymentHideBankTransferEnabled } from '@lib/payment/hide-bank-transfer-env'
+import { isPaymentHideTossWidgetEnabled } from '@lib/payment/hide-toss-widget-env'
 import type { BankTransferDisplay } from '@lib/payment/bank-transfer'
 import { isTossPaymentsConfigured } from '@lib/payment/toss-payments-config'
 
@@ -20,6 +21,8 @@ type Props = {
   emphasis?: boolean
   /** 서버가 읽은 무통장 블록 숨김 플래그 */
   hideBankTransferUi?: boolean
+  /** 서버가 읽은 토스 결제창 숨김 플래그(심사 전 등) */
+  hideTossWidgetUi?: boolean
 }
 
 /**
@@ -31,6 +34,7 @@ export function PaymentSection({
   bankTransfer,
   emphasis = false,
   hideBankTransferUi: hideBankTransferUiProp,
+  hideTossWidgetUi: hideTossWidgetUiProp,
 }: Props) {
   const [depositor, setDepositor] = useState('')
   const [formMsg, setFormMsg] = useState<string | null>(null)
@@ -48,7 +52,10 @@ export function PaymentSection({
     setCheckoutWon(listedPriceWon)
   }, [listedPriceWon])
 
-  const tossConfigured = useMemo(() => isTossPaymentsConfigured(), [])
+  const tossKeysConfigured = useMemo(() => isTossPaymentsConfigured(), [])
+  const hideTossWidget =
+    (hideTossWidgetUiProp === true) || isPaymentHideTossWidgetEnabled()
+  const showTossUi = tossKeysConfigured && !hideTossWidget
 
   const copyAccountNumber = useCallback(async () => {
     if (accountCopyBusy) return
@@ -71,8 +78,7 @@ export function PaymentSection({
    * prop 또는 env 중 하나라도 켜면 숨김 — 느슨한 파싱은 `isPaymentHideBankTransferEnabled`.
    */
   const hideBankForTossFocus =
-    tossConfigured &&
-    (hideBankTransferUiProp === true || isPaymentHideBankTransferEnabled())
+    showTossUi && (hideBankTransferUiProp === true || isPaymentHideBankTransferEnabled())
 
   const onSaveDepositor = useCallback(() => {
     if (!reportId || saveLockRef.current) return
@@ -187,18 +193,28 @@ export function PaymentSection({
       </p>
     )
 
-  const bankFirstBanner = !tossConfigured ? (
-    <div
-      className="rounded-xl border border-[#D4E0D0] bg-[#F4F7F2]/90 px-4 py-3 text-sm leading-relaxed text-[#3D4A38]"
-      role="status"
-    >
-      카드·간편결제는 곧 오픈할 예정이에요. 지금은 아래 무통장 입금으로 결제를 진행해 주시면 바로 확인해 드릴게요.
-    </div>
+  const bankFirstBanner = !showTossUi ? (
+    tossKeysConfigured ? (
+      <div
+        className="rounded-xl border border-[#D4E0D0] bg-[#F4F7F2]/90 px-4 py-3 text-sm leading-relaxed text-[#3D4A38]"
+        role="status"
+      >
+        심사·테스트 준비 기간에는 카드·간편결제 창을 잠시 숨겨두었어요. 아래 무통장 입금으로 결제를 이어가 주시면 확인 후
+        리포트를 보내드릴게요.
+      </div>
+    ) : (
+      <div
+        className="rounded-xl border border-[#D4E0D0] bg-[#F4F7F2]/90 px-4 py-3 text-sm leading-relaxed text-[#3D4A38]"
+        role="status"
+      >
+        카드·간편결제는 곧 오픈할 예정이에요. 지금은 아래 무통장 입금으로 결제를 진행해 주시면 바로 확인해 드릴게요.
+      </div>
+    )
   ) : null
 
   const tossBlock = (
     <IntakeTossPaymentsWidgetSection
-      secondaryPlacement={!tossConfigured}
+      secondaryPlacement={!tossKeysConfigured}
       listedPriceWon={listedPriceWon}
       reportId={reportId}
       onResolvedAmount={setCheckoutWon}
@@ -214,27 +230,27 @@ export function PaymentSection({
       {emphasis ? null : (
         <p className="mx-auto mt-6 max-w-lg text-sm leading-[1.95] text-[#5A5A5A]">
           신청이 접수됐어요. 아래에서 카드·간편결제 또는 무통장 입금으로 결제를 이어가 주시면, 확인 후 리포트를
-          보내드릴게요. (이메일 발송은 {REPORT_EMAIL_SLA_MAX_PHRASE}를 목표로 해요.)
+          보내드릴게요. (이메일 발송: {REPORT_EMAIL_DELIVERY_POLICY_SHORT_CASUAL})
         </p>
       )}
 
       <div className={`mx-auto text-left ${emphasis ? 'max-w-lg' : 'mt-8 max-w-md'} space-y-6`}>
-        {emphasis && tossConfigured && !hideBankForTossFocus ? (
+        {emphasis && showTossUi && !hideBankForTossFocus ? (
           <p className="text-sm leading-[1.85] text-[#5A5A5A]">
             신청이 접수됐어요. 아래에서 카드·간편결제 또는 무통장으로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요.
-            (이메일 발송은 {REPORT_EMAIL_SLA_MAX_PHRASE}를 목표로 해요.)
+            (이메일 발송: {REPORT_EMAIL_DELIVERY_POLICY_SHORT_CASUAL})
           </p>
         ) : null}
-        {emphasis && tossConfigured && hideBankForTossFocus ? (
+        {emphasis && showTossUi && hideBankForTossFocus ? (
           <p className="text-sm leading-[1.85] text-[#5A5A5A]">
-            신청이 접수됐어요. 아래에서 카드·간편결제로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요. (이메일 발송은{' '}
-            {REPORT_EMAIL_SLA_MAX_PHRASE}를 목표로 해요.)
+            신청이 접수됐어요. 아래에서 카드·간편결제로 결제를 이어가 주시면 확인 후 리포트를 보내드릴게요. (이메일 발송:{' '}
+            {REPORT_EMAIL_DELIVERY_POLICY_SHORT_CASUAL})
           </p>
         ) : null}
-        {emphasis && !tossConfigured ? (
+        {emphasis && !showTossUi ? (
           <p className="text-sm leading-[1.85] text-[#5A5A5A]">
-            감사해요. 아래 무통장 입금으로 결제를 이어가 주시면, 확인 후 리포트를 보내드릴게요. (이메일 발송은{' '}
-            {REPORT_EMAIL_SLA_MAX_PHRASE}를 목표로 해요.) 화면이 비어 보인다면 잠시 후 새로고침해 주세요.
+            감사해요. 아래 무통장 입금으로 결제를 이어가 주시면, 확인 후 리포트를 보내드릴게요. (이메일 발송:{' '}
+            {REPORT_EMAIL_DELIVERY_POLICY_SHORT_CASUAL}) 화면이 비어 보인다면 잠시 후 새로고침해 주세요.
           </p>
         ) : null}
 
@@ -256,7 +272,7 @@ export function PaymentSection({
           </p>
         </div>
 
-        {!tossConfigured ? (
+        {!showTossUi ? (
           <div
             className="rounded-xl border border-[#D4E0D0] bg-[#FAFAF8]/95 px-4 py-4 text-[11px] leading-relaxed text-[#4A4A4A] sm:text-xs"
             role="group"
@@ -295,7 +311,7 @@ export function PaymentSection({
           </div>
         ) : null}
 
-        {tossConfigured ? (
+        {showTossUi ? (
           <>
             {tossBlock}
             {!hideBankForTossFocus && bankCard}
@@ -304,7 +320,6 @@ export function PaymentSection({
         ) : (
           <>
             {bankFirstBanner}
-            {tossBlock}
             {bankCard}
             {depositorOrWarn}
           </>
@@ -327,7 +342,7 @@ export function PaymentSection({
             결제 안내
           </h2>
           <p className="mt-1.5 text-xs font-medium uppercase tracking-[0.12em] text-[#5A6F52]/90">
-            {hideBankForTossFocus ? '카드·간편결제' : '카드·간편결제 · 무통장 입금'}
+            {hideBankForTossFocus ? '카드·간편결제' : !showTossUi ? '무통장 입금' : '카드·간편결제 · 무통장 입금'}
           </p>
         </div>
         <div className="mt-6 sm:mt-7">{body}</div>
