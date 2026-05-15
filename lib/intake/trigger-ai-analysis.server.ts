@@ -38,8 +38,9 @@ type IntakeRow = {
   child_display_name: string
   child_gender: string
   child_note: string | null
-  child_height_cm: number | null
-  child_weight_kg: number | null
+  /** DB float — PostgREST/런타임에 따라 number 또는 string 이 올 수 있음 */
+  child_height_cm: unknown
+  child_weight_kg: unknown
   child_birthday: string | null
   drawn_at: string | null
   child_age_in_months: number | null
@@ -94,6 +95,19 @@ function readSessionReportIdFromReportJson(reportJson: unknown): string | null {
   if (typeof rid !== 'string') return null
   const t = rid.trim()
   return t.length > 0 ? t : null
+}
+
+/** PostgREST 등에 따라 `double precision` 이 문자열로 역직렬화될 수 있음 */
+function optionalBodyMetricFromDb(v: unknown): number | null {
+  if (v == null) return null
+  if (typeof v === 'number' && Number.isFinite(v)) return v
+  if (typeof v === 'string') {
+    const t = v.trim().replace(',', '.')
+    if (!t) return null
+    const n = Number(t)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
 }
 
 /**
@@ -233,14 +247,8 @@ export async function triggerAiAnalysis(intakeIdRaw: string): Promise<TriggerAiA
 
   const drawingMemos = drawingMemosFromReportJson(rep.report_json)
 
-  const childHeightCm =
-    typeof row.child_height_cm === 'number' && Number.isFinite(row.child_height_cm)
-      ? row.child_height_cm
-      : null
-  const childWeightKg =
-    typeof row.child_weight_kg === 'number' && Number.isFinite(row.child_weight_kg)
-      ? row.child_weight_kg
-      : null
+  const childHeightCm = optionalBodyMetricFromDb(row.child_height_cm)
+  const childWeightKg = optionalBodyMetricFromDb(row.child_weight_kg)
 
   try {
     const parentNoteForGemini = buildStructuredParentNoteForGemini({
