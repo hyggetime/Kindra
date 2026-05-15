@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { submitIntegratedIntake } from '@app/actions/intake-submit'
-import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
+import { REPORT_EMAIL_DELIVERY_POLICY_APPLY_FORM_NOTE } from '@lib/copy/report-email-sla'
 import { formatPriceWon, LIST_PRICE_MSRP_WON } from '@lib/constants'
 import { LaunchPricingCallout } from '@/components/pricing/LaunchPricingCallout'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
@@ -269,7 +269,7 @@ function ApplyIntegratedFormFields({
         </label>
 
         <p className="mt-5 text-[11px] leading-relaxed text-[#9A9A9A] sm:text-xs">
-          (접수·결제 확인이 끝난 뒤 이메일로 보내 드려요. {REPORT_EMAIL_DELIVERY_POLICY_CASUAL})
+          {REPORT_EMAIL_DELIVERY_POLICY_APPLY_FORM_NOTE}
         </p>
 
         <hr className="mt-10 border-0 border-t border-[#E8E4DC] sm:mt-12" />
@@ -332,37 +332,61 @@ function ApplyIntegratedFormFields({
               placeholder="예: 우리 아이, 민수"
             />
           </div>
-          <fieldset disabled={pending} className="min-w-0">
-            <legend className="mb-1.5 text-xs font-medium text-[#5A5A5A]">
-              아이 성별 <span className="text-[#B85C5C]">*</span>
-            </legend>
-            <p className="mb-2 text-[11px] leading-relaxed text-[#9A9A9A]">
-              성별에 따른 발달 특성을 고려하여 더욱 정교하고 다정한 리포트를 작성하는 데 활용됩니다.
-            </p>
-            <div className="flex flex-wrap items-center gap-6 rounded-xl border border-[#E8E4DC] bg-[#FDFBF9] px-4 py-3">
-              <label className="flex cursor-pointer items-center gap-2.5 rounded-lg py-1 pl-0.5 pr-2 hover:bg-[#F4F7F2]">
-                <input
-                  id="childGender-male"
-                  type="radio"
-                  name="childGender"
-                  value="male"
-                  required
-                  className="h-4 w-4 shrink-0 cursor-pointer accent-[#7C9070] ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9070]/40"
-                />
-                <span className="text-sm text-[#3D3D3D]">남아</span>
-              </label>
-              <label className="flex cursor-pointer items-center gap-2.5 rounded-lg py-1 pl-0.5 pr-2 hover:bg-[#F4F7F2]">
-                <input
-                  id="childGender-female"
-                  type="radio"
-                  name="childGender"
-                  value="female"
-                  className="h-4 w-4 shrink-0 cursor-pointer accent-[#7C9070] ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9070]/40"
-                />
-                <span className="text-sm text-[#3D3D3D]">여아</span>
-              </label>
+          <div>
+            <div className="mb-1.5 flex flex-wrap items-center gap-1.5 text-xs font-medium text-[#5A5A5A]">
+              <span id="child-gender-label">
+                아이 성별 <span className="text-[#B85C5C]">*</span>
+              </span>
+              <span className="group relative inline-flex items-center">
+                <button
+                  type="button"
+                  tabIndex={0}
+                  className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#C8D4C0] bg-[#F4F7F2] text-[10px] font-bold leading-none text-[#5A6F52] outline-none transition hover:bg-[#E8F0E4] focus-visible:ring-2 focus-visible:ring-[#7C9070]/35"
+                  aria-label="성별 입력 안내"
+                >
+                  <span aria-hidden className="translate-y-[0.5px]">
+                    i
+                  </span>
+                </button>
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute left-0 top-full z-30 mt-1.5 w-[min(18rem,calc(100vw-2.5rem))] rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-[11px] font-normal leading-relaxed text-[#5A5A5A] opacity-0 shadow-md transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 md:left-1/2 md:max-w-[min(20rem,calc(100vw-2rem))] md:-translate-x-1/2"
+                >
+                  성별에 따른 발달 특성을 고려하여 더욱 정교하고 다정한 리포트를 작성하는 데 활용됩니다.
+                </span>
+              </span>
             </div>
-          </fieldset>
+            <fieldset
+              disabled={pending}
+              className="min-w-0 border-0 p-0"
+              aria-labelledby="child-gender-label"
+            >
+              <legend className="sr-only">아이 성별 선택</legend>
+              <div className="flex flex-wrap items-center gap-6 rounded-xl border border-[#E8E4DC] bg-[#FDFBF9] px-4 py-3">
+                <label className="flex cursor-pointer items-center gap-2.5 rounded-lg py-1 pl-0.5 pr-2 hover:bg-[#F4F7F2]">
+                  <input
+                    id="childGender-male"
+                    type="radio"
+                    name="childGender"
+                    value="male"
+                    required
+                    className="h-4 w-4 shrink-0 cursor-pointer accent-[#7C9070] ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9070]/40"
+                  />
+                  <span className="text-sm text-[#3D3D3D]">남아</span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-2.5 rounded-lg py-1 pl-0.5 pr-2 hover:bg-[#F4F7F2]">
+                  <input
+                    id="childGender-female"
+                    type="radio"
+                    name="childGender"
+                    value="female"
+                    className="h-4 w-4 shrink-0 cursor-pointer accent-[#7C9070] ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C9070]/40"
+                  />
+                  <span className="text-sm text-[#3D3D3D]">여아</span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
         </div>
 
         <div>

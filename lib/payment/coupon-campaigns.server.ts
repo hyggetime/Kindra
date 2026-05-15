@@ -14,6 +14,18 @@ type CampaignRow = {
   active: boolean
 }
 
+const MULTI_COUPON_TOKEN_MESSAGE =
+  '프로모션 코드는 한 번에 하나만 적용할 수 있어요. HELLOKINDRA와 HIKINDRA 등 두 코드를 한 칸에 함께 넣을 수 없으며, 사용하실 코드 하나만 입력해 주세요.'
+
+/** 공백·쉼표·세미콜론으로 여러 토큰이 나오면 거절(중복 적용 방지). */
+function assertSingleCouponToken(raw: string): { ok: true; token: string } | { ok: false; message: string } {
+  const t = raw.trim()
+  if (!t) return { ok: true, token: '' }
+  const parts = t.split(/[\s,;]+/).filter((s) => s.length > 0)
+  if (parts.length > 1) return { ok: false, message: MULTI_COUPON_TOKEN_MESSAGE }
+  return { ok: true, token: parts[0] ?? '' }
+}
+
 async function fetchCampaignByCode(normalized: string): Promise<CampaignRow | null> {
   const admin = createServiceRoleClient()
   const { data, error } = await admin
@@ -75,7 +87,15 @@ export async function resolveCheckoutCouponAsync(
     return { ok: true, amountWon: listed, discountWon: 0, couponNormalized: null, displayName: null }
   }
 
-  const code = trimmed.toUpperCase()
+  const single = assertSingleCouponToken(trimmed)
+  if (!single.ok) {
+    return { ok: false, message: single.message }
+  }
+
+  const code = single.token.toUpperCase()
+  if (!code) {
+    return { ok: true, amountWon: listed, discountWon: 0, couponNormalized: null, displayName: null }
+  }
   const campaign = await fetchCampaignByCode(code)
   if (!campaign) {
     return {

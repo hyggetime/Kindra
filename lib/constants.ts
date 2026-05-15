@@ -21,8 +21,13 @@ export const PUBLIC_PROMO_COUPON_CODE = 'HELLOKINDRA' as const
 
 export const PUBLIC_PROMO_COUPON_DISPLAY_NAME = 'Hello Kindra'
 
+/** 동일 스펙 보조 프로모션 코드(할인·한도는 DB와 동일) */
+export const PUBLIC_PROMO_COUPON_CODE_ALT = 'HIKINDRA' as const
+
+export const PUBLIC_PROMO_COUPON_CODES_PLACEHOLDER = `${PUBLIC_PROMO_COUPON_CODE} · ${PUBLIC_PROMO_COUPON_CODE_ALT}` as const
+
 /**
- * Hello Kindra 쿠폰 적용 시 **최종 청구가**(원) — 할인액이 아니라 이 금액으로 결제됩니다.
+ * Hello Kindra / Hi Kindra 쿠폰 적용 시 **최종 청구가**(원) — 할인액이 아니라 이 금액으로 결제됩니다.
  * (DB `discount_won` 은 listed − 이 값 = 5,000 으로 두어야 함.)
  */
 export const HELLO_KINDRA_COUPON_FINAL_PRICE_WON = 4_900

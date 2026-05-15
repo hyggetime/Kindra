@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { previewCheckoutCoupon } from '@app/actions/payment-coupon-preview'
-import { formatPriceWon, PUBLIC_PROMO_COUPON_CODE } from '@lib/constants'
+import { formatPriceWon, PUBLIC_PROMO_COUPON_CODES_PLACEHOLDER } from '@lib/constants'
 
 type Props = {
   listedPriceWon: number
@@ -57,7 +57,7 @@ export function PaymentCouponPanel({ listedPriceWon, reportId, value, onChange, 
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={`예: ${PUBLIC_PROMO_COUPON_CODE}`}
+          placeholder={`예: ${PUBLIC_PROMO_COUPON_CODES_PLACEHOLDER}`}
           disabled={pending}
           autoComplete="off"
           className="min-h-[44px] w-full flex-1 rounded-lg border border-[#E8E4DC] bg-white px-3 py-2 text-sm text-[#3D3D3D] outline-none ring-[#7C9070]/15 focus:border-[#7C9070]/40 focus:ring-2 disabled:opacity-60"
@@ -77,6 +77,9 @@ export function PaymentCouponPanel({ listedPriceWon, reportId, value, onChange, 
           {error}
         </p>
       ) : null}
+      <p className="mt-2 text-[10px] leading-relaxed text-[#9A9A9A]">
+        프로모션 코드는 한 칸에 하나만 입력해 주세요. HELLOKINDRA와 HIKINDRA는 동시에 적용되지 않아요.
+      </p>
     </div>
   )
 }

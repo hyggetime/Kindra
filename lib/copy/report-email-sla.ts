@@ -18,3 +18,7 @@ export const REPORT_EMAIL_DELIVERY_POLICY_SHORT_CASUAL =
 /** 결제 안내 박스용(격식, 괄호 없이 단독 줄) */
 export const REPORT_EMAIL_DELIVERY_POLICY_PAYMENT_LINE =
   '이메일 발송: 결제 확인 후 순차 발송되며, 운영 시간 외 건은 익일 오전에 처리됩니다.'
+
+/** 신청 폼 필수 동의 바로 아래 괄호 안 한 줄 */
+export const REPORT_EMAIL_DELIVERY_POLICY_APPLY_FORM_NOTE =
+  '(접수·결제 확인이 되면 순차적으로 이메일 발송됩니다. 운영 시간 외 결제 건은 익일 오전에 처리됩니다.)'
