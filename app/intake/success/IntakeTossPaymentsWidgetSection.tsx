@@ -131,7 +131,7 @@ export function IntakeTossPaymentsWidgetSection({
     } finally {
       setBusy(false)
     }
-  }, [clientKey, consentsOk, couponInput, reportId, runPreview, sdkReady])
+  }, [clientKey, consentsOk, couponInput, listedPriceWon, pushResolved, reportId, runPreview, sdkReady])
 
   return (
     <section

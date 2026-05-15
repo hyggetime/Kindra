@@ -1,7 +1,7 @@
 'use client'
 
 import { measureNaturalWidth, prepareWithSegments } from '@chenglou/pretext'
-import { useLayoutEffect, useState } from 'react'
+import { useMemo, useSyncExternalStore } from 'react'
 
 /** `ApplyPaymentView` 본문 — Pretext 측정과 동일한 문자열 */
 export const APPLY_PAYMENT_THANKS_BODY =
@@ -12,6 +12,22 @@ export const APPLY_PAYMENT_THANKS_BODY =
  */
 const PRETEXT_FONT = '400 14px "Noto Sans KR", "Apple SD Gothic Neo", sans-serif'
 
+const SM_UP_MQ = '(min-width: 640px)'
+
+function subscribeSmUp(onStoreChange: () => void) {
+  const mq = window.matchMedia(SM_UP_MQ)
+  mq.addEventListener('change', onStoreChange)
+  return () => mq.removeEventListener('change', onStoreChange)
+}
+
+function getSmUpSnapshot(): boolean {
+  return window.matchMedia(SM_UP_MQ).matches
+}
+
+function getSmUpServerSnapshot(): boolean {
+  return false
+}
+
 type Props = {
   className?: string
 }
@@ -20,18 +36,12 @@ type Props = {
  * PC 뷰(sm+)에서 한 줄 폭을 Pretext로 계산해 줄바꿈 없이 표시합니다. 모바일은 기본 줄바꿈.
  */
 export function ApplyPaymentThanksLinePc({ className }: Props) {
-  const [oneLineWidthPx, setOneLineWidthPx] = useState<number | null>(null)
-  const [isSmUp, setIsSmUp] = useState(false)
+  const isSmUp = useSyncExternalStore(subscribeSmUp, getSmUpSnapshot, getSmUpServerSnapshot)
 
-  useLayoutEffect(() => {
+  const oneLineWidthPx = useMemo(() => {
+    if (typeof window === 'undefined') return null
     const prepared = prepareWithSegments(APPLY_PAYMENT_THANKS_BODY, PRETEXT_FONT, { wordBreak: 'keep-all' })
-    setOneLineWidthPx(Math.ceil(measureNaturalWidth(prepared)))
-
-    const mq = window.matchMedia('(min-width: 640px)')
-    const sync = () => setIsSmUp(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
+    return Math.ceil(measureNaturalWidth(prepared))
   }, [])
 
   const pcOneLine = isSmUp && oneLineWidthPx != null
