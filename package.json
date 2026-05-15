@@ -21,6 +21,7 @@
     "sb:push:y": "supabase db push --yes"
   },
   "dependencies": {
+    "@chenglou/pretext": "^0.0.7",
     "@google/generative-ai": "^0.24.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.104.0",

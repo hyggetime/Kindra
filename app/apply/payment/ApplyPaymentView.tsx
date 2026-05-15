@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react'
 
+import { ApplyPaymentThanksLinePc } from '@app/apply/payment/ApplyPaymentThanksLinePc'
 import { PaymentSection } from '@/components/payment/PaymentSection'
 import { REPORT_EMAIL_DELIVERY_POLICY_PAYMENT_LINE } from '@lib/copy/report-email-sla'
 import { APPLY_FORM_HREF } from '@lib/apply-href'
@@ -54,7 +55,7 @@ export function ApplyPaymentView({ reportId, bankTransfer, listedPriceWon, hideB
         <div className="mx-auto mt-5 max-w-lg text-left text-sm text-[#5A5A5A]">
           <div className="flex flex-col">
             <div className="flex flex-col gap-y-[0.325em] [&>p]:m-0 [&>p]:leading-[1.65]">
-              <p>신청 감사합니다. 전송하신 아이의 그림과 개인정보는 소중히 안전하게 사용 후 보관됩니다.</p>
+              <ApplyPaymentThanksLinePc className="m-0 text-sm leading-[1.65] text-[#5A5A5A]" />
               <p>{REPORT_EMAIL_DELIVERY_POLICY_PAYMENT_LINE}</p>
             </div>
             <p className="mx-0 mb-0 mt-[0.65em] text-[#8A8A8A] leading-[1.65]">
