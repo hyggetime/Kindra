@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 import { KINDRA_PHILOSOPHY } from '@lib/gemini/prompts'
+import { stripIntakeMachineArtifacts } from '@lib/intake/normalize-intake-report-markdown'
 import {
   extractHashtagTokens,
   splitIntakeMarkdownByH3,
@@ -82,6 +83,7 @@ function sectionEyebrow(title: string): string {
   if (/부모님께|Hygge/i.test(t)) return '부모님께'
   if (/한계|안내/.test(t)) return '안내'
   if (/몸과\s*마음이\s*함께|신체[-\s]*정서|신체와\s*마음/.test(t)) return '몸과 마음'
+  if (/발달\s*·\s*인지|인지\s*렌즈/.test(t)) return '발달·인지'
   return '이어지는 이야기'
 }
 
@@ -229,8 +231,9 @@ export function IntakeReportDocument({
   useScrollDepth(reportId)
   useSectionEngagement(reportId)
 
-  const sections = useMemo(() => splitIntakeMarkdownByH3(markdown), [markdown])
-  const tagsFromMarkdown = useMemo(() => extractHashtagTokens(markdown), [markdown])
+  const cleanedMarkdown = useMemo(() => stripIntakeMachineArtifacts(markdown), [markdown])
+  const sections = useMemo(() => splitIntakeMarkdownByH3(cleanedMarkdown), [cleanedMarkdown])
+  const tagsFromMarkdown = useMemo(() => extractHashtagTokens(cleanedMarkdown), [cleanedMarkdown])
   /** 통합 마음 지도의 첫 번째 비-해시태그 문단 = 헤드라인 인사이트 */
   const headlineSentence = useMemo(() => {
     const mindSec = sections.find((s) => Boolean(s.title) && isIntegratedMindMapTitle(s.title))

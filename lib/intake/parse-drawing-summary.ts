@@ -7,6 +7,81 @@
  * - 둘 다 없으면 전체를 remainder 로 두고 UI에서 썸만 띄운 뒤 본문 통째로 표시
  */
 
+import { stripIntakeMachineArtifacts } from '@lib/intake/normalize-intake-report-markdown'
+
+/** 한 문단 안에 `그림 2:` 등이 붙어 있을 때 문단을 나눕니다. */
+function preprocessInlineDrawingBreaks(body: string): string {
+  const t = body.replace(/\r\n/g, '\n')
+  return t.replace(
+    /([^\n])\s+(?=(?:-\s*)?(?:\*{0,2}\s*)?그림\s*(?:[2-9]|1[0-9])\s*[:：])/g,
+    '$1\n\n',
+  )
+}
+
+/** `그림 k:` 형태의 첫 등장 위치마다 경계를 잡아 장별 본문을 나눕니다. */
+function assignCaptionsFromDrawingColonHeaders(text: string, imageCount: number): string[] {
+  const caps: string[] = Array.from({ length: imageCount }, () => '')
+  const t = text.replace(/\r\n/g, '\n').trim()
+  if (!t || imageCount < 1) return caps
+
+  const re = /\b그림\s*(\d{1,2})\s*[:：]/gi
+  const leftmost = new Map<number, { headerStart: number; contentStart: number }>()
+  let m: RegExpExecArray | null
+  while ((m = re.exec(t)) !== null) {
+    const num = Number(m[1])
+    if (num < 1 || num > imageCount) continue
+    const headerStart = m.index
+    const contentStart = m.index + m[0].length
+    const prev = leftmost.get(num)
+    if (!prev || headerStart < prev.headerStart) {
+      leftmost.set(num, { headerStart, contentStart })
+    }
+  }
+  if (leftmost.size === 0) return caps
+
+  const bounds = [...leftmost.entries()]
+    .sort((a, b) => a[1].headerStart - b[1].headerStart)
+    .map(([num, v]) => ({ num, ...v }))
+
+  for (let i = 0; i < bounds.length; i++) {
+    const { num, contentStart, headerStart } = bounds[i]!
+    const end = i + 1 < bounds.length ? bounds[i + 1]!.headerStart : t.length
+    let chunk = t.slice(contentStart, end).trim()
+    if (i === 0) {
+      const before = t.slice(0, headerStart).trim()
+      if (before) chunk = `${before}\n\n${chunk}`.trim()
+    }
+    const idx = num - 1
+    if (idx >= 0 && idx < imageCount) caps[idx] = chunk
+  }
+  return caps
+}
+
+/** 한 블록에 몰린 장별 설명을 `그림 k:` 경계로 재분배합니다. */
+function refineCaptionsWithColonSplit(captions: string[], imageCount: number): string[] {
+  const n = imageCount
+  if (n < 2) return captions
+
+  const nonemptyIdx = captions
+    .map((c, i) => (c.trim() ? i : -1))
+    .filter((i) => i >= 0) as number[]
+  if (nonemptyIdx.length !== 1) return captions
+
+  const only = nonemptyIdx[0]!
+  const merged = (captions[only] ?? '').trim()
+  if (merged.length < 40) return captions
+
+  const split = assignCaptionsFromDrawingColonHeaders(merged, n)
+  const filled = split.filter((c) => c.trim()).length
+  if (filled < 2) return captions
+
+  const next = [...captions]
+  for (let i = 0; i < n; i++) {
+    if (split[i]?.trim()) next[i] = split[i]!
+  }
+  return next
+}
+
 function splitParagraphs(body: string): string[] {
   return body
     .replace(/\r\n/g, '\n')
@@ -47,11 +122,16 @@ export function parseDrawingSummaryCaptions(
   const n = Math.max(0, Math.floor(imageCount))
   if (n < 1) return { captions: [], remainder: body.trim() }
 
-  const normalized = body.replace(/\r\n/g, '\n')
+  let normalized = stripIntakeMachineArtifacts(body)
+  normalized = preprocessInlineDrawingBreaks(normalized).replace(/\r\n/g, '\n')
   const hasBulletLines = /(?:^|\n)-\s*그림\s*\d+/i.test(normalized)
 
   if (hasBulletLines) {
-    return parseBulletLineStyle(normalized, n)
+    const { captions, remainder } = parseBulletLineStyle(normalized, n)
+    return {
+      captions: refineCaptionsWithColonSplit(captions, n),
+      remainder,
+    }
   }
 
   const captions: string[] = Array.from({ length: n }, () => '')
@@ -68,5 +148,16 @@ export function parseDrawingSummaryCaptions(
     }
     remainder.push(p)
   }
-  return { captions, remainder: remainder.join('\n\n').trim() }
+  let captionsOut = refineCaptionsWithColonSplit(captions, n)
+  const remainderStr = remainder.join('\n\n').trim()
+
+  if (captionsOut.every((c) => !c.trim()) && remainderStr) {
+    const splitR = assignCaptionsFromDrawingColonHeaders(remainderStr, n)
+    const filledR = splitR.filter((c) => c.trim()).length
+    if (filledR >= 2) {
+      return { captions: splitR, remainder: '' }
+    }
+  }
+
+  return { captions: captionsOut, remainder: remainderStr }
 }

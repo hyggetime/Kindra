@@ -1,7 +1,21 @@
 import 'server-only'
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
-import { buildKindraSystemInstruction, buildKindraUserPrompt, type KindraUserContext } from './prompts'
+import {
+  buildKindraStructuredJsonUserPrompt,
+  kindraChartReportResponseSchema,
+  KINDRA_STRUCTURED_JSON_SYSTEM_PROMPT,
+  parseKindraStructuredChartReportJson,
+  type KindraStructuredChartReportJson,
+} from './kindra-structured-json-report'
+import {
+  buildKindraSystemInstruction,
+  buildKindraUserPrompt,
+  inferSexCodeFromGenderLabel,
+  type KindraUserContext,
+} from './prompts'
+import { loadGrowthStatsJsonRaw } from '../intake/load-growth-stats.server'
+import { buildGrowthChartFactsForGeminiPrompt, parseGrowthStatsJson } from '../intake/physio-emotional-from-growth'
 import {
   isKindraGeminiTokenDebug,
   logKindraGeminiUsage,
@@ -150,3 +164,99 @@ export async function generateKindraMultimodalReport(
 
 /** @deprecated `generateKindraMultimodalReport` 사용 */
 export const generateKindraFiveImageReport = generateKindraMultimodalReport
+
+/**
+ * 오각형(5축) 차트 + 융합 서술용 **구조화 JSON** 단일 응답.
+ * `responseMimeType: application/json` + `responseSchema` 로 스키마를 강제합니다.
+ * (기존 마크다운 리포트 경로와 별도 — 토스 미니앱·대시보드 등에서 선택적으로 호출)
+ */
+export async function generateKindraStructuredChartReport(
+  images: GeminiInlineImage[],
+  ctx: KindraUserContext,
+): Promise<KindraStructuredChartReportJson> {
+  const n = images.length
+  if (n < 1 || n > 5) {
+    throw new Error('Kindra structured chart requires 1 to 5 images.')
+  }
+
+  let growthChartFactsBlock: string | undefined
+  const sex = ctx.childGenderCode ?? inferSexCodeFromGenderLabel(ctx.childGenderLabel)
+  if (
+    sex != null &&
+    typeof ctx.completedMonths === 'number' &&
+    Number.isFinite(ctx.completedMonths) &&
+    ((ctx.heightCm != null && Number.isFinite(ctx.heightCm)) || (ctx.weightKg != null && Number.isFinite(ctx.weightKg)))
+  ) {
+    const raw = loadGrowthStatsJsonRaw()
+    const stats = raw ? parseGrowthStatsJson(raw) : null
+    if (stats) {
+      const block = buildGrowthChartFactsForGeminiPrompt(stats, {
+        childShortName: ctx.childDisplayName?.trim() || '아이',
+        sex,
+        completedMonths: Math.max(0, Math.floor(ctx.completedMonths)),
+        heightCm: ctx.heightCm,
+        weightKg: ctx.weightKg,
+      })
+      if (block) growthChartFactsBlock = block
+    }
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not set.')
+  }
+
+  const modelName = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash'
+  const genAI = new GoogleGenerativeAI(apiKey)
+
+  const model = genAI.getGenerativeModel({
+    model: modelName,
+    systemInstruction: KINDRA_STRUCTURED_JSON_SYSTEM_PROMPT,
+    generationConfig: {
+      responseMimeType: 'application/json',
+      responseSchema: kindraChartReportResponseSchema(),
+    },
+  })
+
+  const userParts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
+    { text: buildKindraStructuredJsonUserPrompt(ctx, n, growthChartFactsBlock) },
+    ...images.map((im) => {
+      assertAllowedImageMime(im.mimeType)
+      return {
+        inlineData: {
+          mimeType: im.mimeType.toLowerCase().split(';')[0].trim(),
+          data: im.base64,
+        },
+      }
+    }),
+  ]
+
+  let lastRaw = ''
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (attempt > 0) await sleep(6000)
+    try {
+      const result = await model.generateContent(userParts)
+      const text = result.response.text()
+      if (!text?.trim()) {
+        throw new Error('Empty JSON response from Gemini.')
+      }
+      return parseKindraStructuredChartReportJson(text, n)
+    } catch (e) {
+      lastRaw = e instanceof Error ? e.message : String(e)
+      if (isLikely429(e) && attempt === 0) continue
+      if (lastRaw.includes('API_KEY_INVALID') || lastRaw.includes('401')) {
+        throw new Error('Gemini API 키가 유효하지 않습니다. Google AI Studio 에서 키를 다시 발급해 주세요.')
+      }
+      if (lastRaw.includes('404') || lastRaw.includes('not found')) {
+        throw new Error(
+          `모델을 찾을 수 없습니다(404). GEMINI_MODEL=${modelName}. gemini-2.5-flash 등으로 조정해 보세요.`,
+        )
+      }
+      if (isLikely429(e)) {
+        throw new Error('Gemini API 가 할당량·속도 제한(429)을 반환했습니다. 잠시 후 다시 시도해 주세요.')
+      }
+      throw new Error(`Gemini 구조화 JSON 호출 실패: ${lastRaw}`)
+    }
+  }
+  throw new Error(`Gemini 구조화 JSON 호출 실패: ${lastRaw || '알 수 없음'}`)
+}

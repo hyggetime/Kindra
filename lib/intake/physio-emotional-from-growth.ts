@@ -116,6 +116,87 @@ export type PhysioEmotionalInput = {
   weightKg?: number | null
 }
 
+/** 측정값을 p5–p25–p50–p75–p95 축에 선형 보간한 **대략적** 백분위(참고·비진단). */
+function estimatePercentileFromBand(value: number, band: GrowthBand): { approx: number; edge: 'below_p5' | 'above_p95' | null } {
+  const { p5, p25, p50, p75, p95 } = band
+  if (value < p5) return { approx: 5, edge: 'below_p5' }
+  if (value > p95) return { approx: 95, edge: 'above_p95' }
+  const segs: readonly (readonly [number, number, number, number])[] = [
+    [p5, 5, p25, 25],
+    [p25, 25, p50, 50],
+    [p50, 50, p75, 75],
+    [p75, 75, p95, 95],
+  ]
+  for (const [v0, pct0, v1, pct1] of segs) {
+    if (value >= v0 && value <= v1) {
+      const t = v1 === v0 ? 0 : (value - v0) / (v1 - v0)
+      const p = pct0 + t * (pct1 - pct0)
+      return { approx: Math.round(p), edge: null }
+    }
+  }
+  return { approx: 50, edge: null }
+}
+
+function growthMetricFactLine(
+  label: '키' | '몸무게',
+  value: number,
+  unit: string,
+  band: GrowthBand,
+  digits: number,
+): string {
+  const med = fmtNum(band.p50, digits)
+  const v = fmtNum(value, digits)
+  const { approx, edge } = estimatePercentileFromBand(value, band)
+  if (edge === 'below_p5') {
+    return `**${label} ${v}${unit}**: 같은 월령·성별 성장도표에서 **약 5백분위 미만** 구간에 가깝게 보입니다(중앙값 p50 약 **${med}${unit}**).`
+  }
+  if (edge === 'above_p95') {
+    return `**${label} ${v}${unit}**: 같은 월령·성별 성장도표에서 **약 95백분위를 넘는 편**으로 볼 수 있습니다(중앙값 p50 약 **${med}${unit}**).`
+  }
+  const midBand = approx >= 40 && approx <= 60
+  const tail = midBand ? ' 또래 **중앙값 주변** 구간에 잘 머무는 편으로 볼 수 있습니다.' : ''
+  return `**${label} ${v}${unit}**: 건강보험공단 영유아 성장도표 기준 **약 ${approx}백분위** 부근으로 볼 수 있습니다(같은 조건 중앙값 p50 약 **${med}${unit}**).${tail}`
+}
+
+/**
+ * 구조화 JSON 유저 프롬프트에 붙일 **짧은 사실 블록** — `growth_stats_guide`가 백분위·p50을 구체적으로 쓰도록 함.
+ * LMS 공개 곡선의 p5~p95만 있으므로 보간값은 **대략적**임을 본문에 명시합니다.
+ */
+export function buildGrowthChartFactsForGeminiPrompt(stats: GrowthStatsShape, input: PhysioEmotionalInput): string | null {
+  const { childShortName, sex, completedMonths } = input
+  const keys = monthKeysForSex(stats, sex)
+  if (keys.length === 0) return null
+
+  const monthKey = clampedMonthKey(completedMonths, keys)
+  const row = stats[sex]?.[String(monthKey)]
+  if (!row || (!row.height && !row.weight)) return null
+
+  const sexLabel = sex === 'male' ? '남아' : '여아'
+  const name = childShortName.trim() || '아이'
+  const clampNote =
+    monthKey !== completedMonths
+      ? ` 성장도표에 ${completedMonths}개월 행이 없어 **${monthKey}개월** 행을 참고했습니다.`
+      : ''
+
+  const bullets: string[] = []
+  const hIn = input.heightCm
+  const wIn = input.weightKg
+  if (hIn != null && row.height) {
+    bullets.push(growthMetricFactLine('키', hIn, 'cm', row.height, 1))
+  }
+  if (wIn != null && row.weight) {
+    bullets.push(growthMetricFactLine('몸무게', wIn, 'kg', row.weight, 2))
+  }
+  if (bullets.length === 0) return null
+
+  const header = `## 성장도표 참고 (growth_stats_guide 작성용 — JSON에 이 제목을 출력하지 마세요)`
+  const intro = `**${name}** · 생후 **${completedMonths}개월** · **${sexLabel}** 기준입니다.${clampNote} 아래 백분위는 공개 자료의 **p5–p25–p50–p75–p95** 사이를 **선형 보간**한 **대략적 위치**이며, 임상 진단이나 의학적 판정이 **아닙니다**.`
+
+  const footer = `위 내용을 바탕으로 \`report_sections.growth_stats_guide\`를 쓸 때: (1) **첫 문장**은 **「우리 ${name}」** 호칭만 쓰고(「사랑스러운」 금지), 키·몸무게 숫자가 위 블록·보호자 메모에 **모두** 있으면 **「우리 ${name}의 키가 …cm이고 몸무게는 …kg이군요.」** 형태로 시작. (2) 백분위·p50은 위 사실을 한두 문장으로 다정히. (3) **마지막**은 **평가를 대체하지 않는다**는 문장 직후 **반드시** **「참고용으로만 봐주세요.」** 로 끝낼 것.`
+
+  return [header, intro, bullets.join('\n\n'), footer].join('\n\n')
+}
+
 /** `### 부모님께` / Hygge 절 앞에 삽입하면 읽기 순서가 자연스럽습니다. 없으면 문서 끝에 붙입니다. */
 export function injectPhysioMarkdownBeforeParentsSection(markdown: string, physioBlock: string): string {
   const norm = markdown.replace(/\r\n/g, '\n')
