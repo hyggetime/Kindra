@@ -31,6 +31,26 @@ export type GeminiInlineImage = {
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
+/**
+ * Gemini `generateContent` 파트 배열 — **텍스트 블록을 항상 먼저**, 이미지는 **업로드 순서(그림 1…N)** 그대로 둡니다.
+ * (고정 systemInstruction + 안정적인 유저 텍스트 접두는 Context Caching 전제에 유리한 배치입니다.)
+ */
+export function buildGeminiMultimodalParts(
+  text: string,
+  images: GeminiInlineImage[],
+): Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> {
+  const imageParts = images.map((im) => {
+    assertAllowedImageMime(im.mimeType)
+    return {
+      inlineData: {
+        mimeType: im.mimeType.toLowerCase().split(';')[0].trim(),
+        data: im.base64,
+      },
+    }
+  })
+  return [{ text }, ...imageParts]
+}
+
 export function assertAllowedImageMime(mime: string): void {
   const m = mime.toLowerCase().split(';')[0].trim()
   if (!ALLOWED_MIME.has(m)) {
@@ -79,18 +99,7 @@ export async function generateKindraMultimodalReport(
     systemInstruction: buildKindraSystemInstruction(n),
   })
 
-  const userParts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
-    { text: buildKindraUserPrompt(ctx, n) },
-    ...images.map((im) => {
-      assertAllowedImageMime(im.mimeType)
-      return {
-        inlineData: {
-          mimeType: im.mimeType.toLowerCase().split(';')[0].trim(),
-          data: im.base64,
-        },
-      }
-    }),
-  ]
+  const userParts = buildGeminiMultimodalParts(buildKindraUserPrompt(ctx, n), images)
 
   let lastRaw = ''
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -218,18 +227,10 @@ export async function generateKindraStructuredChartReport(
     },
   })
 
-  const userParts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
-    { text: buildKindraStructuredJsonUserPrompt(ctx, n, growthChartFactsBlock) },
-    ...images.map((im) => {
-      assertAllowedImageMime(im.mimeType)
-      return {
-        inlineData: {
-          mimeType: im.mimeType.toLowerCase().split(';')[0].trim(),
-          data: im.base64,
-        },
-      }
-    }),
-  ]
+  const userParts = buildGeminiMultimodalParts(
+    buildKindraStructuredJsonUserPrompt(ctx, n, growthChartFactsBlock),
+    images,
+  )
 
   let lastRaw = ''
   for (let attempt = 0; attempt < 2; attempt++) {
