@@ -102,6 +102,14 @@ export function HomePage() {
                 관찰의 조각들 보기
               </a>
             </div>
+            <p className="mx-auto mt-8 max-w-md text-center">
+              <Link
+                href="/tools"
+                className="text-[13px] leading-relaxed text-[#8A8A8A] underline decoration-[#D4CFC4] decoration-1 underline-offset-[5px] transition hover:text-[#5C6658] hover:decoration-[#7C9070]/45"
+              >
+                그림을 읽을 때 킨드라가 참고하는 관점과 데이터를, 부담 없이 펼쳐보기
+              </Link>
+            </p>
           </div>
         </section>
 
