@@ -157,7 +157,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     )
   }
 
-  let typed = mergePaymentFromQuery(body as KindraPremiumIntakePaymentBody, req)
+  const typed = mergePaymentFromQuery(body as KindraPremiumIntakePaymentBody, req)
   if (!typed.payment.paymentKey || !typed.payment.orderId || !Number.isFinite(typed.payment.amount)) {
     return NextResponse.json(
       { ok: false, error: 'paymentKey, orderId, amount 를 바디 또는 쿼리로 제공해야 합니다.' },

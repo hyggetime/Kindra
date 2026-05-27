@@ -148,7 +148,7 @@ export function parseDrawingSummaryCaptions(
     }
     remainder.push(p)
   }
-  let captionsOut = refineCaptionsWithColonSplit(captions, n)
+  const captionsOut = refineCaptionsWithColonSplit(captions, n)
   const remainderStr = remainder.join('\n\n').trim()
 
   if (captionsOut.every((c) => !c.trim()) && remainderStr) {
