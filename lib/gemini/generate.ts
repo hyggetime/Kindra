@@ -5,7 +5,7 @@ import {
   buildKindraStructuredJsonUserPrompt,
   kindraChartReportResponseSchema,
   KINDRA_STRUCTURED_JSON_SYSTEM_PROMPT,
-  parseKindraStructuredChartReportJson,
+  parseKindraStructuredChartReportJsonWithFallback,
   type KindraStructuredChartReportJson,
 } from './kindra-structured-json-report'
 import {
@@ -241,7 +241,7 @@ export async function generateKindraStructuredChartReport(
       if (!text?.trim()) {
         throw new Error('Empty JSON response from Gemini.')
       }
-      return parseKindraStructuredChartReportJson(text, n)
+      return parseKindraStructuredChartReportJsonWithFallback(text, n)
     } catch (e) {
       lastRaw = e instanceof Error ? e.message : String(e)
       if (isLikely429(e) && attempt === 0) continue

@@ -59,7 +59,7 @@ const str = (description: string): Schema => ({
 /** 50~100 정수. 밴드: 85~95 매우 안정·우수, 70~84 안정·또래 평균권, 50~69 보완·추후 관찰 (해석은 다정) */
 const score50to100 = (axis: string): Schema => ({
   type: SchemaType.INTEGER,
-  description: `${axis} — **반드시 50 이상 100 이하 정수**. 밴드: (1) 매우 안정·우수한 표현력 → **85~95** (2) 안정·또래 평균 범주 → **70~84** (3) 보완·추후 관찰 필요 → **50~69**. 진단·지능·발달지연 의미 금지. 심허브·또래 월령 대비 **상대적 표현 밀도**로만 해석.`,
+  description: `${axis} — **반드시 50 이상 100 이하 정수**. 당신은 아동 표현 연구에 정통한 **학술 보정자**로서 Goodenough–Harris·Luquet·Lowenfeld·DAP/KFD 등 **근거 가능한 시각 단서**만으로 점수를 정합니다(진단·IQ·발달지연 의미 금지). 밴드: (1) 매우 안정·우수한 표현력 → **85~95** (2) 안정·또래 평균 범주 → **70~84** (3) 보완·추후 관찰 필요 → **50~69**.`,
 })
 
 const visualSummaryItemSchema: Schema = {
@@ -205,12 +205,50 @@ function assertScoreBand(name: keyof KindraChartScoresJson, v: unknown): void {
   }
 }
 
-/** 모델이 가끔 감싸는 \`\`\`json 펜스·BOM 제거 — 파싱 전에 항상 통과 */
+/** 모델이 감싼 \`\`\`json 펜스·BOM·앞뒤 잡담 제거 후, 첫 번째 균형 잡힌 JSON 객체 서브스트링을 추출합니다. */
 export function stripGeminiJsonEnvelope(raw: string): string {
+  return normalizeGeminiJsonText(raw)
+}
+
+/**
+ * ```json ... ``` 블록(복수)·BOM·앞뒤 텍스트를 제거하고, 문자열 리터럴을 존중하며 **첫 `{`…`}` JSON 객체**를 잘라냅니다.
+ */
+export function normalizeGeminiJsonText(raw: string): string {
   let t = raw.trim().replace(/^\uFEFF/, '')
-  const fenced = /^```(?:json)?\s*\r?\n?([\s\S]*?)\r?\n?```\s*$/i.exec(t)
-  if (fenced) t = fenced[1]!.trim()
-  return t
+  t = t.replace(/```(?:json)?\s*([\s\S]*?)```/gi, '$1')
+  t = t.trim()
+  const balanced = extractFirstBalancedJsonObject(t)
+  return (balanced ?? t).trim()
+}
+
+function extractFirstBalancedJsonObject(s: string): string | null {
+  const start = s.indexOf('{')
+  if (start === -1) return null
+  let depth = 0
+  let inStr = false
+  let esc = false
+  for (let i = start; i < s.length; i++) {
+    const ch = s[i]!
+    if (esc) {
+      esc = false
+      continue
+    }
+    if (inStr) {
+      if (ch === '\\') esc = true
+      else if (ch === '"') inStr = false
+      continue
+    }
+    if (ch === '"') {
+      inStr = true
+      continue
+    }
+    if (ch === '{') depth++
+    else if (ch === '}') {
+      depth--
+      if (depth === 0) return s.slice(start, i + 1)
+    }
+  }
+  return null
 }
 
 function assertStringField(path: string, v: unknown): void {
@@ -264,7 +302,7 @@ export function parseKindraStructuredChartReportJson(
   raw: string,
   expectedImageCount?: number,
 ): KindraStructuredChartReportJson {
-  const t = stripGeminiJsonEnvelope(raw)
+  const t = normalizeGeminiJsonText(raw)
   let parsed: unknown
   try {
     parsed = JSON.parse(t)
@@ -311,4 +349,67 @@ export function parseKindraStructuredChartReportJson(
   validateReportSectionsShape(rs)
 
   return parsed as KindraStructuredChartReportJson
+}
+
+const FALLBACK_SCORE = 70 as const
+
+/** Gemini 파싱 실패 시 UI·차트가 깨지지 않도록 동일 스키마의 안전한 뼈대 JSON */
+export function buildFallbackKindraStructuredChartReport(imageCount: number): KindraStructuredChartReportJson {
+  const n = Math.min(5, Math.max(1, Math.floor(imageCount)))
+  const name = '아이'
+  const vis: KindraVisualSummaryItemJson[] = Array.from({ length: n }, (_, i) => ({
+    target_image: `No.${String(i + 1).padStart(2, '0')} (그림 ${i + 1})`,
+    description:
+      '자동 폴백 요약입니다. 모델 응답을 JSON으로 읽지 못했습니다. 네트워크·할당량을 확인한 뒤 다시 시도하거나, 그림 파일 형식(JPEG/PNG/WebP)과 용량을 점검해 주세요.',
+  }))
+  return {
+    chart_scores: {
+      fine_motor: FALLBACK_SCORE,
+      observation: FALLBACK_SCORE,
+      spatial_logic: FALLBACK_SCORE,
+      narrative: FALLBACK_SCORE,
+      emotional_resource: FALLBACK_SCORE,
+    },
+    report_sections: {
+      title: '리포트를 완전히 불러오지 못했어요',
+      visual_summary: vis,
+      overall_summary: `${name}의 그림 ${n}장을 분석하는 동안 응답 형식에 문제가 있었습니다. 아래 점수는 임시 기준값이며, 실제 관찰 내용을 대체하지 않습니다. 잠시 후 다시 시도해 주세요.`,
+      developmental_lenses: {
+        goodenough_analysis:
+          '폴백: 세밀 관찰 렌즈 요약을 생성하지 못했습니다. 다시 시도하면 Goodenough–Harris 관점의 서술이 채워집니다.',
+        luquet_analysis:
+          '폴백: 공간·서사 렌즈 요약을 생성하지 못했습니다. 다시 시도하면 Luquet 관점의 서술이 채워집니다.',
+        lowenfeld_analysis:
+          '폴백: 소근육 렌즈 요약을 생성하지 못했습니다. 다시 시도하면 Lowenfeld 관점의 서술이 채워집니다.',
+      },
+      psychological_lenses: {
+        dap_kfd_analysis: '폴백: 인물·정서 렌즈를 생성하지 못했습니다.',
+        line_pressure_analysis: '폴백: 선·필압 해석을 생성하지 못했습니다.',
+        space_layout_analysis: '폴백: 공간·구도 해석을 생성하지 못했습니다.',
+        color_density_analysis: '폴백: 색·밀도 해석을 생성하지 못했습니다.',
+      },
+      integrated_narrative:
+        '폴백: 여러 장이 함께 이야기하는 결을 아직 쓰지 못했습니다. 재시도 후 따뜻한 통합 내러티브가 이 자리를 채웁니다.',
+      growth_stats_guide:
+        `우리 ${name}의 성장 수치는 이번 폴백에서는 생략되었습니다. 그림과 함께 살펴보실 때 참고용으로만 봐주세요.`,
+      hygge_tips: [
+        '그림을 다시 한번 펼쳐 놓고, 가장 마음에 드는 색 한 가지를 골라 이야기해 보세요.',
+        '오늘 하루 중 5분만, 아이가 말로 표현한 장면을 메모에 적어 보세요.',
+        '창문 밖 하늘을 함께 바라보며, 구름 모양을 서로 이름 지어 보는 놀이를 해 보세요.',
+      ],
+    },
+  }
+}
+
+export function parseKindraStructuredChartReportJsonWithFallback(
+  raw: string,
+  expectedImageCount?: number,
+): KindraStructuredChartReportJson {
+  const n =
+    typeof expectedImageCount === 'number' ? Math.min(5, Math.max(1, Math.floor(expectedImageCount))) : undefined
+  try {
+    return parseKindraStructuredChartReportJson(raw, expectedImageCount)
+  } catch {
+    return buildFallbackKindraStructuredChartReport(n ?? 1)
+  }
 }
