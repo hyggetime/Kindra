@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 
 import { StructuredReportPentagon } from '@/components/preview/StructuredReportPentagon'
+import { VisualSummaryDrawingThumb } from '@/components/preview/VisualSummaryDrawingThumb'
 import { useMockStructuredReport } from '@/lib/MockStructuredReportContext'
 
 function SectionCard({
@@ -37,27 +38,30 @@ export function StructuredReportPremium() {
       <header className="rounded-2xl border border-[#dfe6d8] bg-gradient-to-br from-[#f7faf4] via-white to-[#faf6ef] p-6 shadow-sm">
         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#6b8562]">Kindra premium</p>
         <h1 className="mt-2 text-[1.35rem] font-bold leading-snug tracking-tight text-[#2a3428]">{rs.title}</h1>
-        <p className="mt-3 text-xs text-[#6b6b6b]">제출 그림 {rs.visual_summary.length}장 기준 요약 · 구조화 JSON Mock</p>
+        <p className="mt-3 text-xs text-[#6b6b6b]">제출 그림 {rs.visual_summary.length}장을 바탕으로 한 통합 분석이에요</p>
       </header>
 
       <section className="rounded-2xl border border-[#e4ddd3] bg-white p-5 shadow-sm">
         <h2 className="text-sm font-bold text-[#3d5236]">발달·표현 오각형</h2>
-        <p className="mt-1 text-xs text-[#7a7a7a]">50–100 척도 · 프롬프트 엔진 chart_scores</p>
+        <p className="mt-1 text-xs text-[#7a7a7a]">발달·표현 5축 (50–100)</p>
         <StructuredReportPentagon />
       </section>
 
       <SectionCard eyebrow="Visual" title="장별 시각 해설">
         <ul className="flex flex-col gap-4">
-          {rs.visual_summary.map((item) => (
+          {rs.visual_summary.map((item, index) => (
             <li
               key={item.target_image}
-              className="rounded-xl border border-[#ebe6df] bg-[#fdfcfa] p-4 ring-1 ring-black/5"
+              className="flow-root rounded-xl border border-[#ebe6df] bg-[#fdfcfa] p-4 ring-1 ring-black/5"
             >
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-[#7c9070]/15 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-[#4d6b46]">
-                  {item.target_image}
-                </span>
-              </div>
+              <VisualSummaryDrawingThumb
+                index={index}
+                alt={item.target_image}
+                className="float-left mr-3 mb-2 h-[9rem] w-[9rem] [shape-outside:margin-box]"
+              />
+              <span className="mb-2 inline-flex rounded-full bg-[#7c9070]/15 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-[#4d6b46]">
+                {item.target_image}
+              </span>
               <Prose>{item.description}</Prose>
             </li>
           ))}

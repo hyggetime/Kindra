@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 const TOOLS_TITLE = '킨드라가 마음을 읽는 법 — Kindra'
 const TOOLS_DESC =
-  '킨드라가 아이의 그림을 어떻게 읽는지 알려드려요. HTP·DAP·KFD·LMT·PITR 등 검증된 심리 분석 이론과, 5장 프리미엄 구조화 렌즈를 바탕으로 임상 진단이 아닌 따뜻한 경향성 가이드를 만들어요.'
+  '킨드라가 아이의 그림을 어떻게 읽는지 알려드려요. HTP·DAP·KFD·LMT·PITR 등 수십 년간 검증된 심리 분석 이론과 인지·발달 렌즈를 바탕으로, 임상 진단이 아닌 따뜻한 경향성 가이드를 만들어요.'
 
 export const metadata: Metadata = {
   title: TOOLS_TITLE,
@@ -27,7 +27,7 @@ const FRAMEWORKS: Framework[] = [
     abbr: 'HTP',
     fullName: 'House-Tree-Person',
     description:
-      '집, 나무, 사람을 그리는 방식에서 아이가 자신과 가족, 주변 환경을 어떻게 느끼는지 읽어요. 집의 크기나 창문 유무, 나무의 형태, 사람의 위치 같은 작은 선택 하나하나가 단서가 돼요.',
+      '1948년 존 버크(J.N. Buck)가 개발한, 그림 심리 평가 중 가장 널리 쓰이는 투사 검사 중 하나예요. 집·나무·사람 세 요소는 각각 아이의 가정 환경 인식, 성장 욕구, 자아상을 반영한다고 봐요. 집에 창문이 있는지, 문이 열려 있는지, 나무의 뿌리가 어떤지, 사람이 얼마나 크고 어디에 서 있는지 — 아이가 무의식적으로 선택한 디테일 하나하나가 그 시점 마음의 풍경을 담고 있어요.',
   },
   {
     id: 'dap',
@@ -36,7 +36,7 @@ const FRAMEWORKS: Framework[] = [
     abbr: 'DAP',
     fullName: 'Draw-A-Person',
     description:
-      '사람을 어떻게 그리는지를 통해 아이가 자신을 어떻게 바라보는지, 타인을 어떻게 느끼는지 살펴봐요. 인물의 표정·크기·세부 표현이 아이의 자아상을 드러내요.',
+      '카렌 마코버(1949)가 임상 심리에 적용한 이론으로, 그림 속 인물이 곧 아이의 심리적 자화상이 된다고 봐요. 인물을 얼마나 크게, 어디에 그리는지, 표정이 있는지, 이목구비와 손발이 얼마나 완성되어 있는지가 자아상의 단서예요. 특히 손은 \'관계 맺는 능력\'과 연결되는 요소여서, 손이 있는지·어떻게 그려지는지를 주의 깊게 읽어요.',
   },
   {
     id: 'kfd',
@@ -45,7 +45,7 @@ const FRAMEWORKS: Framework[] = [
     abbr: 'KFD',
     fullName: 'Kinetic Family Drawing',
     description:
-      '움직이는 가족의 모습을 그리게 하면, 아이가 가족 안에서 느끼는 유대와 거리감이 자연스럽게 드러나요. 누가 함께 있고 누가 떨어져 있는지, 가족 사이의 행동까지 읽어봐요.',
+      '번즈와 카우프만(1970)이 개발한 동적 가족화는 \'가족이 함께 무언가를 하는 장면\'을 그리게 해요. 정적인 가족화와 달리, 각 가족이 무엇을 하는지·서로를 향하는지·등을 돌리는지의 움직임 속에서 관계의 온도가 드러나요. 아이 자신은 어디에 그려지는지, 부모와 얼마나 가까이 있는지, 가족이 같은 공간을 함께 나누는지 — 배치와 동작 하나하나가 아이가 느끼는 가족 안의 자기 위치를 말해줘요.',
   },
   {
     id: 'lmt',
@@ -54,7 +54,7 @@ const FRAMEWORKS: Framework[] = [
     abbr: 'LMT',
     fullName: 'Landscape Montage Technique',
     description:
-      '강·산·길·집·사람 등 10가지 요소로 풍경을 구성해요. 아이가 어떤 세상을 만들고, 그 안에 자신을 어디에 두는지를 통해 내면의 힘과 세상을 바라보는 태도를 살펴봐요.',
+      '일본의 정신과 의사 나카이 히사오가 개발한 투사 검사로, 강·산·들판·길·집·나무·사람·꽃·돌·동물 열 가지 요소를 하나씩 이어 그리며 하나의 풍경을 완성해요. 각 요소의 크기·위치·순서에서 아이가 세상을 어떻게 구성하는지가 보여요. 사람(자신)을 어디에 두는지, 자연 요소들과 얼마나 조화롭게 어우러지는지에서 내면의 균형감과 세계 인식이 드러나요.',
   },
   {
     id: 'pitr',
@@ -63,31 +63,38 @@ const FRAMEWORKS: Framework[] = [
     abbr: 'PITR',
     fullName: 'Person in the Rain',
     description:
-      '비라는 어려운 상황에서 사람이 어떻게 있는지를 그리게 해요. 우산이 있는지, 혼자인지, 표정은 어떤지를 통해 아이가 스트레스를 어떻게 다루는지 읽어봐요.',
+      '아브라함 레비(1999)가 개발한 이 검사는 \'빗속의 사람을 그려보세요\'라는 단순한 지시 하나로 아이의 스트레스 대처 방식을 읽어요. 우산이 있는지(보호 자원), 비가 얼마나 세게 쏟아지는지(인식하는 스트레스 강도), 사람이 혼자인지 누군가와 함께인지(사회적 지지 감각), 표정이 어떤지 — 어려운 상황에서 아이가 스스로를 어떻게 보호하고 회복하는지가 그림 속에 담겨 있어요.',
   },
 ]
 
-/** 5장 프리미엄 구조화 리포트 — 학술 렌즈 (스캔용 라벨 + 한 줄) */
-const PREMIUM_ACADEMIC_LENSES: { tag: string; title: string; detail: string }[] = [
+const DEVELOPMENTAL_LENSES: { tag: string; researcher: string; title: string; detail: string }[] = [
   {
     tag: 'Goodenough–Harris',
+    researcher: '굿이너프 · 해리스, 1926 / 1963',
     title: '관찰·형태 렌즈',
-    detail: '형태적 디테일과 사물 묘사의 정교함을 추적하는 세밀 관찰력 인지 지표',
+    detail:
+      '아이가 그린 인물의 디테일 수준 — 머리카락·눈썹·손가락·옷의 세부 등이 얼마나 완성되어 있는지 — 을 통해 아이가 세상을 얼마나 세밀하게 관찰하고 재현하는지를 읽어요. 인지 발달 단계와 세밀 관찰력이 그림 안에 기록되어 있어요.',
   },
   {
     tag: 'Luquet',
+    researcher: '뤼케, 1913',
     title: '공간·서사 렌즈',
-    detail: '기저선 활용, 공간 구조화 및 도화지 속 서사(이야기) 구성 능력',
+    detail:
+      '아이들은 \'보이는 것\'이 아니라 \'알고 있는 것\'을 그린다는 관찰에서 출발해요. 하늘과 땅이 분리되어 있는지, 기저선(땅줄)이 등장하는지, 여러 장면이 한 화면에 공존하는지를 통해 아이의 인지적 공간 구성 능력과 서사 사고력이 드러나요.',
   },
   {
     tag: 'Lowenfeld',
+    researcher: '로웬펠드, 1947',
     title: '운동·표현 렌즈',
-    detail: '선의 연결성과 일관된 필압을 통한 소근육 협응 및 신체 표현 단계',
+    detail:
+      '창의적 표현 발달 이론은 긁적거림에서 시각적 사실 표현까지 아동화의 단계를 체계화했어요. 선이 얼마나 의도적으로 이어지는지, 필압이 일정하게 유지되는지, 신체 각 부위가 연결성 있게 표현되는지를 통해 소근육 운동 발달과 표현 단계를 살펴봐요.',
   },
   {
     tag: 'DAP / KFD',
+    researcher: '마코버 · 번즈, 1949 / 1970',
     title: '정서·형식 심리 렌즈',
-    detail: '인물의 역동성, 필압의 밀도, 여백의 균형을 통해 읽어내는 내면 정서 안정감',
+    detail:
+      '인물화와 움직이는 가족화가 결합된 이 렌즈는 그림 속 인물의 배치·접촉·표정·크기에서 아이의 관계 감각과 정서 안정감을 읽어요. 손을 뻗는지 움츠리는지, 가족이 서로를 향하는지 등을 돌리는지, 인물 사이 여백이 어느 정도인지 — 필압의 강약과 여백 배분이 아이의 내면 정서를 드러내는 언어가 돼요.',
   },
 ]
 
@@ -124,6 +131,7 @@ export default function ToolsPage() {
       </header>
 
       <main>
+        {/* ── 히어로 ── */}
         <section className="border-b border-[#7c9070]/10 bg-gradient-to-b from-[#fdfbf9] to-[#f5efe6]/80 px-5 py-16 sm:px-8 sm:py-20">
           <div className="mx-auto max-w-3xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#7c9070]">
@@ -132,23 +140,22 @@ export default function ToolsPage() {
             <h1 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-[#2f2f2f] sm:text-4xl">
               아이의 그림을 읽는
               <br />
-              다섯 가지 관점
+              검증된 심리 분석 도구
             </h1>
             <div className="mt-8 max-w-2xl space-y-4 text-pretty text-base leading-relaxed text-[#2f2f2f]/85 sm:text-lg">
               <p>
-                그림을 보면서 &ldquo;이 아이가 무슨 생각을 하는 걸까&rdquo; 느끼신 적 있으신가요? 킨드라가 그
-                질문에 함께 다가가는 방법을 소개해 드려요.
+                &ldquo;이 아이가 무슨 생각을 하는 걸까&rdquo; — 그림을 보며 한 번쯤 느껴 보셨을 거예요. 킨드라는 그
+                질문에 함께 다가가기 위해, 수십 년간 아동 심리학에서 검증된 분석 이론을 활용해요.
               </p>
               <p>
-                킨드라는 아동 심리학에서 오랫동안 검증된 다섯 가지 분석 이론을 활용해요. 어느 하나만으로 아이를
-                판단하지 않고, 여러 관점을 함께 읽어 아이만의 마음 지도를 완성해요. 최근에는{' '}
-                <strong className="font-semibold text-[#2f2f2f]">5장을 한 묶음으로 읽는 프리미엄 구조화 렌즈</strong>
-                도 같은 철학 안에 얹어 두었어요.
+                어느 하나의 관점으로 아이를 판단하지 않아요. 다섯 가지 이론 프레임과 네 가지 인지·발달 렌즈가 서로
+                보완하며, 아이만의 입체적인 마음 지도를 완성해요.
               </p>
             </div>
           </div>
         </section>
 
+        {/* ── 킨드라의 약속 ── */}
         <section className="border-b border-[#7c9070]/10 bg-white/40 px-5 py-14 sm:px-8 sm:py-16">
           <div className="mx-auto max-w-3xl">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7c9070]/80">
@@ -165,49 +172,15 @@ export default function ToolsPage() {
           </div>
         </section>
 
+        {/* ── 다섯 가지 분석 관점 ── */}
         <section className="px-5 py-16 sm:px-8 sm:py-20">
           <div className="mx-auto max-w-5xl">
-            <div className="mb-12 text-center">
+            <div className="mb-12">
               <h2 className="text-2xl font-semibold text-[#2f2f2f]">다섯 가지 분석 관점</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#2f2f2f]/70">
-                각 이론은 그림 하나로 아이를 단정하는 도구가 아니에요. 아이의 그림 전체에서 패턴을 읽을 때 참조하는
-                심리학적 관점이에요.
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#2f2f2f]/70">
+                각 이론은 그림 하나로 아이를 단정하는 도구가 아니에요. 아이의 그림 전체에서 패턴을 읽을 때 함께
+                참조하는, 수십 년간 검증된 심리학적 관점이에요.
               </p>
-            </div>
-
-            {/* 프리미엄 5장 — 기존 카드 규격 */}
-            <div className="mb-8">
-              <article className="flex flex-col rounded-2xl border border-[#7c9070]/25 bg-white/70 p-6 shadow-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:border-[#7c9070]/45 hover:bg-white hover:shadow-md sm:p-8">
-                <p className="mb-3 inline-flex w-fit rounded-full border border-[#7c9070]/35 bg-[#f7faf5]/90 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-[#4d6b46]">
-                  [인지·표현 발달 통합 검사]
-                </p>
-                <div className="mb-4 flex flex-wrap items-start gap-3">
-                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7c9070]/12 text-[11px] font-bold tabular-nums text-[#4d6b46]">
-                    ★
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold leading-snug text-[#2f2f2f]">5장 통합 프리미엄 렌즈</p>
-                    <p className="mt-0.5 text-[11px] text-[#2f2f2f]/45">구조화 JSON · chart_scores + report_sections</p>
-                  </div>
-                </div>
-                <p className="text-sm leading-relaxed text-[#2f2f2f]/82">
-                  아이의 그림 5장을 유기적으로 연결하여 인지 발달과 정서 밀도를 입체적으로 읽어내는 프리미엄 다차원
-                  분석 도구입니다.
-                </p>
-
-                <ul className="mt-6 grid list-none gap-3 sm:grid-cols-2">
-                  {PREMIUM_ACADEMIC_LENSES.map((l) => (
-                    <li
-                      key={l.tag}
-                      className="rounded-xl border border-[#e4ddd3] bg-[#fdfbf9]/80 px-3.5 py-3 text-left"
-                    >
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#7c9070]">{l.tag}</p>
-                      <p className="mt-1 text-xs font-semibold text-[#2f2f2f]">{l.title}</p>
-                      <p className="mt-1.5 text-[13px] leading-snug text-[#2f2f2f]/75">{l.detail}</p>
-                    </li>
-                  ))}
-                </ul>
-              </article>
             </div>
 
             <ul className="grid list-none grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -230,14 +203,54 @@ export default function ToolsPage() {
                 </li>
               ))}
             </ul>
+
+            {/* ── 5장 심층 발달 렌즈 ── */}
+            <div className="mt-16 border-t border-[#7c9070]/15 pt-14">
+              <div className="mb-8">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7c9070]/80">
+                  그림 5장이 모였을 때 · 발달·정서 심층 렌즈
+                </p>
+                <h2 className="text-xl font-semibold text-[#2f2f2f] sm:text-2xl">
+                  인지·발달 연구가 쌓아온 네 가지 관점
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#2f2f2f]/70">
+                  그림 한 장은 하나의 순간이지만, 다섯 장이 모이면 아이의 마음 흐름이 됩니다. 킨드라는 표현 발달
+                  연구자들이 수십 년간 다듬어 온 아래 네 가지 렌즈로 그림들을 하나의 이야기로 연결해요. 아이가 어떻게
+                  선을 다루는지, 공간을 어떻게 구성하는지, 대상을 어떻게 관찰하고 재현하는지 — 그림 속에 담긴 발달과
+                  정서의 밀도를 입체적으로 파악해요.
+                </p>
+              </div>
+
+              <ul className="grid list-none grid-cols-1 gap-4 sm:grid-cols-2">
+                {DEVELOPMENTAL_LENSES.map((l) => (
+                  <li key={l.tag}>
+                    <article className="flex h-full flex-col rounded-2xl border border-[#7c9070]/25 bg-[#f7faf5]/70 p-5 shadow-sm transition duration-300 ease-out hover:border-[#7c9070]/45 hover:bg-[#f7faf5] hover:shadow-md sm:p-6">
+                      <div className="mb-3 flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7c9070]">
+                            {l.tag}
+                          </p>
+                          <p className="mt-0.5 text-xs text-[#2f2f2f]/40">{l.researcher}</p>
+                        </div>
+                        <span className="shrink-0 rounded-full border border-[#7c9070]/25 bg-white px-2.5 py-0.5 text-[10px] font-semibold text-[#4d6b46]">
+                          {l.title}
+                        </span>
+                      </div>
+                      <p className="text-sm leading-relaxed text-[#2f2f2f]/80">{l.detail}</p>
+                    </article>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
+        {/* ── 실제 데이터와 함께 ── */}
         <section className="border-y border-[#7c9070]/10 bg-white/40 px-5 py-16 sm:px-8 sm:py-20">
           <div className="mx-auto max-w-5xl">
-            <div className="mb-10 text-center">
+            <div className="mb-10">
               <h2 className="text-2xl font-semibold text-[#2f2f2f]">이론만이 아닌, 실제 데이터와 함께</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[#2f2f2f]/70">
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#2f2f2f]/70">
                 다섯 가지 분석 이론 외에, 킨드라는 두 가지 실제 데이터를 리포트 작성에 함께 활용해요.
               </p>
             </div>
@@ -291,6 +304,7 @@ export default function ToolsPage() {
           </div>
         </section>
 
+        {/* ── 이렇게 함께 읽어요 ── */}
         <section className="border-b border-[#7c9070]/10 bg-[#f5efe6]/50 px-5 py-16 sm:px-8 sm:py-20">
           <div className="mx-auto max-w-3xl">
             <h2 className="text-2xl font-semibold text-[#2f2f2f]">이렇게 함께 읽어요</h2>
@@ -314,6 +328,7 @@ export default function ToolsPage() {
           </div>
         </section>
 
+        {/* ── 이것이 모여 리포트가 돼요 ── */}
         <section className="px-5 py-16 sm:px-8 sm:py-20">
           <div className="mx-auto max-w-3xl">
             <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7c9070]/80">
@@ -333,12 +348,12 @@ export default function ToolsPage() {
           </div>
         </section>
 
+        {/* ── CTA ── */}
         <section className="border-t border-[#7c9070]/10 bg-[#f2efe9] px-5 py-14 sm:px-8">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 text-center">
             <h2 className="text-lg font-semibold text-[#2f2f2f]">아이의 그림을 함께 읽어드릴게요</h2>
             <p className="max-w-md text-sm leading-relaxed text-[#2f2f2f]/65">
-              그림을 올려 주시면 킨드라가 다섯 가지 관점으로 살펴보고, 아이만의 마음 지도를 준비해 드려요. 개발
-              프리뷰에서는 5장 구조화 리포트 화면도 바로 열어볼 수 있어요.
+              그림을 올려 주시면 킨드라가 다섯 가지 관점과 발달 렌즈로 살펴보고, 아이만의 마음 지도를 준비해 드려요.
             </p>
             <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
               <Link
@@ -354,19 +369,10 @@ export default function ToolsPage() {
                 미니앱 홈
               </Link>
             </div>
-            <p className="mt-1 max-w-lg text-xs leading-relaxed text-[#2f2f2f]/50">
-              실시간 엔진·대기 UI·오각형 차트까지 한 번에 보시려면{' '}
-              <Link
-                href="/preview/structured-report/"
-                className="font-medium text-[#4d6b46] underline decoration-[#7c9070]/45 underline-offset-[3px] transition hover:decoration-[#7c9070]"
-              >
-                구조화 리포트 프리뷰로 이동
-              </Link>
-              하세요.
-            </p>
           </div>
         </section>
 
+        {/* ── 법적 고지 ── */}
         <section className="border-t border-[#7c9070]/10 px-5 py-8 sm:px-8">
           <div className="mx-auto max-w-3xl">
             <p className="rounded-xl border border-[#7c9070]/20 bg-white/40 p-5 text-sm leading-relaxed text-[#2f2f2f]/60">
@@ -380,7 +386,7 @@ export default function ToolsPage() {
       </main>
 
       <footer className="border-t border-[#e4ddd3] px-5 py-8 text-center text-[11px] text-[#2f2f2f]/45 sm:px-8">
-        <p>© Kindra — 토스 미니앱 도구 안내</p>
+        <p>© Kindra — 킨드라 분석 도구 안내</p>
       </footer>
     </div>
   )

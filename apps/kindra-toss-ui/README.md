@@ -24,7 +24,7 @@ npm run dev
 ### 실시간 분석 (루트 Gemini 엔진)
 
 1. 루트 Kindra 웹을 띄웁니다: 저장소 루트에서 `npm run dev` (기본 **http://localhost:3000**). `.env.local`에 `GEMINI_API_KEY` 필요. API는 `development` 또는 `ALLOW_PROMPT_PLAYGROUND=1` 일 때만 열립니다.
-2. 미니앱: `cd apps/kindra-toss-ui && npm run dev` (**http://localhost:3010**).
+2. 미니앱: `cd apps/kindra-toss-ui && npm run dev` (**http://localhost:3001** — 루트 `.env.example` 의 `KINDRA_STRUCTURED_REPORT_CORS_ORIGIN` 과 맞춤).
 3. `.env.local` (미니앱)에 선택: `NEXT_PUBLIC_KINDRA_WEB_API_ORIGIN=http://localhost:3000` (기본값과 동일하면 생략 가능).
 4. 프리뷰 페이지 **「실제 엔드포인트 실시간 분석 가동」** — 이미지를 고르지 않으면 루트 `public/gallery/` 5장을 가져와 `POST /api/kindra-structured-report` 로 `generateKindraStructuredChartReport` 를 호출합니다. 성공 시 Mock이 **실시간 JSON으로 덮어써집니다.**
 
