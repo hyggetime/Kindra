@@ -21,6 +21,7 @@ import type { IntakeReportSessionPayload } from '@lib/intake/intake-report-sessi
 import { buildReportSessionImageFields, type ReportSlotBuffer } from '@lib/intake/report-session-images.server'
 import { allocateKindraReportSerial } from '@lib/intake/report-serial-allocation.server'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
+import { reportStatusPatch, REPORT_STATUS } from '@lib/reports/report-lifecycle'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { isPaymentConfirmedForAi } from '@lib/intake/intake-payment-confirmed.server'
 
@@ -344,6 +345,7 @@ export async function triggerAiAnalysis(intakeIdRaw: string): Promise<TriggerAiA
     const { error: upRepErr } = await admin
       .from('kindra_reports')
       .update({
+        ...reportStatusPatch(REPORT_STATUS.ANALYSIS_COMPLETE),
         report_json: {
           schema: STORED_KINDRA_INTAKE_SCHEMA,
           childName: row.child_display_name,

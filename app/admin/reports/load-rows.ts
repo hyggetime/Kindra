@@ -29,7 +29,10 @@ export async function loadAdminReportRows(pw: string): Promise<{ ok: true; rows:
       review_text,
       bank_depositor_name,
       deposit_confirmed,
-      toss_payment_key
+      toss_payment_key,
+      channel,
+      status,
+      email_delivery_error
     `,
     )
     .order('created_at', { ascending: false })
@@ -80,11 +83,18 @@ export async function loadAdminReportRows(pw: string): Promise<{ ok: true; rows:
       typeof listedRaw === 'number' && Number.isFinite(listedRaw) ? Math.round(listedRaw) : LIST_PRICE_WON
     const cc = (r as { coupon_code_applied?: unknown }).coupon_code_applied
     const couponCodeApplied = typeof cc === 'string' && cc.trim() ? cc.trim() : null
-    const ch = (r as { charged_amount_won?: unknown }).charged_amount_won
+    const chAmt = (r as { charged_amount_won?: unknown }).charged_amount_won
     const chargedAmountWon =
-      typeof ch === 'number' && Number.isFinite(ch) ? Math.round(ch) : null
+      typeof chAmt === 'number' && Number.isFinite(chAmt) ? Math.round(chAmt) : null
     const tpk = (r as { toss_payment_key?: unknown }).toss_payment_key
     const tossPaymentKey = typeof tpk === 'string' && tpk.trim() ? tpk.trim() : null
+
+    const chChannel = (r as { channel?: unknown }).channel
+    const channel = typeof chChannel === 'string' && chChannel.trim() ? chChannel.trim().toLowerCase() : null
+    const st = (r as { status?: unknown }).status
+    const status = typeof st === 'string' && st.trim() ? st.trim().toLowerCase() : null
+    const ede = (r as { email_delivery_error?: unknown }).email_delivery_error
+    const emailDeliveryError = typeof ede === 'string' && ede.trim() ? ede.trim() : null
 
     const iid = (r as { intake_id?: unknown }).intake_id
     const intakeId = typeof iid === 'string' ? iid : null
@@ -107,6 +117,9 @@ export async function loadAdminReportRows(pw: string): Promise<{ ok: true; rows:
       reviewText,
       bankDepositorName,
       depositConfirmed,
+      channel,
+      status,
+      emailDeliveryError,
     }
   })
 

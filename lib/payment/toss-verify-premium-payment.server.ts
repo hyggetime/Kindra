@@ -1,7 +1,5 @@
 import 'server-only'
 
-import { createHash, timingSafeEqual } from 'node:crypto'
-
 import { fetchTossPaymentByPaymentKey } from '@lib/payment/toss-fetch-payment.server'
 import { getTossSecretKey } from '@lib/payment/toss-secret.server'
 
@@ -124,9 +122,5 @@ export async function verifyTossPremiumPaymentReceipt(params: {
   }
 }
 
-/** SHA-256 다이제스트끼리 timing-safe 비교 (문자열 길이 누출 완화). */
-export function constantTimeEqualToken(a: string, b: string): boolean {
-  const ha = createHash('sha256').update(a, 'utf8').digest()
-  const hb = createHash('sha256').update(b, 'utf8').digest()
-  return ha.length === hb.length && timingSafeEqual(ha, hb)
-}
+/** @deprecated import from `@lib/auth/kindra-client-auth.server` */
+export { constantTimeEqualToken } from '@lib/auth/kindra-client-auth.server'

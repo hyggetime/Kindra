@@ -1,6 +1,8 @@
 'use server'
 
 import { recordCouponRedemptionAfterPayment } from '@lib/payment/coupon-campaigns.server'
+import { REPORT_STATUS } from '@lib/reports/report-lifecycle'
+import { updateKindraReportStatusIfAllowed } from '@lib/reports/report-status-transition.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { triggerAiAnalysis } from '@lib/intake/trigger-ai-analysis.server'
 
@@ -43,7 +45,18 @@ export async function updateKindraReportIsSent(
     }
   }
 
-  const { error } = await supabase.from('kindra_reports').update({ is_sent: isSent }).eq('id', id)
+  if (isSent) {
+    const statusResult = await updateKindraReportStatusIfAllowed(supabase, id, REPORT_STATUS.SENT, {
+      is_sent: true,
+    })
+    if (!statusResult.ok) {
+      console.error('[admin/reports] update is_sent status', statusResult.reason)
+      return { ok: false }
+    }
+    return { ok: true }
+  }
+
+  const { error } = await supabase.from('kindra_reports').update({ is_sent: false }).eq('id', id)
 
   if (error) {
     console.error('[admin/reports] update is_sent', error.message)
@@ -62,20 +75,41 @@ export async function updateKindraReportDepositConfirmed(
   if (!uuidRe.test(id)) return { ok: false }
 
   const supabase = createServiceRoleClient()
-  const { data: before } = await supabase.from('kindra_reports').select('intake_id').eq('id', id).maybeSingle()
+  const { data: before } = await supabase
+    .from('kindra_reports')
+    .select('intake_id, status')
+    .eq('id', id)
+    .maybeSingle()
   const intakeId =
     before && typeof (before as { intake_id?: string | null }).intake_id === 'string'
       ? (before as { intake_id: string }).intake_id
       : null
 
-  const { error } = await supabase.from('kindra_reports').update({ deposit_confirmed: depositConfirmed }).eq('id', id)
-
-  if (error) {
-    console.error('[admin/reports] update deposit_confirmed', error.message)
-    return { ok: false }
+  if (!depositConfirmed) {
+    const { error } = await supabase.from('kindra_reports').update({ deposit_confirmed: false }).eq('id', id)
+    if (error) {
+      console.error('[admin/reports] update deposit_confirmed', error.message)
+      return { ok: false }
+    }
+    return { ok: true }
   }
 
-  if (depositConfirmed && intakeId) {
+  const statusResult = await updateKindraReportStatusIfAllowed(supabase, id, REPORT_STATUS.PAYMENT_CONFIRMED, {
+    deposit_confirmed: true,
+  })
+  if (!statusResult.ok) {
+    console.error('[admin/reports] update deposit_confirmed status', statusResult.reason)
+    return { ok: false }
+  }
+  if (!statusResult.applied) {
+    const { error } = await supabase.from('kindra_reports').update({ deposit_confirmed: true }).eq('id', id)
+    if (error) {
+      console.error('[admin/reports] update deposit_confirmed only', error.message)
+      return { ok: false }
+    }
+  }
+
+  if (intakeId) {
     const now = new Date().toISOString()
     const { error: pErr } = await supabase
       .from('kindra_intakes')

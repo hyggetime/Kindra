@@ -3,6 +3,9 @@ import 'server-only'
 import { triggerAiAnalysis } from '@lib/intake/trigger-ai-analysis.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { fetchTossPaymentByPaymentKey } from '@lib/payment/toss-fetch-payment.server'
+import { REPORT_STATUS, type ReportStatus } from '@lib/reports/report-lifecycle'
+import { reportChannelPatchOnVerifiedTossPayment } from '@lib/reports/resolve-report-channel.server'
+import { updateKindraReportStatusIfAllowed } from '@lib/reports/report-status-transition.server'
 
 export type TossWebhookPayload = {
   eventType?: string
@@ -29,20 +32,22 @@ async function resolveReportRowByPayment(
   paymentKey: string,
   orderIdHint: string,
   remote: Record<string, unknown> | null,
-): Promise<{ reportId: string; intakeId: string | null } | null> {
+): Promise<{ reportId: string; intakeId: string | null; channel: string | null } | null> {
   const admin = createServiceRoleClient()
 
   const { data: byKey } = await admin
     .from('kindra_reports')
-    .select('id, intake_id')
+    .select('id, intake_id, channel')
     .eq('toss_payment_key', paymentKey)
     .maybeSingle()
 
   if (byKey && typeof (byKey as { id?: string }).id === 'string') {
     const intakeRaw = (byKey as { intake_id?: string | null }).intake_id
+    const channelRaw = (byKey as { channel?: string | null }).channel
     return {
       reportId: (byKey as { id: string }).id,
       intakeId: typeof intakeRaw === 'string' ? intakeRaw : null,
+      channel: typeof channelRaw === 'string' ? channelRaw : null,
     }
   }
 
@@ -61,16 +66,47 @@ async function resolveReportRowByPayment(
 
   const { data: report } = await admin
     .from('kindra_reports')
-    .select('id, intake_id')
+    .select('id, intake_id, channel')
     .eq('id', reportId)
     .maybeSingle()
 
   if (!report || typeof (report as { id?: string }).id !== 'string') return null
 
   const intakeRaw = (report as { intake_id?: string | null }).intake_id
+  const channelRaw = (report as { channel?: string | null }).channel
   return {
     reportId: (report as { id: string }).id,
     intakeId: typeof intakeRaw === 'string' ? intakeRaw : null,
+    channel: typeof channelRaw === 'string' ? channelRaw : null,
+  }
+}
+
+/** 토스 메타데이터는 항상 반영하고, status 변경만 전이 엔진을 거칩니다. */
+async function applyKindraReportTossPatch(
+  admin: ReturnType<typeof createServiceRoleClient>,
+  reportId: string,
+  basePatch: Record<string, unknown>,
+  proposedStatus?: ReportStatus,
+): Promise<void> {
+  const { error: baseErr } = await admin.from('kindra_reports').update(basePatch).eq('id', reportId)
+  if (baseErr) {
+    console.error('[kindra:toss-webhook] report base patch failed', reportId, baseErr.message)
+    return
+  }
+
+  if (!proposedStatus) return
+
+  const statusResult = await updateKindraReportStatusIfAllowed(admin, reportId, proposedStatus)
+  if (!statusResult.ok) {
+    console.error('[kindra:toss-webhook] report status transition failed', reportId, statusResult.reason)
+    return
+  }
+  if (!statusResult.applied && !statusResult.decision.apply) {
+    console.info('[kindra:toss-webhook] report status transition skipped', {
+      reportId,
+      proposed: proposedStatus,
+      reason: statusResult.decision.reason,
+    })
   }
 }
 
@@ -118,13 +154,21 @@ export async function processTossWebhookPayload(payload: TossWebhookPayload): Pr
     const patch: Record<string, unknown> = {
       toss_payment_status: status || null,
       toss_webhook_updated_at: now,
+      ...reportChannelPatchOnVerifiedTossPayment({
+        orderId,
+        existingChannel: resolved.channel,
+      }),
     }
 
+    let proposedStatus: ReportStatus | undefined
     if (status === 'CANCELED' || status === 'PARTIAL_CANCELED') {
       patch.payment_cancelled_at = now
+      proposedStatus = REPORT_STATUS.CANCELLED
+    } else if (status === 'DONE') {
+      proposedStatus = REPORT_STATUS.PAYMENT_CONFIRMED
     }
 
-    await admin.from('kindra_reports').update(patch).eq('id', resolved.reportId)
+    await applyKindraReportTossPatch(admin, resolved.reportId, patch, proposedStatus)
 
     if (resolved.intakeId) {
       if (status === 'DONE') {
@@ -183,15 +227,21 @@ export async function processTossWebhookPayload(payload: TossWebhookPayload): Pr
     const admin = createServiceRoleClient()
     const now = new Date().toISOString()
 
-    await admin
-      .from('kindra_reports')
-      .update({
+    await applyKindraReportTossPatch(
+      admin,
+      resolved.reportId,
+      {
         toss_payment_status:
           remote && typeof remote.status === 'string' ? remote.status : 'CANCELED',
         toss_webhook_updated_at: now,
         payment_cancelled_at: now,
-      })
-      .eq('id', resolved.reportId)
+        ...reportChannelPatchOnVerifiedTossPayment({
+          orderId,
+          existingChannel: resolved.channel,
+        }),
+      },
+      REPORT_STATUS.CANCELLED,
+    )
 
     if (resolved.intakeId) {
       await admin

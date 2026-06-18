@@ -7,18 +7,18 @@ import type {
   KindraPremiumIntakePayload,
   KindraPremiumIntakePaymentBody,
 } from '@/lib/kindraPremiumIntakeTypes'
-import { postStructuredReportAnalysis, readFileAsInlineImage } from '@/lib/structuredReportLive'
+import { getKindraApiBaseUrl, getKindraMiniappApiAuthHeaders } from '@/lib/kindraApiEndpoints'
+import { normalizeStructuredReportInput, premiumPayloadToStructuredApiContext } from '@/lib/kindra-engine'
+import {
+  KINDRA_LIVE_STRUCTURED_REPORT_STORAGE_KEY,
+  KINDRA_PREMIUM_INTAKE_STORAGE_KEY,
+} from '@/lib/kindraPremiumIntakeTypes'
+import { setPremiumSessionItem } from '@/lib/premiumIntakeStorage'
+import { fetchUrlAsInlineImage, postStructuredReportAnalysis } from '@/lib/structuredReportLive'
 
 import type { KindraStructuredReportJson } from './kindraStructuredReportTypes'
 
-/** `NEXT_PUBLIC_KINDRA_API_URL` — 없으면 루트 웹 API 오리진으로 폴백(개발 편의). */
-export function getKindraApiBaseUrl(): string {
-  const direct = process.env.NEXT_PUBLIC_KINDRA_API_URL?.trim()
-  if (direct) return direct.replace(/\/$/, '')
-  const fallback = process.env.NEXT_PUBLIC_KINDRA_WEB_API_ORIGIN?.trim() ?? 'http://localhost:3000'
-  return fallback.replace(/\/$/, '')
-}
-
+export { getKindraApiBaseUrl } from '@/lib/kindraApiEndpoints'
 const PREMIUM_INTAKE_PATH = '/api/kindra-premium-intake'
 
 /** 브라우저: 미니앱 서버 프록시(시크릿 주입). 서버 번들: 메인 API 직접. */
@@ -49,7 +49,7 @@ export async function postPremiumIntakeAfterPayment(
     try {
       const data = (await res.json()) as { ok?: unknown; report?: KindraStructuredReportJson }
       if (data?.ok === true && data.report && typeof data.report === 'object') {
-        return data.report
+        return normalizeStructuredReportInput(data.report, body.payload.imageUrls.length)
       }
     } catch {
       /* malformed body */
@@ -93,24 +93,22 @@ export async function runStructuredReportFromPremiumPayload(
   const images = await Promise.all(
     payload.imageUrls.map(async (url) => {
       assertHttpsOrRelative(url)
-      const res = await fetch(url, { signal })
-      if (!res.ok) throw new Error(`이미지 로드 실패: ${url} (${res.status})`)
-      const blob = await res.blob()
-      const file = new File([blob], 'drawing.png', { type: blob.type || 'image/png' })
-      return readFileAsInlineImage(file)
+      return fetchUrlAsInlineImage(url, signal)
     }),
   )
 
-  const context: Record<string, unknown> = {
-    kind: 'KindraPremiumIntake',
-    childName: payload.childName,
-    childAgeLabel: payload.childAgeLabel,
-    childGender: payload.childGender,
-    parentMemo: payload.parentMemo,
-    imageUrls: [...payload.imageUrls],
-    guardianEmail: payload.guardianEmail ?? null,
-    marketingOptIn: payload.marketingOptIn ?? false,
-  }
+  return postStructuredReportAnalysis(images, premiumPayloadToStructuredApiContext(payload), signal)
+}
 
-  return postStructuredReportAnalysis(images, context, signal)
+/**
+ * 인테이크 제출 → 구조화 리포트 API → payload·report 를 세션(또는 인메모리)에 저장.
+ */
+export async function submitPremiumIntakeForReport(
+  payload: KindraPremiumIntakePayload,
+  signal?: AbortSignal,
+): Promise<KindraStructuredReportJson> {
+  setPremiumSessionItem(KINDRA_PREMIUM_INTAKE_STORAGE_KEY, JSON.stringify(payload))
+  const report = await runStructuredReportFromPremiumPayload(payload, signal)
+  setPremiumSessionItem(KINDRA_LIVE_STRUCTURED_REPORT_STORAGE_KEY, JSON.stringify(report))
+  return report
 }
