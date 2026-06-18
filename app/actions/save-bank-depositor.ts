@@ -9,6 +9,7 @@ import {
   isReportAccessExpired,
 } from '@lib/payment/report-access-cookie.server'
 import { getListedPriceWonForReport } from '@lib/payment/report-checkout.server'
+import { reportStatusPatch, REPORT_STATUS } from '@lib/reports/report-lifecycle'
 import { createServerSupabaseClient } from '@lib/supabase/server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 
@@ -30,7 +31,10 @@ async function buildDepositorUpdatePatch(
 ): Promise<{ ok: true; patch: Record<string, unknown> } | { ok: false; message: string }> {
   const couponTrim = typeof couponCodeRaw === 'string' ? couponCodeRaw.trim() : ''
   if (!couponTrim) {
-    return { ok: true, patch: { bank_depositor_name: name } }
+    return {
+      ok: true,
+      patch: { bank_depositor_name: name, ...reportStatusPatch(REPORT_STATUS.AWAITING_DEPOSIT) },
+    }
   }
   const listed = await getListedPriceWonForReport(reportId)
   const r = await resolveCheckoutCouponAsync(listed, couponTrim, reportId)
@@ -43,6 +47,7 @@ async function buildDepositorUpdatePatch(
       bank_depositor_name: name,
       coupon_code_applied: r.couponNormalized,
       charged_amount_won: r.amountWon,
+      ...reportStatusPatch(REPORT_STATUS.AWAITING_DEPOSIT),
     },
   }
 }

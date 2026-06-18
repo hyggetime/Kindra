@@ -13,4 +13,7 @@ export type AdminReportRowVm = {
   reviewText: string | null
   bankDepositorName: string | null
   depositConfirmed: boolean
+  channel: string | null
+  status: string | null
+  emailDeliveryError: string | null
 }

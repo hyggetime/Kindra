@@ -9,6 +9,8 @@ import { LIST_PRICE_WON } from '@lib/constants'
 import { buildApplyPaymentPath } from '@lib/payment/parse-payment-page-params'
 import { setReportAccessCookie } from '@lib/payment/report-access-cookie.server'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
+import { reportCreateFields, REPORT_STATUS } from '@lib/reports/report-lifecycle'
+import { resolveReportChannelFromServerAction } from '@lib/reports/resolve-report-channel.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 
 export type DevBypassIntakeResult =
@@ -54,11 +56,13 @@ export async function createDevBypassIntakeReport(): Promise<DevBypassIntakeResu
   }
 
   const reportUuid = randomUUID()
+  const reportChannel = await resolveReportChannelFromServerAction()
   const { error } = await admin.from('kindra_reports').insert({
     id: reportUuid,
     owner_email: email,
     title: `${childDisplayName} · 통합 리포트 (바이패스)`,
     listed_price_won: LIST_PRICE_WON,
+    ...reportCreateFields({ channel: reportChannel, status: REPORT_STATUS.AWAITING_PAYMENT }),
     report_json: {
       schema: STORED_KINDRA_INTAKE_SCHEMA,
       childName: childDisplayName,

@@ -7,6 +7,7 @@ import { getRedirectOriginForTossCallbacks } from '@lib/payment/redirect-origin-
 import { saveTossCheckoutSession } from '@lib/payment/toss-checkout-session.server'
 import { encodeCheckoutCookie, type TossCheckoutPayload } from '@lib/payment/toss-checkout-token.server'
 import { getListedPriceWonForReport } from '@lib/payment/report-checkout.server'
+import { warnIfClientSentChannel } from '@lib/reports/resolve-report-channel.server'
 
 export const runtime = 'nodejs'
 
@@ -25,6 +26,8 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
+
+  warnIfClientSentChannel(body, 'payments/toss/prepare')
 
   const reportRaw = body.reportId
   const reportId =

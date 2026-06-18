@@ -9,16 +9,23 @@
  */
 import { NextResponse } from 'next/server'
 
+import {
+  bearerTokenFromHeaders,
+  constantTimeEqualToken,
+  miniappSharedSecret,
+} from '@lib/auth/kindra-client-auth.server'
 import { generateKindraStructuredChartReport } from '@lib/gemini/generate'
 import type { KindraStructuredChartReportJson } from '@lib/gemini/kindra-structured-json-report'
 import { buildFallbackKindraStructuredChartReport } from '@lib/gemini/kindra-structured-json-report'
 import { fetchPremiumImageUrlsAsGeminiInline } from '@lib/kindra-premium-intake-fetch.server'
 import { premiumPayloadToKindraUserContext } from '@lib/kindra-premium-intake-map'
 import type { KindraPremiumIntakePaymentBody } from '@lib/kindra-premium-intake-types'
+import { verifyTossPremiumPaymentReceipt } from '@lib/payment/toss-verify-premium-payment.server'
+import { REPORT_CHANNEL, type ReportChannel } from '@lib/reports/report-lifecycle'
 import {
-  constantTimeEqualToken,
-  verifyTossPremiumPaymentReceipt,
-} from '@lib/payment/toss-verify-premium-payment.server'
+  resolveReportChannelFromRequest,
+  warnIfClientSentChannel,
+} from '@lib/reports/resolve-report-channel.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -27,23 +34,10 @@ function playgroundAllowed(): boolean {
   return process.env.NODE_ENV === 'development' || process.env.ALLOW_PROMPT_PLAYGROUND === '1'
 }
 
-function miniappSharedSecret(): string | undefined {
-  const s = process.env.KINDRA_MINIAPP_SHARED_SECRET?.trim()
-  return s || undefined
-}
-
-function bearerTokenFromRequest(req: Request): string | null {
-  const raw = req.headers.get('authorization')?.trim()
-  if (!raw) return null
-  const m = /^Bearer\s+(.+)$/i.exec(raw)
-  if (!m) return null
-  return m[1]!.trim() || null
-}
-
 function accessAllowed(req: Request): { ok: true } | { ok: false; status: 401 | 403; error: string } {
   const shared = miniappSharedSecret()
   if (shared) {
-    const token = bearerTokenFromRequest(req)
+    const token = bearerTokenFromHeaders(req.headers)
     if (!token || !constantTimeEqualToken(token, shared)) {
       return { ok: false, status: 401, error: '인증이 필요합니다. Authorization Bearer 토큰이 올바르지 않습니다.' }
     }
@@ -116,7 +110,11 @@ function mergePaymentFromQuery(
   }
 }
 
-async function persistPremiumOrder(report: KindraStructuredChartReportJson, body: KindraPremiumIntakePaymentBody) {
+async function persistPremiumOrder(
+  report: KindraStructuredChartReportJson,
+  body: KindraPremiumIntakePaymentBody,
+  channel: ReportChannel,
+) {
   try {
     const sb = createServiceRoleClient()
     const { error } = await sb.from('kindra_miniapp_orders').insert({
@@ -126,6 +124,7 @@ async function persistPremiumOrder(report: KindraStructuredChartReportJson, body
       terms_agreed_at: new Date().toISOString(),
       result: {
         kind: 'premium_structured_v1',
+        channel,
         report,
         payment: body.payment,
         childName: body.payload.childName,
@@ -156,6 +155,10 @@ export async function POST(req: Request): Promise<NextResponse> {
       { status: 400, headers: corsHeaders(req) },
     )
   }
+
+  warnIfClientSentChannel(body, 'kindra-premium-intake')
+
+  const entryChannel = resolveReportChannelFromRequest(req)
 
   let typed = mergePaymentFromQuery(body as KindraPremiumIntakePaymentBody, req)
   if (!typed.payment.paymentKey || !typed.payment.orderId || !Number.isFinite(typed.payment.amount)) {
@@ -195,7 +198,11 @@ export async function POST(req: Request): Promise<NextResponse> {
     report = buildFallbackKindraStructuredChartReport(5)
   }
 
-  await persistPremiumOrder(report, typed)
+  await persistPremiumOrder(
+    report,
+    typed,
+    entryChannel === REPORT_CHANNEL.DESKTOP ? REPORT_CHANNEL.DESKTOP : REPORT_CHANNEL.TOSS,
+  )
 
-  return NextResponse.json({ ok: true, report }, { headers: corsHeaders(req) })
+  return NextResponse.json({ ok: true, report, channel: entryChannel }, { headers: corsHeaders(req) })
 }

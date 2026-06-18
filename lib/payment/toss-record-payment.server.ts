@@ -2,6 +2,7 @@ import 'server-only'
 
 import { getTossClientKey } from '@lib/payment/toss-payments-config'
 import { getTossSecretKey } from '@lib/payment/toss-secret.server'
+import { reportStatusPatch, REPORT_STATUS } from '@lib/reports/report-lifecycle'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 
 function detectTossTestKeysFromEnv(): boolean {
@@ -30,6 +31,7 @@ export async function attachTossPaymentKeyToReport(
     const patch: Record<string, unknown> = {
       toss_payment_key: paymentKey,
       toss_payment_is_test: isTest,
+      ...reportStatusPatch(REPORT_STATUS.PAYMENT_CONFIRMED),
     }
     if (opts?.couponCode !== undefined) patch.coupon_code_applied = opts.couponCode
     if (opts?.chargedAmountWon !== undefined) patch.charged_amount_won = opts.chargedAmountWon

@@ -26,6 +26,8 @@ import { allocateKindraReportSerial } from '@lib/intake/report-serial-allocation
 import { LIST_PRICE_WON } from '@lib/constants'
 import { setReportAccessCookie } from '@lib/payment/report-access-cookie.server'
 import { STORED_KINDRA_INTAKE_SCHEMA } from '@lib/reports/resolve-report-json'
+import { reportCreateFields, REPORT_STATUS } from '@lib/reports/report-lifecycle'
+import { resolveReportChannelFromServerAction } from '@lib/reports/resolve-report-channel.server'
 import { createServiceRoleClient } from '@lib/supabase/admin'
 import { REPORT_EMAIL_DELIVERY_POLICY_CASUAL } from '@lib/copy/report-email-sla'
 import { isSkipPaymentForAnalysis } from '@lib/intake/skip-payment-for-analysis'
@@ -424,6 +426,7 @@ export async function submitIntegratedIntake(
         drawingMemos,
       }
 
+      const reportChannel = await resolveReportChannelFromServerAction()
       const reportUuid = randomUUID()
       const { error: reportInsertError } = await admin.from('kindra_reports').insert({
         id: reportUuid,
@@ -431,6 +434,7 @@ export async function submitIntegratedIntake(
         title: `${childDisplayName} · 통합 리포트`,
         listed_price_won: LIST_PRICE_WON,
         intake_id: intakeId,
+        ...reportCreateFields({ channel: reportChannel, status: REPORT_STATUS.ANALYSIS_COMPLETE }),
         report_json: {
           schema: STORED_KINDRA_INTAKE_SCHEMA,
           childName: childDisplayName,
@@ -512,6 +516,7 @@ export async function submitIntegratedIntake(
       childAgeInMonthsAtDrawing: childAgeMonthsAtDrawing,
     }
 
+    const reportChannel = await resolveReportChannelFromServerAction()
     const reportUuid = randomUUID()
     const { error: reportInsertError } = await admin.from('kindra_reports').insert({
       id: reportUuid,
@@ -519,6 +524,7 @@ export async function submitIntegratedIntake(
       title: `${childDisplayName} · 통합 리포트`,
       listed_price_won: LIST_PRICE_WON,
       intake_id: intakeId,
+      ...reportCreateFields({ channel: reportChannel, status: REPORT_STATUS.AWAITING_PAYMENT }),
       report_json: {
         schema: STORED_KINDRA_INTAKE_SCHEMA,
         childName: childDisplayName,

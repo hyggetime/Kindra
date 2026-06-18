@@ -1,14 +1,11 @@
+import { normalizeStructuredReportInput } from '@/lib/kindra-engine'
+import { getKindraApiBaseUrl, getKindraMiniappApiAuthHeaders } from '@/lib/kindraApiEndpoints'
+
 import type { KindraStructuredReportJson } from './kindraStructuredReportTypes'
 
-/** 루트 Kindra 웹(`npm run dev` 기본 3000) — 미니앱 프리뷰에서 CORS로 호출 */
-export function getKindraWebApiOrigin(): string {
-  return (process.env.NEXT_PUBLIC_KINDRA_WEB_API_ORIGIN ?? 'http://localhost:3000').replace(/\/$/, '')
-}
-
 export function getStructuredReportApiUrl(): string {
-  return `${getKindraWebApiOrigin()}/api/kindra-structured-report`
+  return `${getKindraApiBaseUrl()}/api/kindra-structured-report`
 }
-
 /** `public/gallery/*` — 루트 앱이 정적 제공 (테스트용 5장) */
 export const DEFAULT_GALLERY_PATHS = [
   '/gallery/birthday-cake.png',
@@ -46,6 +43,17 @@ export async function readFileAsInlineImage(file: File): Promise<{ mimeType: str
   return { mimeType, base64: arrayBufferToBase64(buf) }
 }
 
+/** 웹 `File` 없이 URL → 인라인 이미지 (RN·Granite 호환) */
+export async function fetchUrlAsInlineImage(
+  url: string,
+  signal?: AbortSignal,
+): Promise<{ mimeType: string; base64: string }> {
+  const res = await fetch(url, { signal })
+  if (!res.ok) throw new Error(`이미지 로드 실패: ${url} (${res.status})`)
+  const mimeType = (res.headers.get('content-type')?.split(';')[0] ?? 'image/png').trim().toLowerCase()
+  return { mimeType, base64: arrayBufferToBase64(await res.arrayBuffer()) }
+}
+
 export type StructuredReportApiSuccess = { ok: true; report: KindraStructuredReportJson }
 export type StructuredReportApiError = { ok: false; error: string }
 
@@ -56,7 +64,10 @@ export async function postStructuredReportAnalysis(
 ): Promise<KindraStructuredReportJson> {
   const res = await fetch(getStructuredReportApiUrl(), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...getKindraMiniappApiAuthHeaders(),
+    },
     body: JSON.stringify({ images, context }),
     signal,
   })
@@ -75,5 +86,13 @@ export async function postStructuredReportAnalysis(
   if (!o.ok) {
     throw new Error(o.error ?? '알 수 없는 오류')
   }
-  return o.report
+  const imageCount =
+    typeof context.imageCount === 'number'
+      ? context.imageCount
+      : Array.isArray(context.imageUrls)
+        ? context.imageUrls.length
+        : Array.isArray(images)
+          ? images.length
+          : undefined
+  return normalizeStructuredReportInput(o.report, imageCount)
 }

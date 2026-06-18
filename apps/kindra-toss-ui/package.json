@@ -2,13 +2,22 @@
   "name": "kindra-toss-ui",
   "private": true,
   "version": "0.0.0",
+  "bin": {
+    "granite": "./scripts/granite-cli-shim.cjs"
+  },
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
+    "build:granite": "granite build",
+    "build:ait": "node scripts/ensure-granite-shim.cjs && npx ait build",
+    "postinstall": "node scripts/ensure-granite-shim.cjs",
     "start": "next start -p 3001",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck:granite": "tsc -p tsconfig.granite.json --noEmit"
   },
   "dependencies": {
+    "@apps-in-toss/framework": "^2.6.1",
+    "@granite-js/react-native": "1.0.29",
     "@supabase/supabase-js": "^2.104.0",
     "@tosspayments/tosspayments-sdk": "^2.7.0",
     "next": "^15.5.0",
@@ -17,6 +26,8 @@
     "recharts": "^2.15.0"
   },
   "devDependencies": {
+    "@apps-in-toss/cli": "^2.6.1",
+    "@granite-js/plugin-router": "1.0.29",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.7",
